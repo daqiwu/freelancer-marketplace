@@ -11,6 +11,8 @@ services:
       MYSQL_PASSWORD: password123
     ports:
       - "3306:3306"
+    networks:
+      - freelancer-network
     volumes:
       - db_data:/var/lib/mysql
 
@@ -24,7 +26,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - USER_DOCKER=true
+      - USE_DOCKER=true
     ports:
       - "8000:8000"
     depends_on:
