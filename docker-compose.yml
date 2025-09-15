@@ -20,8 +20,11 @@ services:
       dockerfile: Dockerfile
     container_name: freelancer_backend
     restart: always
+    command: ["sleep", "999999"]  # 占位，容器启动后保持运行 --- IGNORE ---
     env_file:
       - ./backend/.env
+    environment:
+      - USER_DOCKER=true
     ports:
       - "8000:8000"
     depends_on:
@@ -35,6 +38,7 @@ services:
       dockerfile: Dockerfile
     container_name: freelancer_frontend
     restart: always
+    command: ["sleep", "999999"]  # 占位，容器启动后保持运行 --- IGNORE ---
     ports:
       - "8080:8080"
     networks:
