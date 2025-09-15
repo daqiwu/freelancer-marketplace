@@ -40,7 +40,6 @@ services:
       dockerfile: Dockerfile
     container_name: freelancer_frontend
     restart: always
-    command: ["sleep", "999999"]  # 占位，容器启动后保持运行 --- IGNORE ---
     ports:
       - "8080:8080"
     networks:
