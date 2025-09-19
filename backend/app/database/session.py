@@ -1,13 +1,12 @@
 from typing import Annotated, AsyncGenerator
 
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from fastapi import Depends, Request, HTTPException
 
 from app.config import settings
-from app.user.models import User
+from app.models.models import User
 
 engine = create_async_engine(settings.DATABASE_URL, echo = True)
 
@@ -19,14 +18,17 @@ async def get_session()-> AsyncGenerator[AsyncSession, None]:
 
 DBsession = Annotated[AsyncSession, Depends(get_session)]
 
-async def get_current_user(request: Request, db: DBsession):
-    user_id = request.state.user_id
+async def get_current_user(request: Request, db: DBsession) -> User:
+    user_id = getattr(request.state, "user_id", None) 
     if not user_id:
-        return None
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
     user = await db.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        raise HTTPException(status_code=401, detail="User not found or token invalid")
+        
     return user
+
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
