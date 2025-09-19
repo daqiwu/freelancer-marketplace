@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.user.routes import user_router
+from app.routes.auth import user_router
 
 marketplace_router = APIRouter(prefix='/freelancer/marketplace')
 
