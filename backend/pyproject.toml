@@ -18,6 +18,10 @@ dependencies = [
     "pymysql (>=1.1.2,<2.0.0)",
     "aiomysql (>=0.2.0,<0.3.0)",
     "pytest (>=8.4.2,<9.0.0)",
+    "jose (>=1.0.0,<2.0.0)",
+    "bcrypt (>=5.0.0,<6.0.0)",
+    "jwt (>=1.4.0,<2.0.0)",
+    "python-jose (>=3.5.0,<4.0.0)",
 ]
 
 # --- 可选依赖/开发依赖：用于测试的包放在这里 ---
@@ -32,6 +36,10 @@ test = [
 packages = [
     { include = "app" },
 ]
+
+[tool.poetry.group.dev.dependencies]
+httpx = "^0.28.1"
+pytest-asyncio = "^1.2.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

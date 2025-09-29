@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.user.routes import user_router
+from app.routes.auth import auth_router
 
 marketplace_router = APIRouter(prefix='/freelancer/marketplace')
 
-marketplace_router.include_router(user_router)
+marketplace_router.include_router(auth_router)
