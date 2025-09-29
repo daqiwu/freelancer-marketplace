@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, BigInteger, String, Text, ForeignKey, Enum, DECIMAL, TIMESTAMP
 from sqlalchemy.orm import relationship, declarative_base
 import enum
+import bcrypt
 
 Base = declarative_base()
 
@@ -25,10 +26,12 @@ class User(Base):
     customer_profile = relationship("CustomerProfile", uselist=False, back_populates="user")
     provider_profile = relationship("ProviderProfile", uselist=False, back_populates="user")
 
+    def verify_password(self, password: str) -> bool:
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+
 class CustomerProfile(Base):
     __tablename__ = "customer_profiles"
     id = Column(BigInteger, ForeignKey("users.id"), primary_key=True)
-    company_name = Column(String(255))
     location = Column(String(255))
     budget_preference = Column(DECIMAL(10,2))
     
@@ -47,8 +50,17 @@ class ProviderProfile(Base):
 class OrderStatus(enum.Enum):
     pending = "pending"
     accepted = "accepted"
+    in_progress = "in_progress"
     completed = "completed"
+    reviewed = "reviewed"
     cancelled = "cancelled"
+
+class LocationEnum(enum.Enum):
+    NORTH = "NORTH"
+    SOUTH = "SOUTH"
+    EAST = "EAST"
+    WEST = "WEST"
+    MID = "MID"
 
 class Order(Base):
     __tablename__ = "orders"
@@ -58,5 +70,8 @@ class Order(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text)
     status = Column(Enum(OrderStatus), default=OrderStatus.pending)
+    price = Column(DECIMAL(10,2))
+    location = Column(Enum(LocationEnum), nullable=False)
+    address = Column(String(255))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)

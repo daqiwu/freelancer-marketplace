@@ -1,17 +1,40 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+# from app.models.models import User
+from app.services.auth_service import register_user, authenticate_user, create_access_token
+from app.config import get_db
+from pydantic import BaseModel
 
-from app.schemas.schemas import UserCreateResponse, UserCreate, UserLoginResponse, UserLogin
-from app.database.session import DBsession
-from app.services.auth_service import user_register, user_login
+class RegisterRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    role_id: int
 
-user_router = APIRouter(prefix='/user')
+class RegisterResponse(BaseModel):
+    id: int
+    username: str
+    email: str
 
-@user_router.post("/register", response_model=UserCreateResponse)
-async def register(user: UserCreate, dbsession: DBsession):
-    user = await user_register(user, dbsession)
-    return UserCreateResponse(id=user)
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
-@user_router.post("/login", response_model=UserLoginResponse)
-async def login(user: UserLogin, dbsession: DBsession):
-    user = await user_login(user, dbsession)
-    return UserLoginResponse(id=user)
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+auth_router = APIRouter(prefix='/auth', tags=['auth'])
+
+@auth_router.post("/register", response_model=RegisterResponse)
+async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    user = await register_user(db, data.username, data.email, data.password, data.role_id)
+    return RegisterResponse(id=user.id, username=user.username, email=user.email)
+
+@auth_router.post("/login", response_model=TokenResponse)
+async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
+    user = await authenticate_user(db, data.email, data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    token = await create_access_token({"sub": str(user.id)})
+    return TokenResponse(access_token=token)
