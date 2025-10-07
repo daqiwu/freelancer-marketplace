@@ -6,6 +6,21 @@ import bcrypt
 
 Base = declarative_base()
 
+class OrderStatus(enum.Enum):
+    pending = "pending"
+    accepted = "accepted"
+    in_progress = "in_progress"
+    completed = "completed"
+    reviewed = "reviewed"
+    cancelled = "cancelled"
+
+class LocationEnum(enum.Enum):
+    NORTH = "NORTH"
+    SOUTH = "SOUTH"
+    EAST = "EAST"
+    WEST = "WEST"
+    MID = "MID"
+
 class Role(Base):
     __tablename__ = "roles"
     id = Column(Integer, primary_key=True)
@@ -32,7 +47,8 @@ class User(Base):
 class CustomerProfile(Base):
     __tablename__ = "customer_profiles"
     id = Column(BigInteger, ForeignKey("users.id"), primary_key=True)
-    location = Column(String(255))
+    location = Column(Enum(LocationEnum), nullable=False)
+    address = Column(String(255))
     budget_preference = Column(DECIMAL(10,2))
     
     user = relationship("User", back_populates="customer_profile")
@@ -46,21 +62,6 @@ class ProviderProfile(Base):
     availability = Column(String(100))
     
     user = relationship("User", back_populates="provider_profile")
-
-class OrderStatus(enum.Enum):
-    pending = "pending"
-    accepted = "accepted"
-    in_progress = "in_progress"
-    completed = "completed"
-    reviewed = "reviewed"
-    cancelled = "cancelled"
-
-class LocationEnum(enum.Enum):
-    NORTH = "NORTH"
-    SOUTH = "SOUTH"
-    EAST = "EAST"
-    WEST = "WEST"
-    MID = "MID"
 
 class Order(Base):
     __tablename__ = "orders"
