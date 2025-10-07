@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
 
-from app.router import marketplace_router
+from app.routes import marketplace_router
 
 app = FastAPI(title='FREELANCER MARKETPLACE',description='welcome to FREELANCER MARKETPLACE')
 
