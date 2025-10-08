@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models.models import User
 import bcrypt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from jose import jwt
 
 SECRET_KEY = "your_secret_key"  # 建议放到环境变量
@@ -16,8 +16,8 @@ async def register_user(db: AsyncSession, username: str, email: str, password: s
         email=email,
         password_hash=hashed_pw,
         role_id=role_id,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC)
     )
     db.add(user)
     await db.commit()
@@ -33,7 +33,11 @@ async def authenticate_user(db: AsyncSession, email: str, password: str):
 
 async def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+async def logout_user():
+    # JWT 无法在服务端失效，通常前端清除 token 即可
+    return {"msg": "Logout successful"}

@@ -7,6 +7,7 @@ from sqlalchemy.future import select
 from app.models.models import User
 from app.services.auth_service import register_user, authenticate_user
 
+from httpx import AsyncClient
 
 class TestUserServices:
     """用户服务层测试类"""
@@ -90,3 +91,30 @@ class TestUserServices:
 
         user = await authenticate_user(mock_db, "test@example.com", "wrongpassword")
         assert user is None
+
+@pytest.mark.asyncio
+async def test_register_and_login_api():
+    async with AsyncClient(base_url="http://localhost:8000") as ac:
+        # 清理测试用户
+        await ac.delete("http://localhost:8000/auth/test/cleanup?username=apitestuser")
+
+        # 注册
+        register_data = {
+            "username": "apitestuser",
+            "email": "apitestuser@example.com",
+            "password": "apitestpass",
+            "role_id": 1
+        }
+        reg_resp = await ac.post("http://localhost:8000/auth/register", json=register_data)
+        print(reg_resp.text)  # 调试用
+        assert reg_resp.status_code == 200
+        assert reg_resp.json()["email"] == "apitestuser@example.com"
+
+        # 登录
+        login_data = {
+            "email": "apitestuser@example.com",
+            "password": "apitestpass"
+        }
+        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        assert login_resp.status_code == 200
+        assert "access_token" in login_resp.json()

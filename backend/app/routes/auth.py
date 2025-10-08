@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import delete
+from sqlalchemy.future import select
 # from app.models.models import User
-from app.services.auth_service import register_user, authenticate_user, create_access_token
+from app.services.auth_service import register_user, authenticate_user, create_access_token, logout_user
 from app.config import get_db
 from pydantic import BaseModel
+from app.models.models import User, Order
 
 class RegisterRequest(BaseModel):
     username: str
@@ -38,3 +41,20 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = await create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)
+
+@auth_router.delete("/test/cleanup")
+async def cleanup_test_user(username: str, db: AsyncSession = Depends(get_db)):
+    # 查找用户
+    result = await db.execute(select(User).where(User.username == username))
+    user = result.scalars().first()
+    if user:
+        # 先删除该用户的订单
+        await db.execute(delete(Order).where(Order.customer_id == user.id))
+        # 再删除用户
+        await db.execute(delete(User).where(User.id == user.id))
+        await db.commit()
+    return {"msg": "deleted"}
+
+@auth_router.post("/logout")
+async def logout():
+    return await logout_user()
