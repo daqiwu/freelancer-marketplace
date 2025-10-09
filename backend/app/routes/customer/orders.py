@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, validator
 from app.config import get_db
-from app.services.customer_service import publish_order, cancel_order
+from app.services.customer_service import publish_order, cancel_order, get_my_orders, get_order_detail, get_order_history, review_order
 from app.models.models import LocationEnum, OrderStatus
-from typing import Optional
+from typing import Optional, List
 from jose import JWTError, jwt
-from app.dependencies import get_current_user  # 导入依赖
+from app.dependencies import get_current_user  # 导入依赖 # Import dependency
 
 class PublishOrderRequest(BaseModel):
     title: str
@@ -37,16 +37,57 @@ class CancelOrderResponse(BaseModel):
     status: str
     message: str
 
+class OrderSummary(BaseModel):
+    id: int
+    title: str
+    status: str
+    price: float
+    location: str
+    created_at: str
+
+class OrderDetail(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    status: str
+    price: float
+    location: str
+    address: Optional[str]
+    created_at: str
+    updated_at: str
+    provider_id: Optional[int]
+
+class ReviewOrderRequest(BaseModel):
+    order_id: int
+    stars: int = 5
+    content: Optional[str] = None
+
+    @validator("stars")
+    def stars_valid(cls, v):
+        if v < 1 or v > 5:
+            raise ValueError("Stars must be between 1 and 5")
+        return v
+
+class ReviewOrderResponse(BaseModel):
+    review_id: int
+    order_id: int
+    stars: int
+    content: Optional[str]
+    message: str
+
 orders_router = APIRouter(prefix='/customer/orders', tags=['orders'])
 
 @orders_router.post("/publish", response_model=PublishOrderResponse)
 async def publish_order_route(
     data: PublishOrderRequest,
     db: AsyncSession = Depends(get_db),
-    current_user_id: int = Depends(get_current_user)  # 实际项目应启用此行
-    # current_user_id: int = Depends(lambda: 3)  # 演示用，实际应从token获取
-):
+    current_user_id: int = Depends(get_current_user)  # 实际项目应启用此行 # Enable this line in production
+    # current_user_id: int = Depends(lambda: 3)  # 演示用，实际应从token获取 # For demo, should get from token
+
     # 如果你准备启用token解析，取消上面注释，注释掉lambda: 3
+    # If you want to enable token parsing, uncomment above and comment out lambda: 3
+
+):
     try:
         order = await publish_order(db, current_user_id, data)
     except ValueError as e:
@@ -67,9 +108,90 @@ async def cancel_order_route(
         order = await cancel_order(db, current_user_id, order_id)
     except ValueError as e:
         # 订单不可取消时的提示
+        # Prompt when order cannot be cancelled
         raise HTTPException(status_code=400, detail=str(e))
     return CancelOrderResponse(
         order_id=order.id,
         status=order.status.value,
         message=f"You have successfully cancelled the order: {order.id}."
+    )
+
+@orders_router.get("/my", response_model=List[OrderSummary])
+async def list_my_orders(
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    orders = await get_my_orders(db, current_user_id)
+    return [
+        OrderSummary(
+            id=o.id,
+            title=o.title,
+            status=o.status.value,
+            price=float(o.price),
+            location=o.location.value,
+            created_at=str(o.created_at)
+        )
+        for o in orders
+    ]
+
+@orders_router.get("/my/{order_id}", response_model=OrderDetail)
+async def get_my_order_detail(
+    order_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    order = await get_order_detail(db, current_user_id, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return OrderDetail(
+        id=order.id,
+        title=order.title,
+        description=order.description,
+        status=order.status.value,
+        price=float(order.price),
+        location=order.location.value,
+        address=order.address,
+        created_at=str(order.created_at),
+        updated_at=str(order.updated_at),
+        provider_id=order.provider_id
+    )
+
+@orders_router.get("/history", response_model=List[OrderSummary])
+async def list_order_history(
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    orders = await get_order_history(db, current_user_id)
+    return [
+        OrderSummary(
+            id=o.id,
+            title=o.title,
+            status=o.status.value,
+            price=float(o.price),
+            location=o.location.value,
+            created_at=str(o.created_at)
+        )
+        for o in orders
+    ]
+
+@orders_router.post("/review", response_model=ReviewOrderResponse)
+async def review_order_route(
+    data: ReviewOrderRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    客户评价订单接口
+    Customer reviews order API
+    """
+    try:
+        review = await review_order(db, current_user_id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return ReviewOrderResponse(
+        review_id=review.id,
+        order_id=review.order_id,
+        stars=review.stars,
+        content=review.content,
+        message=f"Review submitted for order {review.order_id}."
     )
