@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func
 
-from app.models.models import Order, OrderStatus, LocationEnum
+from app.models.models import Order, OrderStatus, LocationEnum, PaymentStatus
 
 
 async def list_available_orders(
@@ -76,8 +76,8 @@ async def update_order_status(
     """
     Provider updates the status of an accepted order.
     Allowed transitions:
-      - accepted -> in_progress
-      - in_progress -> completed
+    - accepted -> in_progress
+    - in_progress -> completed
     Only the assigned provider can update.
     """
     result = await db.execute(select(Order).where(Order.id == order_id))
@@ -125,14 +125,13 @@ async def calculate_provider_total_earnings(
 ):
     """
     Calculate the provider's total earnings as the sum of prices for orders
-    that have been completed or reviewed. Returns 0.0 when none.
+    that have been paid. Returns 0.0 when none.
     """
     result = await db.execute(
         select(func.coalesce(func.sum(Order.price), 0)).where(
             (Order.provider_id == provider_id)
-            & (Order.status.in_([OrderStatus.completed, OrderStatus.reviewed]))
+            & (Order.payment_status == PaymentStatus.paid)
         )
     )
     total = result.scalar() or 0
-    # SQLAlchemy may return Decimal; cast to float for API responses
     return float(total)
