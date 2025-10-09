@@ -56,7 +56,7 @@ class CustomerProfile(Base):
 class ProviderProfile(Base):
     __tablename__ = "provider_profiles"
     id = Column(BigInteger, ForeignKey("users.id"), primary_key=True)
-    skills = Column(Text)  # JSON 格式字符串
+    skills = Column(Text)  # JSON格式字符串  # JSON format string
     experience_years = Column(Integer)
     hourly_rate = Column(DECIMAL(10,2))
     availability = Column(String(100))

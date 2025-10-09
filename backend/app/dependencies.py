@@ -1,13 +1,17 @@
 from fastapi import HTTPException, Request, Depends
 from jose import JWTError, jwt
 
-SECRET_KEY = "your_secret_key"  # 推荐从环境变量读取
+SECRET_KEY = "your_secret_key"  # 推荐从环境变量读取  # Recommended to read from environment variable
 ALGORITHM = "HS256"
 
 def get_current_user(request: Request):
     """
     从 Authorization header 解析 JWT token，获取当前用户ID
     实际项目应完善异常处理和用户校验
+    """
+    """
+    Parse JWT token from Authorization header to get current user ID
+    In actual projects, improve exception handling and user validation
     """
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
