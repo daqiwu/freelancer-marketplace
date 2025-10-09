@@ -50,6 +50,7 @@ class CustomerProfile(Base):
     location = Column(Enum(LocationEnum), nullable=False)
     address = Column(String(255))
     budget_preference = Column(DECIMAL(10,2))
+    balance = Column(DECIMAL(10,2), default=0)  # 账户余额  # Account balance
     
     user = relationship("User", back_populates="customer_profile")
 
@@ -62,6 +63,10 @@ class ProviderProfile(Base):
     availability = Column(String(100))
     
     user = relationship("User", back_populates="provider_profile")
+
+class PaymentStatus(enum.Enum):
+    unpaid = "unpaid"  # 未支付  # Unpaid
+    paid = "paid"      # 已支付  # Paid
 
 class Order(Base):
     __tablename__ = "orders"
@@ -76,3 +81,21 @@ class Order(Base):
     address = Column(String(255))
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
+    payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.unpaid)  # 支付状态  # Payment status
+
+class Review(Base):
+    __tablename__ = "reviews"
+    id = Column(BigInteger, primary_key=True)  # 评价ID  # Review ID
+    order_id = Column(BigInteger, ForeignKey("orders.id"), nullable=False)  # 订单ID  # Order ID
+    customer_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)  # 客户ID  # Customer ID
+    provider_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)  # 服务商ID  # Provider ID
+    stars = Column(Integer, nullable=False, default=5)  # 星级（1-5，默认5）  # Stars (1-5, default 5)
+    content = Column(Text, nullable=True)  # 评价内容  # Review content
+    created_at = Column(TIMESTAMP)  # 创建时间  # Created time
+
+    # 关联订单  # Relationship to order
+    order = relationship("Order", backref="review")
+    # 关联客户  # Relationship to customer
+    customer = relationship("User", foreign_keys=[customer_id])
+    # 关联服务商  # Relationship to provider
+    provider = relationship("User", foreign_keys=[provider_id])
