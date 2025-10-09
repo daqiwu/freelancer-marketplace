@@ -1,9 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.models.models import User
+from app.models.models import User, CustomerProfile, ProviderProfile, LocationEnum, Role
 import bcrypt
 from datetime import datetime, timedelta, UTC
 from jose import jwt
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException
 
 SECRET_KEY = "your_secret_key"  # 建议放到环境变量 # Recommended to put in environment variable
 ALGORITHM = "HS256"
@@ -20,8 +22,44 @@ async def register_user(db: AsyncSession, username: str, email: str, password: s
         updated_at=datetime.now(UTC)
     )
     db.add(user)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail="用户名或邮箱已存在")  # Username or email already exists
     await db.refresh(user)
+
+    # 查询角色名，避免懒加载
+    result = await db.execute(select(Role).where(Role.id == role_id))
+    role = result.scalar_one_or_none()
+    role_name = role.role_name if role else None
+
+    if role_name == "customer":
+        # 初始化客户资料
+        profile = CustomerProfile(
+            id=user.id,
+            location=LocationEnum.NORTH,  # 默认值
+            address=None,                 # 可为null
+            budget_preference=0,          # 默认值
+            balance=0                     # 默认值
+        )
+        db.add(profile)
+        await db.commit()
+        await db.refresh(profile)
+    elif role_name == "provider":
+        # 初始化服务商资料
+        profile = ProviderProfile(
+            id=user.id,
+            skills="",                    # 可为null或空字符串
+            experience_years=0,           # 默认值
+            hourly_rate=0,                # 默认值
+            availability=None             # 可为null
+        )
+        db.add(profile)
+        await db.commit()
+        await db.refresh(profile)
+    # 管理员不需要 profile
+
     return user
 
 async def authenticate_user(db: AsyncSession, email: str, password: str):

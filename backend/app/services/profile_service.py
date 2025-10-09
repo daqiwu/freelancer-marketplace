@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from app.models.models import User, CustomerProfile, ProviderProfile, Role
+from fastapi import HTTPException
 
 async def get_customer_profile(db: AsyncSession, user_id: int):
     """
@@ -87,38 +88,56 @@ async def get_admin_profile(db: AsyncSession, user_id: int):
         "updated_at": str(user.updated_at)
     }
 
-async def create_customer_profile(db: AsyncSession, user_id: int, location: str, address: str, budget_preference: float, balance: float):
+async def update_customer_profile(db: AsyncSession, user_id: int, location: str, address: str, budget_preference: float, balance: float):
     """
-    创建客户资料（测试专用）
-    Create customer profile (for test only)
+    更新客户资料（首次更新即为创建，后续为更新）
+    Update customer profile (create if not exists, else update)
     """
-    from app.models.models import CustomerProfile
-    profile = CustomerProfile(
-        id=user_id,
-        location=location,
-        address=address,
-        budget_preference=budget_preference,
-        balance=balance
-    )
-    db.add(profile)
+    result = await db.execute(select(CustomerProfile).where(CustomerProfile.id == user_id))
+    profile = result.scalars().first()
+    if not profile:
+        # 首次创建
+        profile = CustomerProfile(
+            id=user_id,
+            location=location,
+            address=address,
+            budget_preference=budget_preference,
+            balance=balance
+        )
+        db.add(profile)
+    else:
+        # 更新
+        profile.location = location
+        profile.address = address
+        profile.budget_preference = budget_preference
+        profile.balance = balance
     await db.commit()
     await db.refresh(profile)
     return profile
 
-async def create_provider_profile(db: AsyncSession, user_id: int, skills: str, experience_years: int, hourly_rate: float, availability: str):
+async def update_provider_profile(db: AsyncSession, user_id: int, skills: str, experience_years: int, hourly_rate: float, availability: str):
     """
-    创建服务商资料（测试专用）
-    Create provider profile (for test only)
+    更新服务商资料（首次更新即为创建，后续为更新）
+    Update provider profile (create if not exists, else update)
     """
-    from app.models.models import ProviderProfile
-    profile = ProviderProfile(
-        id=user_id,
-        skills=skills,
-        experience_years=experience_years,
-        hourly_rate=hourly_rate,
-        availability=availability
-    )
-    db.add(profile)
+    result = await db.execute(select(ProviderProfile).where(ProviderProfile.id == user_id))
+    profile = result.scalars().first()
+    if not profile:
+        # 首次创建
+        profile = ProviderProfile(
+            id=user_id,
+            skills=skills,
+            experience_years=experience_years,
+            hourly_rate=hourly_rate,
+            availability=availability
+        )
+        db.add(profile)
+    else:
+        # 更新
+        profile.skills = skills
+        profile.experience_years = experience_years
+        profile.hourly_rate = hourly_rate
+        profile.availability = availability
     await db.commit()
     await db.refresh(profile)
     return profile

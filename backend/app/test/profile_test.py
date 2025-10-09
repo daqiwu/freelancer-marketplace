@@ -28,7 +28,7 @@ async def test_get_my_profile_customer():
 
         # 补充：注册后插入客户资料  # Insert customer profile after register
         # 这里假设有一个测试接口用于插入 profile
-        await ac.post("http://localhost:8000/profile/test/create_customer_profile", json={
+        await ac.post("http://localhost:8000/profile/update_customer_profile", json={
             "username": "profiletestcustomer",
             "location": "NORTH",
             "address": "Test Address",
@@ -72,7 +72,7 @@ async def test_get_my_profile_provider():
         headers = {"Authorization": f"Bearer {token}"}
 
         # 补充：注册后插入服务商资料  # Insert provider profile after register
-        await ac.post("http://localhost:8000/profile/test/create_provider_profile", json={
+        await ac.post("http://localhost:8000/profile/update_provider_profile", json={
             "username": "profiletestprovider",
             "skills": "Python,SQL",
             "experience_years": 5,

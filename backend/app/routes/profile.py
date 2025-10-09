@@ -7,8 +7,8 @@ from app.services.profile_service import (
     get_customer_profile,
     get_provider_profile,
     get_admin_profile,
-    create_customer_profile,
-    create_provider_profile
+    update_customer_profile,
+    update_provider_profile
 )
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
@@ -47,56 +47,56 @@ async def get_my_profile(
         raise HTTPException(status_code=404, detail="用户信息不存在  // User profile not found")
     return profile
 
-class CreateCustomerProfileRequest(BaseModel):
-    username: str
+class UpdateCustomerProfileRequest(BaseModel):
     location: str
     address: str
     budget_preference: float
     balance: float
 
-@profile_router.post("/test/create_customer_profile")
-async def test_create_customer_profile(
-    data: CreateCustomerProfileRequest,
-    db: AsyncSession = Depends(get_db)
+@profile_router.put("/update_customer_profile")
+async def update_customer_profile_api(
+    data: UpdateCustomerProfileRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
 ):
     """
-    测试创建客户资料接口
-    Test create customer profile API
+    更新客户资料接口
+    Update customer profile API
     """
-    # 查找用户ID  # Find user ID
+    # 只允许当前用户更新自己的 profile
     from app.models.models import User
-    result = await db.execute(select(User).where(User.username == data.username))
+    result = await db.execute(select(User).where(User.id == current_user_id))
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在  // User not found")
-    profile = await create_customer_profile(
-        db, user.id, data.location, data.address, data.budget_preference, data.balance
+    profile = await update_customer_profile(
+        db, current_user_id, data.location, data.address, data.budget_preference, data.balance
     )
-    return {"msg": "客户资料创建成功  // Customer profile created", "profile_id": profile.id}
+    return {"msg": "客户资料更新成功  // Customer profile updated", "profile_id": profile.id}
 
-class CreateProviderProfileRequest(BaseModel):
-    username: str
+class UpdateProviderProfileRequest(BaseModel):
     skills: str
     experience_years: int
     hourly_rate: float
     availability: str
 
-@profile_router.post("/test/create_provider_profile")
-async def test_create_provider_profile(
-    data: CreateProviderProfileRequest,
-    db: AsyncSession = Depends(get_db)
+@profile_router.put("/update_provider_profile")
+async def update_provider_profile_api(
+    data: UpdateProviderProfileRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
 ):
     """
-    测试创建服务商资料接口
-    Test create provider profile API
+    更新服务商资料接口
+    Update provider profile API
     """
-    # 查找用户ID  # Find user ID
+    # 只允许当前用户更新自己的 profile
     from app.models.models import User
-    result = await db.execute(select(User).where(User.username == data.username))
+    result = await db.execute(select(User).where(User.id == current_user_id))
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在  // User not found")
-    profile = await create_provider_profile(
-        db, user.id, data.skills, data.experience_years, data.hourly_rate, data.availability
+    profile = await update_provider_profile(
+        db, current_user_id, data.skills, data.experience_years, data.hourly_rate, data.availability
     )
-    return {"msg": "服务商资料创建成功  // Provider profile created", "profile_id": profile.id}
+    return {"msg": "服务商资料更新成功  // Provider profile updated", "profile_id": profile.id}
