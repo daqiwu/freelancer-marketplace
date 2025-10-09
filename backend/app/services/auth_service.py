@@ -5,7 +5,7 @@ import bcrypt
 from datetime import datetime, timedelta, UTC
 from jose import jwt
 
-SECRET_KEY = "your_secret_key"  # 建议放到环境变量
+SECRET_KEY = "your_secret_key"  # 建议放到环境变量 # Recommended to put in environment variable
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -40,4 +40,5 @@ async def create_access_token(data: dict, expires_delta: timedelta = None):
 
 async def logout_user():
     # JWT 无法在服务端失效，通常前端清除 token 即可
+    # JWT cannot be invalidated on server side, usually frontend just clears the token
     return {"msg": "Logout successful"}

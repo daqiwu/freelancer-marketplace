@@ -10,11 +10,11 @@ from app.services.auth_service import register_user, authenticate_user
 from httpx import AsyncClient
 
 class TestUserServices:
-    """用户服务层测试类"""
+    """用户服务层测试类"""  # User service layer test class
     
     @pytest.fixture
     def mock_db(self):
-        """模拟异步数据库会话"""
+        """模拟异步数据库会话"""  # Mock async database session
         session = AsyncMock(spec=AsyncSession)
         session.execute = AsyncMock()
         session.add = MagicMock()
@@ -24,7 +24,7 @@ class TestUserServices:
     
     @pytest.fixture
     def sample_user(self):
-        """示例用户对象"""
+        """示例用户对象"""  # Sample user object
         return User(
             id=1,
             username="testuser",
@@ -35,13 +35,13 @@ class TestUserServices:
 
     @pytest.mark.asyncio
     async def test_register_user_success(self, mock_db):
-        """测试用户注册成功"""
-        # 模拟邮箱不存在
+        """测试用户注册成功"""  # Test user registration success
+        # 模拟邮箱不存在  # Simulate email not exists
         mock_result = MagicMock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db.execute.return_value = mock_result
 
-        # 模拟refresh设置id
+        # 模拟refresh设置id  # Simulate refresh sets id
         def refresh_side_effect(user):
             user.id = 1
         mock_db.refresh.side_effect = refresh_side_effect
@@ -58,13 +58,13 @@ class TestUserServices:
 
     @pytest.mark.asyncio
     async def test_authenticate_user_success(self, mock_db, sample_user, monkeypatch):
-        """测试用户认证成功"""
-        # mock scalars().first() 返回 sample_user
+        """测试用户认证成功"""  # Test user authentication success
+        # mock scalars().first() 返回 sample_user  # mock scalars().first() returns sample_user
         mock_result = MagicMock()
         mock_result.scalars.return_value.first.return_value = sample_user
         mock_db.execute.return_value = mock_result
 
-        # mock 密码校验
+        # mock 密码校验  # mock password verification
         monkeypatch.setattr(sample_user, "verify_password", lambda pwd: pwd == "password123")
 
         user = await authenticate_user(mock_db, "test@example.com", "password123")
@@ -72,7 +72,8 @@ class TestUserServices:
 
     @pytest.mark.asyncio
     async def test_authenticate_user_not_found(self, mock_db):
-        """测试用户认证失败-用户不存在"""
+        """测试用户认证失败-用户不存在"""  # Test user authentication failure - user not found
+        # mock scalars().first() 返回 None  # mock scalars().first() returns None
         mock_result = MagicMock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db.execute.return_value = mock_result
@@ -82,7 +83,7 @@ class TestUserServices:
 
     @pytest.mark.asyncio
     async def test_authenticate_user_wrong_password(self, mock_db, sample_user, monkeypatch):
-        """测试用户认证失败-密码错误"""
+        """测试用户认证失败-密码错误"""  # Test user authentication failure - wrong password
         mock_result = MagicMock()
         mock_result.scalars.return_value.first.return_value = sample_user
         mock_db.execute.return_value = mock_result
@@ -95,25 +96,25 @@ class TestUserServices:
 @pytest.mark.asyncio
 async def test_register_and_login_api():
     async with AsyncClient(base_url="http://localhost:8000") as ac:
-        # 清理测试用户
-        await ac.delete("http://localhost:8000/auth/test/cleanup?username=apitestuser")
+        # 清理测试用户  # Clean up test user
+        await ac.delete("http://localhost:8000/auth/test/cleanup?username=authapitestuser")
 
-        # 注册
+        # 注册  # Register
         register_data = {
-            "username": "apitestuser",
-            "email": "apitestuser@example.com",
-            "password": "apitestpass",
+            "username": "authapitestuser",
+            "email": "authapitestuser@example.com",
+            "password": "authapitestpass",
             "role_id": 1
         }
         reg_resp = await ac.post("http://localhost:8000/auth/register", json=register_data)
-        print(reg_resp.text)  # 调试用
+        print(reg_resp.text)  # 调试用  # For debugging
         assert reg_resp.status_code == 200
-        assert reg_resp.json()["email"] == "apitestuser@example.com"
+        assert reg_resp.json()["email"] == "authapitestuser@example.com"
 
-        # 登录
+        # 登录  # Login
         login_data = {
-            "email": "apitestuser@example.com",
-            "password": "apitestpass"
+            "email": "authapitestuser@example.com",
+            "password": "authapitestpass"
         }
         login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
         assert login_resp.status_code == 200
