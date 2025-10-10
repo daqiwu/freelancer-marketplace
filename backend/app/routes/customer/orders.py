@@ -56,6 +56,7 @@ class OrderDetail(BaseModel):
     created_at: str
     updated_at: str
     provider_id: Optional[int]
+    review: Optional[dict] = None  # 新增
 
 class ReviewOrderRequest(BaseModel):
     order_id: int
@@ -143,18 +144,7 @@ async def get_my_order_detail(
     order = await get_order_detail(db, current_user_id, order_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return OrderDetail(
-        id=order.id,
-        title=order.title,
-        description=order.description,
-        status=order.status.value,
-        price=float(order.price),
-        location=order.location.value,
-        address=order.address,
-        created_at=str(order.created_at),
-        updated_at=str(order.updated_at),
-        provider_id=order.provider_id
-    )
+    return order  # 直接返回 dict，Pydantic 会自动转换
 
 @orders_router.get("/history", response_model=List[OrderSummary])
 async def list_order_history(
