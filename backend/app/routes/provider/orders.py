@@ -12,6 +12,7 @@ from app.services.provider_service import (
     accept_order,
     update_order_status,
     list_provider_order_history,
+    get_order_detail_for_provider,
 )
 
 
@@ -167,4 +168,32 @@ async def provider_history_route(
         for o in orders
     ]
     return HistoryResponse(items=items, total=len(items))
+
+
+# -------- Provider Order Detail --------
+class ProviderOrderDetail(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    status: str
+    price: float
+    location: str
+    address: Optional[str]
+    created_at: str
+    updated_at: str
+    provider_id: Optional[int]
+    review: Optional[dict] = None
+
+
+@provider_orders_router.get("/my/{order_id}", response_model=ProviderOrderDetail)
+async def get_my_order_detail_for_provider(
+    order_id: int,
+    *,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user),
+):
+    order = await get_order_detail_for_provider(db, provider_id=current_user_id, order_id=order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
 

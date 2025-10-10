@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func
 
-from app.models.models import Order, OrderStatus, LocationEnum, PaymentStatus
+from app.models.models import Order, OrderStatus, LocationEnum, PaymentStatus, Review
 from app.services.notification_service import send_customer_notification, send_provider_notification
 
 
@@ -163,3 +163,49 @@ async def calculate_provider_total_earnings(
     )
     total = result.scalar() or 0
     return float(total)
+
+
+async def get_order_detail_for_provider(
+    db: AsyncSession,
+    *,
+    provider_id: int,
+    order_id: int,
+) -> Optional[dict]:
+    """
+    Get order detail for a provider-owned order. If the order status is reviewed,
+    include the review content; otherwise, the review field is None.
+    """
+    result = await db.execute(
+        select(Order).where(Order.id == order_id, Order.provider_id == provider_id)
+    )
+    order = result.scalars().first()
+    if not order:
+        return None
+
+    review_data = None
+    if order.status == OrderStatus.reviewed:
+        review_result = await db.execute(
+            select(Review).where(Review.order_id == order_id)
+        )
+        review = review_result.scalars().first()
+        if review:
+            review_data = {
+                "review_id": review.id,
+                "stars": review.stars,
+                "content": review.content,
+                "created_at": str(review.created_at),
+            }
+
+    return {
+        "id": order.id,
+        "title": order.title,
+        "description": order.description,
+        "status": order.status.value,
+        "price": float(order.price) if order.price is not None else 0.0,
+        "location": order.location.value,
+        "address": order.address,
+        "created_at": str(order.created_at),
+        "updated_at": str(order.updated_at),
+        "provider_id": order.provider_id,
+        "review": review_data,
+    }
