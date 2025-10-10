@@ -3,6 +3,7 @@ from app.models.models import Review, Order, OrderStatus, PaymentStatus
 from datetime import datetime, UTC
 from sqlalchemy.future import select
 from typing import List
+from app.services.notification_service import send_customer_notification, send_provider_notification
 
 async def publish_order(db: AsyncSession, customer_id: int, data):
     # 数据校验已在 Pydantic 层完成  # Data validation is done in Pydantic layer
@@ -21,6 +22,11 @@ async def publish_order(db: AsyncSession, customer_id: int, data):
     db.add(order)
     await db.commit()
     await db.refresh(order)
+    # 通知客户
+    await send_customer_notification(
+        db, customer_id, order.id,
+        f"You have successfully published the order: {order.id}."
+    )
     # TODO: 发送通知到客户 inbox，可在此扩展  # TODO: Send notification to customer inbox, can be extended here
     return order
 
@@ -33,11 +39,22 @@ async def cancel_order(db: AsyncSession, customer_id: int, order_id: int):
     # 只有 pending 或 accepted 状态可取消  # Only orders with pending or accepted status can be cancelled
     if order.status not in [OrderStatus.pending, OrderStatus.accepted]:
         raise ValueError("The order can not be cancelled!")
+    prev_status = order.status
     order.status = OrderStatus.cancelled
     order.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(order)
-    # TODO: 发送通知到客户和服务商 inbox  # TODO: Send notification to customer and provider inbox
+    # 通知客户
+    await send_customer_notification(
+        db, customer_id, order.id,
+        f"You have successfully cancelled the order: {order.id}."
+    )
+    # 如果之前是 accepted，还要通知服务商
+    if prev_status == OrderStatus.accepted and order.provider_id:
+        await send_provider_notification(
+            db, order.provider_id, order.id,
+            f"Your order has been cancelled by the customer: {customer_id}."
+        )
     return order
 
 async def get_my_orders(db: AsyncSession, customer_id: int) -> List[Order]:
@@ -113,4 +130,15 @@ async def review_order(db: AsyncSession, customer_id: int, data: ReviewData):
     await db.commit()
     await db.refresh(review)
     await db.refresh(order)
+    # 通知客户
+    await send_customer_notification(
+        db, customer_id, order.id,
+        f"You have successfully reviewed the order: {order.id}."
+    )
+    # 通知服务商
+    if order.provider_id:
+        await send_provider_notification(
+            db, order.provider_id, order.id,
+            f"The customer: {customer_id} has reviewed your order: {order.id}."
+        )
     return review
