@@ -1,8 +1,9 @@
 # backend/app/models/models.py
-from sqlalchemy import Column, Integer, BigInteger, String, Text, ForeignKey, Enum, DECIMAL, TIMESTAMP
+from sqlalchemy import Column, Integer, BigInteger, String, Text, ForeignKey, Enum, DECIMAL, TIMESTAMP, DateTime, Boolean
 from sqlalchemy.orm import relationship, declarative_base
 import enum
 import bcrypt
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -99,3 +100,21 @@ class Review(Base):
     customer = relationship("User", foreign_keys=[customer_id])
     # 关联服务商  # Relationship to provider
     provider = relationship("User", foreign_keys=[provider_id])
+
+class CustomerInbox(Base):
+    __tablename__ = "customer_inbox"
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    customer_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    order_id = Column(BigInteger, ForeignKey("orders.id"), nullable=True)
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_read = Column(Boolean, default=False)
+
+class ProviderInbox(Base):
+    __tablename__ = "provider_inbox"
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    provider_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    order_id = Column(BigInteger, ForeignKey("orders.id"), nullable=True)
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_read = Column(Boolean, default=False)
