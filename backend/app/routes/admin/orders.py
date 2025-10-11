@@ -1,5 +1,4 @@
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_db
 from app.dependencies import get_current_user
@@ -33,8 +32,9 @@ admin_orders_router = APIRouter(prefix="/admin/orders", tags=["admin-orders"])
 async def list_all_orders_route(
 	db: AsyncSession = Depends(get_db),
 	current_user_id: int = Depends(get_current_user),
+	status: Optional[str] = Query(default=None, description="Order status filter"),
 ):
-	orders = await list_all_orders(db)
+	orders = await list_all_orders(db, status=status)
 	items = [
 		AdminOrderItem(
 			id=o.id,

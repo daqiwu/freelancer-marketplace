@@ -10,6 +10,8 @@ from app.routes import marketplace_router
 from app.routes.customer.payments import payments_router
 from app.routes.profile import profile_router
 from app.routes.admin.orders import admin_orders_router
+from app.routes.admin.users import admin_users_router
+from app.routes.notification import notification_router
 
 app = FastAPI(title='FREELANCER MARKETPLACE', description='welcome to FREELANCER MARKETPLACE')
 
@@ -22,6 +24,8 @@ app.include_router(provider_earnings_router)
 app.include_router(payments_router)
 app.include_router(profile_router)
 app.include_router(admin_orders_router)
+app.include_router(admin_users_router)
+app.include_router(notification_router)
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from sqlalchemy import func
 
 from app.models.models import Order, OrderStatus, LocationEnum, PaymentStatus
+from app.services.notification_service import send_customer_notification, send_provider_notification
 
 
 async def list_available_orders(
@@ -36,7 +37,6 @@ async def list_available_orders(
     return list(result.scalars().all())
 
 
-
 async def accept_order(
     db: AsyncSession,
     *,
@@ -62,7 +62,16 @@ async def accept_order(
 
     await db.commit()
     await db.refresh(order)
-    # TODO: send inbox notifications to provider and customer
+    # 通知客户
+    await send_customer_notification(
+        db, order.customer_id, order.id,
+        f"Your order: {order.id} has been accepted by the provider: {provider_id}."
+    )
+    # 通知服务商
+    await send_provider_notification(
+        db, provider_id, order.id,
+        f"You have successfully accepted the order: {order.id}."
+    )
     return order
 
 
@@ -101,6 +110,25 @@ async def update_order_status(
     order.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(order)
+    # 通知逻辑
+    if new_status == OrderStatus.in_progress:
+        await send_customer_notification(
+            db, order.customer_id, order.id,
+            f"The status of your order: {order.id} has been updated to ‘in_progress’ by the provider: {provider_id}."
+        )
+        await send_provider_notification(
+            db, provider_id, order.id,
+            f"You have successfully updated the status of the order: {order.id} to ‘in_progress’."
+        )
+    elif new_status == OrderStatus.completed:
+        await send_customer_notification(
+            db, order.customer_id, order.id,
+            f"The status of your order: {order.id} has been updated to ‘completed’ by the provider: {provider_id}."
+        )
+        await send_provider_notification(
+            db, provider_id, order.id,
+            f"You have successfully updated the status of the order: {order.id} to ‘completed’."
+        )
     return order
 
 
