@@ -26,15 +26,21 @@ class AdminOrdersResponse(BaseModel):
 	items: List[AdminOrderItem]
 	total: int
 
-admin_orders_router = APIRouter(prefix="/admin/orders", tags=["admin-orders"])
+admin_orders_router = APIRouter(prefix="/admin", tags=["admin-orders"])
 
-@admin_orders_router.get("/all", response_model=AdminOrdersResponse)
+
+@admin_orders_router.get("/orders", response_model=AdminOrdersResponse)
 async def list_all_orders_route(
 	db: AsyncSession = Depends(get_db),
 	current_user_id: int = Depends(get_current_user),
 	status: Optional[str] = Query(default=None, description="Order status filter"),
+	page: int = Query(default=1, ge=1, description="Page number"),
+	limit: int = Query(default=20, ge=1, le=100, description="Items per page"),
+	sort_by: Optional[str] = Query(default="created_at", description="Sort by field"),
+	order: Optional[str] = Query(default="desc", description="Sort order: asc or desc"),
 ):
-	orders = await list_all_orders(db, status=status)
+	# Update service to support pagination and sorting
+	orders = await list_all_orders(db, status=status, page=page, limit=limit, sort_by=sort_by, order=order)
 	items = [
 		AdminOrderItem(
 			id=o.id,
