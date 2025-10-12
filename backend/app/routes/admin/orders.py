@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_db
 from app.dependencies import get_current_user
@@ -29,7 +29,12 @@ class AdminOrdersResponse(BaseModel):
 admin_orders_router = APIRouter(prefix="/admin", tags=["admin-orders"])
 
 
-@admin_orders_router.get("/orders", response_model=AdminOrdersResponse)
+
+@admin_orders_router.get("/orders", response_model=AdminOrdersResponse, responses={
+	401: {"description": "Unauthorized", "content": {"application/json": {"example": {"error": "Authentication required."}}}},
+	422: {"description": "Validation Error", "content": {"application/json": {"example": {"error": "Validation failed.", "details": {}}}}},
+	500: {"description": "Internal Server Error", "content": {"application/json": {"example": {"error": "Internal server error."}}}},
+})
 async def list_all_orders_route(
 	db: AsyncSession = Depends(get_db),
 	current_user_id: int = Depends(get_current_user),
@@ -64,6 +69,12 @@ async def list_all_orders_route(
 			for o in orders
 		]
 		return AdminOrdersResponse(items=items, total=len(items))
+	except HTTPException as e:
+		# Pass through FastAPI HTTPExceptions (e.g. 401)
+		return {"error": e.detail}
+	except ValueError as ve:
+		# Validation error
+		raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"error": "Validation failed.", "details": str(ve)})
 	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Error fetching orders: {str(e)}")
+		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail={"error": "Error Fetching orders", "details": str(e)})
 

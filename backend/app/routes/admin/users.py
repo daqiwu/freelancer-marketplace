@@ -27,7 +27,11 @@ admin_users_router = APIRouter(prefix="/admin/users", tags=["admin-users"])
 
 
 
-@admin_users_router.get("/", response_model=UsersResponse)
+@admin_users_router.get("/", response_model=UsersResponse, responses={
+	401: {"description": "Unauthorized", "content": {"application/json": {"example": {"error": "Authentication required."}}}},
+	422: {"description": "Validation Error", "content": {"application/json": {"example": {"error": "Validation failed.", "details": {}}}}},
+	500: {"description": "Internal Server Error", "content": {"application/json": {"example": {"error": "Internal server error."}}}},
+})
 async def list_users_route(
 	role_id: Optional[int] = Query(default=None, description="1=customer, 2=provider"),
 	page: int = Query(default=1, ge=1, description="Page number"),
@@ -58,8 +62,12 @@ async def list_users_route(
 			for u in users
 		]
 		return UsersResponse(items=items, total=len(items))
+	except HTTPException as e:
+		return {"error": e.detail}
+	except ValueError as ve:
+		raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail={"error": "Validation failed.", "details": str(ve)})
 	except Exception as e:
-		raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
+		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail={"error": "Internal server error.", "details": str(e)})
 
 # New route to view a specific user
 from fastapi import HTTPException
