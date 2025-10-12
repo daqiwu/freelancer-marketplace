@@ -27,7 +27,7 @@ admin_users_router = APIRouter(prefix="/admin/users", tags=["admin-users"])
 
 
 
-@admin_users_router.get("/list", response_model=UsersResponse)
+@admin_users_router.get("/", response_model=UsersResponse)
 async def list_users_route(
 	role_id: Optional[int] = Query(default=None, description="1=customer, 2=provider"),
 	page: int = Query(default=1, ge=1, description="Page number"),
@@ -38,7 +38,14 @@ async def list_users_route(
 	current_user_id: int = Depends(get_current_user),
 ):
 	try:
-		users = await list_users_by_role(db, role_id, page=page, limit=limit, sort_by=sort_by, order=order)
+		users = await list_users_by_role(
+			db,
+			role_id,
+			page=page,
+			limit=limit,
+			sort_by=sort_by,
+			order=order
+		)
 		items = [
 			UserItem(
 				id=u.id,

@@ -39,22 +39,31 @@ async def list_all_orders_route(
 	sort_by: Optional[str] = Query(default="created_at", description="Sort by field"),
 	order: Optional[str] = Query(default="desc", description="Sort order: asc or desc"),
 ):
-	# Update service to support pagination and sorting
-	orders = await list_all_orders(db, status=status, page=page, limit=limit, sort_by=sort_by, order=order)
-	items = [
-		AdminOrderItem(
-			id=o.id,
-			title=o.title,
-			price=float(o.price) if o.price is not None else 0.0,
-			location=o.location,
-			address=o.address,
-			status=o.status.value,
-			customer_id=o.customer_id,
-			provider_id=getattr(o, "provider_id", None),
-			created_at=str(o.created_at),
-			updated_at=str(o.updated_at),
+	try:
+		orders = await list_all_orders(
+			db,
+			status=status,
+			page=page,
+			limit=limit,
+			sort_by=sort_by,
+			order=order
 		)
-		for o in orders
-	]
-	return AdminOrdersResponse(items=items, total=len(items))
+		items = [
+			AdminOrderItem(
+				id=o.id,
+				title=o.title,
+				price=float(o.price) if o.price is not None else 0.0,
+				location=o.location,
+				address=o.address,
+				status=o.status.value,
+				customer_id=o.customer_id,
+				provider_id=getattr(o, "provider_id", None),
+				created_at=str(o.created_at),
+				updated_at=str(o.updated_at),
+			)
+			for o in orders
+		]
+		return AdminOrdersResponse(items=items, total=len(items))
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"Error fetching orders: {str(e)}")
 
