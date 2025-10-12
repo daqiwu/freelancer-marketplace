@@ -72,12 +72,44 @@ async def get_my_orders(db: AsyncSession, customer_id: int) -> List[Order]:
     )
     return result.scalars().all()
 
-async def get_order_detail(db: AsyncSession, customer_id: int, order_id: int) -> Order:
+async def get_order_detail(db: AsyncSession, customer_id: int, order_id: int) -> dict:
+    """
+    获取订单详情。如果订单已评价，则返回review内容，否则review部分为空。
+    """
     result = await db.execute(
-        select(Order)
-        .where(Order.id == order_id, Order.customer_id == customer_id)
+        select(Order).where(Order.id == order_id, Order.customer_id == customer_id)
     )
-    return result.scalars().first()
+    order = result.scalars().first()
+    if not order:
+        return None
+
+    review_data = None
+    if order.status == OrderStatus.reviewed:
+        review_result = await db.execute(
+            select(Review).where(Review.order_id == order_id)
+        )
+        review = review_result.scalars().first()
+        if review:
+            review_data = {
+                "review_id": review.id,
+                "stars": review.stars,
+                "content": review.content,
+                "created_at": str(review.created_at)
+            }
+
+    return {
+        "id": order.id,
+        "title": order.title,
+        "description": order.description,
+        "status": order.status.value,
+        "price": float(order.price),
+        "location": order.location.value,
+        "address": order.address,
+        "created_at": str(order.created_at),
+        "updated_at": str(order.updated_at),
+        "provider_id": order.provider_id,
+        "review": review_data  # 如果没有评价则为 None
+    }
 
 async def get_order_history(db: AsyncSession, customer_id: int) -> List[Order]:
     """
