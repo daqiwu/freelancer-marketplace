@@ -1,16 +1,19 @@
 import pytest
 from httpx import AsyncClient
+import time
 
 @pytest.mark.asyncio
 async def test_register_success():
+    timestamp = int(time.time())
     async with AsyncClient(base_url="http://localhost:8000") as ac:
         # 清理测试用户
-        await ac.delete("/auth/test/cleanup", params={"username": "apitestuser"})
+        username = f"apitestuser_{timestamp}"
+        await ac.delete("/auth/test/cleanup", params={"username": username})
 
         # 注册
         register_data = {
-            "username": "apitestuser",
-            "email": "apitestuser@example.com",
+            "username": username,
+            "email": f"apitestuser_{timestamp}@example.com",
             "password": "apitestpass",
             "role_id": 1
         }
@@ -18,8 +21,8 @@ async def test_register_success():
         print("register:", reg_resp.text)
         assert reg_resp.status_code == 200
         resp_json = reg_resp.json()
-        assert resp_json["username"] == "apitestuser"
-        assert resp_json["email"] == "apitestuser@example.com"
+        assert resp_json["username"] == username
+        assert resp_json["email"] == f"apitestuser_{timestamp}@example.com"
 
 @pytest.mark.asyncio
 async def test_login_success():
