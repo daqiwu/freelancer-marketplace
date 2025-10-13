@@ -1,14 +1,19 @@
 import pytest
 from httpx import AsyncClient
+import time
 
 @pytest.mark.asyncio
 async def test_publish_order_api():
     async with AsyncClient(base_url="http://localhost:8000") as ac:
         # 注册并登录获取token  # Register and login to get token
-        await ac.delete("http://localhost:8000/auth/test/cleanup?username=orderapitestuser")
+        timestamp = str(int(time.time()))
+        username = f"orderapitestuser_{timestamp}"
+        email = f"orderapitestuser_{timestamp}@example.com"
+        
+        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
         register_data = {
-            "username": "orderapitestuser",
-            "email": "orderapitestuser@example.com",
+            "username": username,
+            "email": email,
             "password": "orderapitestpass",
             "role_id": 1
         }
