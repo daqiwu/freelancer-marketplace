@@ -9,8 +9,19 @@
       </div>
 
       <div class="profile-container">
+        <!-- 加载状态 -->
+        <div v-if="loading" class="loading-container">
+          <div class="loading-spinner">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="spinner">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <p>加载用户信息中...</p>
+        </div>
+
         <!-- 个人信息展示 -->
-        <div v-if="!isEditing" class="profile-display">
+        <div v-else-if="!isEditing" class="profile-display">
           <div class="profile-card">
             <div class="avatar-section">
               <div class="avatar">
@@ -229,6 +240,7 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue'
+import apiService from '@/services/api.js'
 
 export default {
   name: 'ProfilePage',
@@ -241,11 +253,12 @@ export default {
       saving: false,
       showPasswordModal: false,
       savingPassword: false,
+      loading: true,
       userInfo: {
-        username: '张三',
-        phone: '138-0000-1234',
-        email: 'zhangsan@example.com',
-        registerDate: '2024-01-01',
+        username: '',
+        phone: '',
+        email: '',
+        registerDate: '',
         avatar: null
       },
       editForm: {
@@ -260,7 +273,31 @@ export default {
       }
     }
   },
+  async created() {
+    await this.loadUserProfile()
+  },
   methods: {
+    async loadUserProfile() {
+      try {
+        this.loading = true
+        const profile = await apiService.getUserProfile()
+        
+        // 根据用户角色设置信息
+        this.userInfo = {
+          username: profile.username,
+          email: profile.email,
+          phone: '138-0000-1234',  // 临时硬编码，手机号功能暂时不实现
+          registerDate: profile.created_at ? new Date(profile.created_at).toLocaleDateString() : '',
+          avatar: null
+        }
+        
+        this.loading = false
+      } catch (error) {
+        console.error('加载用户资料失败:', error)
+        this.loading = false
+        alert('加载用户资料失败，请重试')
+      }
+    },
     startEdit() {
       this.editForm = {
         username: this.userInfo.username,
@@ -278,20 +315,63 @@ export default {
       }
     },
     async saveProfile() {
-      this.saving = true
-      
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // 更新用户信息
-      this.userInfo.username = this.editForm.username
-      this.userInfo.phone = this.editForm.phone
-      this.userInfo.email = this.editForm.email
-      
-      this.saving = false
-      this.isEditing = false
-      
-      alert('个人信息保存成功！')
+      try {
+        this.saving = true
+        
+        console.log('开始保存用户资料...')
+        console.log('编辑表单数据:', this.editForm)
+        
+        // 先测试获取用户信息
+        console.log('获取当前用户信息...')
+        const currentProfile = await apiService.getUserProfile()
+        console.log('当前用户信息:', currentProfile)
+        
+        // 先更新用户基本信息
+        console.log('更新用户基本信息...')
+        await apiService.updateUserInfo({
+          username: this.editForm.username,
+          email: this.editForm.email
+        })
+        console.log('用户基本信息更新成功')
+        
+        // 根据角色调用不同的API
+        if (currentProfile.role === 'customer') {
+          console.log('更新客户资料...')
+          await apiService.updateCustomerProfile({
+            location: 'NORTH',
+            address: this.editForm.phone || '未设置',
+            budget_preference: 1000,
+            balance: currentProfile.customer_profile?.balance || 0
+          })
+          console.log('客户资料更新成功')
+        } else if (currentProfile.role === 'provider') {
+          console.log('更新服务商资料...')
+          await apiService.updateProviderProfile({
+            skills: currentProfile.provider_profile?.skills || '',
+            experience_years: currentProfile.provider_profile?.experience_years || 1,
+            hourly_rate: currentProfile.provider_profile?.hourly_rate || 50,
+            availability: currentProfile.provider_profile?.availability || 'Weekdays'
+          })
+          console.log('服务商资料更新成功')
+        }
+        
+        // 更新本地用户信息
+        this.userInfo.username = this.editForm.username
+        this.userInfo.phone = this.editForm.phone
+        this.userInfo.email = this.editForm.email
+        
+        this.saving = false
+        this.isEditing = false
+        
+        console.log('保存完成')
+        alert('个人信息保存成功！')
+      } catch (error) {
+        console.error('保存用户资料失败:', error)
+        console.error('错误详情:', error.message)
+        console.error('错误堆栈:', error.stack)
+        this.saving = false
+        alert(`保存失败: ${error.message}`)
+      }
     },
     changePassword() {
       this.passwordForm = {
@@ -374,6 +454,32 @@ export default {
 
 .profile-container {
   position: relative;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.loading-spinner {
+  margin-bottom: 20px;
+}
+
+.loading-spinner .spinner {
+  color: #74b9ff;
+  animation: spin 1s linear infinite;
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
 }
 
 .profile-display {

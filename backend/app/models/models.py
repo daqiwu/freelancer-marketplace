@@ -43,7 +43,11 @@ class User(Base):
     provider_profile = relationship("ProviderProfile", uselist=False, back_populates="user")
 
     def verify_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        try:
+            return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        except Exception as e:
+            print(f"Password verification error: {e}")
+            return False
 
 class CustomerProfile(Base):
     __tablename__ = "customer_profiles"

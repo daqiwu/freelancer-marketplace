@@ -8,16 +8,16 @@
 
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="username">用户名</label>
+          <label for="email">邮箱地址</label>
           <input 
-            type="text" 
-            id="username" 
-            v-model="form.username" 
+            type="email" 
+            id="email" 
+            v-model="form.email" 
             required
-            placeholder="请输入用户名"
-            :class="{ 'error': errors.username }"
+            placeholder="请输入邮箱地址"
+            :class="{ 'error': errors.email }"
           >
-          <span v-if="errors.username" class="error-message">{{ errors.username }}</span>
+          <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
         </div>
 
         <div class="form-group">
@@ -33,15 +33,6 @@
           <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
         </div>
 
-        <div class="form-group">
-          <label for="role">角色</label>
-          <select id="role" v-model="form.role" required :class="{ 'error': errors.role }">
-            <option value="">请选择角色</option>
-            <option value="customer">客户 (Customer)</option>
-            <option value="provider">服务提供者 (Provider)</option>
-          </select>
-          <span v-if="errors.role" class="error-message">{{ errors.role }}</span>
-        </div>
 
         <button type="submit" class="login-btn" :disabled="loading">
           <svg v-if="loading" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="spinner">
@@ -60,15 +51,16 @@
 </template>
 
 <script>
+import apiService from '@/services/api.js'
+
 export default {
   name: 'LoginPage',
   data() {
     return {
       loading: false,
       form: {
-        username: '',
-        password: '',
-        role: ''
+        email: '',
+        password: ''
       },
       errors: {}
     }
@@ -77,20 +69,19 @@ export default {
     validateForm() {
       this.errors = {}
       
-      if (!this.form.username.trim()) {
-        this.errors.username = '请输入用户名'
+      if (!this.form.email.trim()) {
+        this.errors.email = '请输入邮箱地址'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = '请输入有效的邮箱地址'
       }
       
       if (!this.form.password.trim()) {
         this.errors.password = '请输入密码'
       }
       
-      if (!this.form.role) {
-        this.errors.role = '请选择角色'
-      }
-      
       return Object.keys(this.errors).length === 0
     },
+    
     async handleLogin() {
       if (!this.validateForm()) {
         return
@@ -98,37 +89,41 @@ export default {
       
       this.loading = true
       
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // 从本地存储获取用户数据
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      const user = users.find(u => 
-        u.username === this.form.username && 
-        u.password === this.form.password && 
-        u.role === this.form.role
-      )
-      
-      if (user) {
-        // 登录成功，保存用户信息到sessionStorage
+      try {
+        await apiService.login(this.form)
+        
+        // 登录成功，获取用户信息
+        const userProfile = await apiService.getUserProfile()
+        
+        // 保存用户信息到sessionStorage
         sessionStorage.setItem('currentUser', JSON.stringify({
-          id: user.id,
-          username: user.username,
-          role: user.role
+          id: userProfile.id,
+          username: userProfile.username,
+          email: userProfile.email,
+          role: userProfile.role
         }))
         
         this.loading = false
         alert('登录成功！')
         
         // 根据角色跳转到不同页面
-        if (this.form.role === 'customer') {
+        if (userProfile.role === 'customer') {
           this.$router.push('/?role=customer')
-        } else {
+        } else if (userProfile.role === 'provider') {
           this.$router.push('/?role=provider')
+        } else {
+          this.$router.push('/')
         }
-      } else {
+        
+      } catch (error) {
         this.loading = false
-        alert('用户名、密码或角色错误，请检查后重试')
+        console.error('登录失败:', error)
+        
+        if (error.message.includes('401') || error.message.includes('邮箱或密码错误')) {
+          alert('邮箱或密码错误，请重试')
+        } else {
+          alert('登录失败，请稍后重试')
+        }
       }
     }
   }

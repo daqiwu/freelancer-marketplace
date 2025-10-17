@@ -16,8 +16,8 @@ class Settings(BaseSettings):
             return aws_url.strip()
         use_docker = os.getenv("USE_DOCKER", "false").lower() == "true"
         if use_docker:
-            return os.getenv("DOCKER_DATABASE_URL").strip()
-        return os.getenv("LOCAL_DATABASE_URL").strip()
+            return os.getenv("DOCKER_DATABASE_URL", "mysql+aiomysql://root:password@db:3306/freelancer_marketplace").strip()
+        return os.getenv("LOCAL_DATABASE_URL", "sqlite+aiosqlite:///./freelancer.db").strip()
 
 settings = Settings()
 
