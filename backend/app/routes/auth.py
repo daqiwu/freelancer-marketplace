@@ -42,18 +42,6 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
     token = await create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)
 
-@auth_router.delete("/test/cleanup")
-async def cleanup_test_user(username: str, db: AsyncSession = Depends(get_db)):
-    # 查找用户  # Find user
-    result = await db.execute(select(User).where(User.username == username))
-    user = result.scalars().first()
-    if user:
-        # 先删除该用户的订单  # Delete user's orders first
-        await db.execute(delete(Order).where(Order.customer_id == user.id))
-        # 再删除用户  # Then delete user
-        await db.execute(delete(User).where(User.id == user.id))
-        await db.commit()
-    return {"msg": "deleted"}
 
 @auth_router.post("/logout")
 async def logout():

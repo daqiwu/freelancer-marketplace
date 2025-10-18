@@ -74,6 +74,10 @@ async def update_customer_profile_api(
     )
     return {"msg": "客户资料更新成功  // Customer profile updated", "profile_id": profile.id}
 
+class UpdateUserInfoRequest(BaseModel):
+    username: str
+    email: str
+
 class UpdateProviderProfileRequest(BaseModel):
     skills: str
     experience_years: int
@@ -100,3 +104,27 @@ async def update_provider_profile_api(
         db, current_user_id, data.skills, data.experience_years, data.hourly_rate, data.availability
     )
     return {"msg": "服务商资料更新成功  // Provider profile updated", "profile_id": profile.id}
+
+@profile_router.put("/update_user_info")
+async def update_user_info_api(
+    data: UpdateUserInfoRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: int = Depends(get_current_user)
+):
+    """
+    更新用户基本信息接口
+    Update user basic info API
+    """
+    from app.models.models import User
+    result = await db.execute(select(User).where(User.id == current_user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在  // User not found")
+    
+    # 更新用户基本信息
+    user.username = data.username
+    user.email = data.email
+    await db.commit()
+    await db.refresh(user)
+    
+    return {"msg": "用户信息更新成功  // User info updated", "user_id": user.id}

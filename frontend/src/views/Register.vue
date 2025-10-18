@@ -21,6 +21,19 @@
         </div>
 
         <div class="form-group">
+          <label for="email">邮箱地址</label>
+          <input 
+            type="email" 
+            id="email" 
+            v-model="form.email" 
+            required
+            placeholder="请输入邮箱地址"
+            :class="{ 'error': errors.email }"
+          >
+          <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+        </div>
+
+        <div class="form-group">
           <label for="password">密码</label>
           <input 
             type="password" 
@@ -48,16 +61,16 @@
 
         <div class="form-group">
           <label for="role">角色</label>
-          <select id="role" v-model="form.role" required :class="{ 'error': errors.role }">
+          <select id="role" v-model="form.role_id" required :class="{ 'error': errors.role_id }">
             <option value="">请选择角色</option>
-            <option value="customer">客户 (Customer)</option>
-            <option value="provider">服务提供者 (Provider)</option>
+            <option value="1">客户 (Customer)</option>
+            <option value="2">服务提供者 (Provider)</option>
           </select>
-          <span v-if="errors.role" class="error-message">{{ errors.role }}</span>
+          <span v-if="errors.role_id" class="error-message">{{ errors.role_id }}</span>
         </div>
 
         <div class="role-description">
-          <div v-if="form.role === 'customer'" class="role-info customer-info">
+          <div v-if="form.role_id === '1'" class="role-info customer-info">
             <h4>客户角色</h4>
             <p>作为客户，您可以：</p>
             <ul>
@@ -67,7 +80,7 @@
               <li>与服务提供者沟通</li>
             </ul>
           </div>
-          <div v-else-if="form.role === 'provider'" class="role-info provider-info">
+          <div v-else-if="form.role_id === '2'" class="role-info provider-info">
             <h4>服务提供者角色</h4>
             <p>作为服务提供者，您可以：</p>
             <ul>
@@ -96,6 +109,8 @@
 </template>
 
 <script>
+import apiService from '@/services/api.js'
+
 export default {
   name: 'RegisterPage',
   data() {
@@ -103,9 +118,10 @@ export default {
       loading: false,
       form: {
         username: '',
+        email: '',
         password: '',
         confirmPassword: '',
-        role: ''
+        role_id: ''
       },
       errors: {}
     }
@@ -120,6 +136,12 @@ export default {
         this.errors.username = '用户名至少需要3个字符'
       }
       
+      if (!this.form.email.trim()) {
+        this.errors.email = '请输入邮箱地址'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = '请输入有效的邮箱地址'
+      }
+      
       if (!this.form.password.trim()) {
         this.errors.password = '请输入密码'
       } else if (this.form.password.length < 6) {
@@ -132,12 +154,13 @@ export default {
         this.errors.confirmPassword = '两次输入的密码不一致'
       }
       
-      if (!this.form.role) {
-        this.errors.role = '请选择角色'
+      if (!this.form.role_id) {
+        this.errors.role_id = '请选择角色'
       }
       
       return Object.keys(this.errors).length === 0
     },
+    
     async handleRegister() {
       if (!this.validateForm()) {
         return
@@ -145,37 +168,32 @@ export default {
       
       this.loading = true
       
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // 检查用户名是否已存在
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      const existingUser = users.find(u => u.username === this.form.username)
-      
-      if (existingUser) {
+      try {
+        const userData = {
+          username: this.form.username,
+          email: this.form.email,
+          password: this.form.password,
+          role_id: parseInt(this.form.role_id)
+        }
+        
+        await apiService.register(userData)
+        
         this.loading = false
-        alert('用户名已存在，请选择其他用户名')
-        return
+        alert('注册成功！请登录您的账户')
+        
+        // 跳转到登录页面
+        this.$router.push('/login')
+        
+      } catch (error) {
+        this.loading = false
+        console.error('注册失败:', error)
+        
+        if (error.message.includes('用户名或邮箱已存在')) {
+          alert('用户名或邮箱已存在，请选择其他用户名或邮箱')
+        } else {
+          alert('注册失败，请稍后重试')
+        }
       }
-      
-      // 创建新用户
-      const newUser = {
-        id: Date.now(),
-        username: this.form.username,
-        password: this.form.password,
-        role: this.form.role,
-        createdAt: new Date().toISOString()
-      }
-      
-      // 保存用户到本地存储
-      users.push(newUser)
-      localStorage.setItem('users', JSON.stringify(users))
-      
-      this.loading = false
-      alert('注册成功！请登录您的账户')
-      
-      // 跳转到登录页面
-      this.$router.push('/login')
     }
   }
 }
@@ -297,6 +315,7 @@ export default {
 .role-info li {
   margin-bottom: 5px;
 }
+
 
 .customer-info {
   border-color: #00b894;

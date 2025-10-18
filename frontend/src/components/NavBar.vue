@@ -18,7 +18,11 @@
       <div class="navbar-user">
         <div v-if="isLoggedIn" class="user-info">
           <span class="user-name">{{ currentUser.username }}</span>
-          <span class="user-role">{{ currentUser.role === 'customer' ? '客户' : '服务提供者' }}</span>
+          <span class="user-role">{{ 
+            currentUser.role === 'customer' ? '客户' : 
+            currentUser.role === 'provider' ? '服务提供者' : 
+            currentUser.role === 'admin' ? '管理员' : '用户' 
+          }}</span>
           <button @click="handleLogout" class="logout-btn">退出</button>
         </div>
         <div v-else class="auth-buttons">
@@ -57,9 +61,14 @@ export default {
           { path: '/messages?role=provider', label: '我的消息' },
           { path: '/profile?role=provider', label: '个人信息' }
         ]
+      } else if (this.currentRole === 'admin') {
+        return [
+          { path: '/admin', label: '管理员控制台' }
+        ]
       } else {
         return [
           { path: '/?role=customer', label: '我的发布' },
+          { path: '/customer/orders?role=customer', label: '我的订单' },
           { path: '/my-tasks?role=customer', label: '我的任务' },
           { path: '/messages?role=customer', label: '我的消息' },
           { path: '/profile?role=customer', label: '个人信息' }

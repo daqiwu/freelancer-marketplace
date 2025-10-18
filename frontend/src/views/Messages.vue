@@ -40,7 +40,12 @@
           </div>
         </div>
 
-        <div v-if="filteredMessages.length === 0" class="empty-state">
+        <div v-if="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>正在加载消息...</p>
+        </div>
+        
+        <div v-else-if="filteredMessages.length === 0" class="empty-state">
           <div class="empty-icon">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -51,38 +56,27 @@
         </div>
 
         <div v-else class="message-list">
-          <div v-for="message in filteredMessages" :key="message.id" class="message-card" :class="{ unread: !message.read }">
+          <div v-for="message in filteredMessages" :key="message.id" class="message-card" :class="{ unread: !message.is_read }">
             <div class="message-header">
               <div class="message-title">
-                <h3>{{ message.title }}</h3>
-                <span v-if="!message.read" class="unread-badge">未读</span>
+                <h3>{{ message.message }}</h3>
+                <span v-if="!message.is_read" class="unread-badge">未读</span>
               </div>
               <div class="message-meta">
-                <span class="message-time">{{ formatTime(message.createdAt) }}</span>
-                <span class="message-type" :class="message.type">{{ getTypeLabel(message.type) }}</span>
+                <span class="message-time">{{ formatTime(message.created_at) }}</span>
+                <span class="message-type" :class="getMessageType(message)">{{ getTypeLabel(getMessageType(message)) }}</span>
               </div>
             </div>
             
             <div class="message-content">
               <div class="content-preview" :class="{ expanded: message.expanded }">
-                <p>{{ message.content }}</p>
+                <p>{{ message.message }}</p>
               </div>
-              <button 
-                v-if="message.content.length > 100" 
-                class="expand-btn" 
-                @click="toggleExpand(message.id)"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path v-if="!message.expanded" d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path v-else d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                {{ message.expanded ? '收起' : '展开' }}
-              </button>
             </div>
 
             <div class="message-actions">
               <button 
-                v-if="!message.read" 
+                v-if="!message.is_read" 
                 class="action-btn mark-read" 
                 @click="markAsRead(message.id)"
               >
@@ -107,6 +101,7 @@
 
 <script>
 import NavBar from '@/components/NavBar.vue'
+import apiService from '@/services/api.js'
 
 export default {
   name: 'MessagesPage',
@@ -115,6 +110,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       activeTab: 'all',
       tabs: [
         { key: 'all', label: '全部' },
@@ -122,53 +118,7 @@ export default {
         { key: 'system', label: '系统通知' },
         { key: 'task', label: '任务相关' }
       ],
-      messages: [
-        {
-          id: 1,
-          title: '欢迎使用任务平台！',
-          content: '欢迎您加入我们的任务平台！在这里您可以找到各种有趣的任务，也可以发布自己的需求。我们致力于为每一位用户提供优质的服务体验。如果您在使用过程中遇到任何问题，请随时联系我们的客服团队。祝您使用愉快！',
-          type: 'system',
-          read: false,
-          createdAt: new Date('2024-01-15 10:30:00'),
-          expanded: false
-        },
-        {
-          id: 2,
-          title: '您的新任务申请已通过',
-          content: '恭喜！您申请的"网站前端开发项目"任务已通过审核，现在可以开始工作了。请及时与客户联系，确认具体的项目细节和时间安排。',
-          type: 'task',
-          read: true,
-          createdAt: new Date('2024-01-14 15:20:00'),
-          expanded: false
-        },
-        {
-          id: 3,
-          title: '系统维护通知',
-          content: '为了提供更好的服务，我们将在今晚22:00-24:00进行系统维护升级。维护期间可能会影响部分功能的使用，请您提前做好相关准备。给您带来的不便敬请谅解。',
-          type: 'system',
-          read: false,
-          createdAt: new Date('2024-01-13 09:15:00'),
-          expanded: false
-        },
-        {
-          id: 4,
-          title: '任务完成确认',
-          content: '您的任务"移动应用UI设计"已完成，客户已确认验收。任务款项将在3个工作日内到账，请注意查收。感谢您的优质服务！',
-          type: 'task',
-          read: true,
-          createdAt: new Date('2024-01-12 16:45:00'),
-          expanded: false
-        },
-        {
-          id: 5,
-          title: '平台功能更新',
-          content: '我们很高兴地宣布，平台新增了以下功能：1. 任务搜索优化，支持更精准的筛选条件；2. 消息推送功能，重要通知及时送达；3. 个人资料管理，支持头像上传和详细信息编辑；4. 任务进度跟踪，实时了解任务状态。这些更新将为您提供更好的使用体验，欢迎体验新功能！',
-          type: 'system',
-          read: true,
-          createdAt: new Date('2024-01-10 14:00:00'),
-          expanded: false
-        }
-      ]
+      messages: []
     }
   },
   computed: {
@@ -176,13 +126,13 @@ export default {
       return this.messages.length
     },
     unreadMessages() {
-      return this.messages.filter(m => !m.read).length
+      return this.messages.filter(m => !m.is_read).length
     },
     todayMessages() {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       return this.messages.filter(m => {
-        const messageDate = new Date(m.createdAt)
+        const messageDate = new Date(m.created_at)
         messageDate.setHours(0, 0, 0, 0)
         return messageDate.getTime() === today.getTime()
       }).length
@@ -191,17 +141,79 @@ export default {
       if (this.activeTab === 'all') {
         return this.messages
       } else if (this.activeTab === 'unread') {
-        return this.messages.filter(m => !m.read)
+        return this.messages.filter(m => !m.is_read)
       } else {
-        return this.messages.filter(m => m.type === this.activeTab)
+        return this.messages.filter(m => this.getMessageType(m) === this.activeTab)
       }
     }
   },
+  async mounted() {
+    await this.loadMessages()
+  },
   methods: {
+    async loadMessages() {
+      this.loading = true
+      try {
+        const role = this.getCurrentRole()
+        const data = role === 'customer' 
+          ? await apiService.getCustomerInbox()
+          : await apiService.getProviderInbox()
+        
+        this.messages = data.map(msg => ({
+          ...msg,
+          expanded: false
+        }))
+      } catch (error) {
+        console.error('Error loading messages:', error)
+        // 如果API失败，显示一些示例数据
+        this.messages = this.getSampleMessages()
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    getSampleMessages() {
+      return [
+        {
+          id: 1,
+          message: '欢迎使用任务平台！',
+          is_read: false,
+          created_at: new Date().toISOString(),
+          expanded: false
+        },
+        {
+          id: 2,
+          message: '您的新任务申请已通过',
+          is_read: true,
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          expanded: false
+        }
+      ]
+    },
+    
+    getCurrentRole() {
+      const currentUser = sessionStorage.getItem('currentUser')
+      if (currentUser) {
+        const user = JSON.parse(currentUser)
+        return user.role
+      }
+      return this.$route.query.role || 'customer'
+    },
+    
+    
+    getMessageType(message) {
+      const messageText = message.message.toLowerCase()
+      if (messageText.includes('order') || messageText.includes('task') || messageText.includes('accepted') || messageText.includes('completed')) {
+        return 'task'
+      }
+      return 'system'
+    },
+    
     getCurrentTabLabel() {
       const tab = this.tabs.find(t => t.key === this.activeTab)
       return tab ? tab.label : ''
     },
+    
     getTypeLabel(type) {
       const typeMap = {
         'system': '系统通知',
@@ -209,6 +221,7 @@ export default {
       }
       return typeMap[type] || '其他'
     },
+    
     formatTime(date) {
       const now = new Date()
       const messageDate = new Date(date)
@@ -225,18 +238,21 @@ export default {
         return messageDate.toLocaleDateString('zh-CN')
       }
     },
+    
     toggleExpand(messageId) {
       const message = this.messages.find(m => m.id === messageId)
       if (message) {
         message.expanded = !message.expanded
       }
     },
+    
     markAsRead(messageId) {
       const message = this.messages.find(m => m.id === messageId)
       if (message) {
-        message.read = true
+        message.is_read = true
       }
     },
+    
     deleteMessage(messageId) {
       if (confirm('确定要删除这条消息吗？')) {
         const index = this.messages.findIndex(m => m.id === messageId)
@@ -387,6 +403,30 @@ export default {
   color: #999;
   font-size: 14px;
   margin: 0;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #74b9ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .message-list {
