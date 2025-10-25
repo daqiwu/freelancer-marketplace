@@ -4,7 +4,7 @@ from app.config import get_db
 from app.models.models import CustomerInbox, ProviderInbox
 from app.dependencies import get_current_user
 
-notification_router = APIRouter(prefix="/notification", tags=["notification"])
+notification_router = APIRouter(prefix="/api/v1/notification", tags=["notification"])
 
 @notification_router.get("/customer_inbox")
 async def get_customer_inbox(

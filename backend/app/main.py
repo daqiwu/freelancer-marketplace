@@ -49,7 +49,7 @@ async def startup_event():
         
         # 初始化数据库（包括创建管理员账户）
         from init_db import init_db
-        init_db()
+        await init_db()
         
     except Exception as e:
         print(f"数据库初始化失败: {e}")

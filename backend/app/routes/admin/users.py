@@ -23,7 +23,7 @@ class UsersResponse(BaseModel):
 	total: int
 
 
-admin_users_router = APIRouter(prefix="/admin/users", tags=["admin-users"])
+admin_users_router = APIRouter(prefix="/api/v1/admin/users", tags=["admin-users"])
 
 
 
