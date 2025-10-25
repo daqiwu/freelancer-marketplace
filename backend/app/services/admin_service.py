@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
-from app.models.models import Order, User, ProviderProfile, CustomerProfile, Review, CustomerInbox, ProviderInbox
+from app.models.models import Order, User, ProviderProfile, CustomerProfile, Review, CustomerInbox, ProviderInbox, OrderStatus
+from app.services.notification_service import send_customer_notification
+from datetime import datetime, UTC
 
 async def list_all_orders(db: AsyncSession, status: str = None, page: int = 1, limit: int = 20, sort_by: str = "created_at", order: str = "desc"):
     """
@@ -76,3 +78,81 @@ async def delete_user_by_id(db: AsyncSession, id: int):
     await db.execute(delete(User).where(User.id == id))
     await db.commit()
 
+async def get_pending_review_orders(db: AsyncSession):
+    """获取所有待审核订单"""
+    result = await db.execute(
+        select(Order).where(Order.status == OrderStatus.pending_review)
+        .order_by(Order.created_at.desc())
+    )
+    return result.scalars().all()
+
+async def approve_order(db: AsyncSession, order_id: int, approved: bool, reject_reason: str = None):
+    """管理员审批订单"""
+    # 查找订单
+    result = await db.execute(select(Order).where(Order.id == order_id))
+    order = result.scalars().first()
+    
+    if not order:
+        raise ValueError("Order not found")
+    
+    if order.status != OrderStatus.pending_review:
+        raise ValueError("Only pending_review orders can be approved")
+    
+    if approved:
+        # 批准订单
+        order.status = OrderStatus.pending
+        order.updated_at = datetime.now(UTC)
+        await db.commit()
+        await db.refresh(order)
+        
+        # 通知客户
+        await send_customer_notification(
+            db, order.customer_id, order.id,
+            f"Your order #{order.id} has been approved by admin and is now available for providers to accept."
+        )
+        return order
+    else:
+        # 拒绝订单
+        if not reject_reason:
+            raise ValueError("Reject reason is required when rejecting an order")
+        
+        order.status = OrderStatus.cancelled
+        order.updated_at = datetime.now(UTC)
+        await db.commit()
+        await db.refresh(order)
+        
+        # 通知客户
+        await send_customer_notification(
+            db, order.customer_id, order.id,
+            f"Your order #{order.id} has been rejected. Reason: {reject_reason}"
+        )
+        return order
+
+async def update_order(db: AsyncSession, order_id: int, update_data: dict):
+    """管理员更新订单"""
+    result = await db.execute(select(Order).where(Order.id == order_id))
+    order = result.scalars().first()
+    
+    if not order:
+        raise ValueError("Order not found")
+    
+    # 更新订单字段
+    for key, value in update_data.items():
+        if hasattr(order, key) and value is not None:
+            setattr(order, key, value)
+    
+    order.updated_at = datetime.now(UTC)
+    await db.commit()
+    await db.refresh(order)
+    return order
+
+async def delete_order(db: AsyncSession, order_id: int):
+    """管理员删除订单"""
+    # 先删除相关的通知和评价
+    await db.execute(delete(CustomerInbox).where(CustomerInbox.order_id == order_id))
+    await db.execute(delete(ProviderInbox).where(ProviderInbox.order_id == order_id))
+    await db.execute(delete(Review).where(Review.order_id == order_id))
+    
+    # 删除订单
+    await db.execute(delete(Order).where(Order.id == order_id))
+    await db.commit()

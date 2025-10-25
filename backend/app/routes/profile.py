@@ -13,7 +13,7 @@ from app.services.profile_service import (
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
 
-profile_router = APIRouter(prefix="/profile", tags=["profile"])
+profile_router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
 
 @profile_router.get("/me")
 async def get_my_profile(

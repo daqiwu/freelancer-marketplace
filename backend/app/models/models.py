@@ -7,12 +7,20 @@ from datetime import datetime
 
 Base = declarative_base()
 
+class ServiceType(enum.Enum):
+    cleaning_repair = "cleaning_repair"
+    it_technology = "it_technology"
+    education_training = "education_training"
+    life_health = "life_health"
+    design_consulting = "design_consulting"
+    other = "other"
+
 class OrderStatus(enum.Enum):
+    pending_review = "pending_review"
     pending = "pending"
     accepted = "accepted"
     in_progress = "in_progress"
     completed = "completed"
-    reviewed = "reviewed"
     cancelled = "cancelled"
 
 class LocationEnum(enum.Enum):
@@ -70,8 +78,8 @@ class ProviderProfile(Base):
     user = relationship("User", back_populates="provider_profile")
 
 class PaymentStatus(enum.Enum):
-    unpaid = "unpaid"  # 未支付  # Unpaid
-    paid = "paid"      # 已支付  # Paid
+    unpaid = "unpaid"  
+    paid = "paid"     
 
 class Order(Base):
     __tablename__ = "orders"
@@ -80,18 +88,42 @@ class Order(Base):
     provider_id = Column(BigInteger, ForeignKey("users.id"))
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    status = Column(Enum(OrderStatus), default=OrderStatus.pending)
-    price = Column(DECIMAL(10,2))
+    service_type = Column(Enum(ServiceType), nullable=False)
+    status = Column(Enum(OrderStatus), default=OrderStatus.pending_review, nullable=False)
+    price = Column(DECIMAL(10,2), nullable=False)
     location = Column(Enum(LocationEnum), nullable=False)
     address = Column(String(255))
+    service_start_time = Column(DateTime)
+    service_end_time = Column(DateTime)
+    payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.unpaid, nullable=False)
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
-    payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.unpaid)  # 支付状态  # Payment status
+
+class PaymentMethodEnum(enum.Enum):
+    simulated = "simulated"
+
+class PaymentStatusEnum(enum.Enum):
+    pending = "pending"
+    completed = "completed"
+    failed = "failed"
+
+class Payment(Base):
+    __tablename__ = "payments"
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    order_id = Column(BigInteger, ForeignKey("orders.id"), nullable=False, unique=True)
+    customer_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    provider_id = Column(BigInteger, ForeignKey("users.id"))
+    amount = Column(DECIMAL(10,2), nullable=False)
+    payment_method = Column(Enum(PaymentMethodEnum), default=PaymentMethodEnum.simulated)
+    status = Column(Enum(PaymentStatusEnum), default=PaymentStatusEnum.pending)
+    transaction_id = Column(String(255), unique=True)
+    created_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP)
 
 class Review(Base):
     __tablename__ = "reviews"
     id = Column(BigInteger, primary_key=True)  # 评价ID  # Review ID
-    order_id = Column(BigInteger, ForeignKey("orders.id"), nullable=False)  # 订单ID  # Order ID
+    order_id = Column(BigInteger, ForeignKey("orders.id"), nullable=False, unique=True)  # 订单ID (唯一)  # Order ID (unique)
     customer_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)  # 客户ID  # Customer ID
     provider_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)  # 服务商ID  # Provider ID
     stars = Column(Integer, nullable=False, default=5)  # 星级（1-5，默认5）  # Stars (1-5, default 5)

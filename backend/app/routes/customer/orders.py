@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, validator
 from app.config import get_db
 from app.services.customer_service import publish_order, cancel_order, get_my_orders, get_order_detail, get_order_history, review_order
-from app.models.models import LocationEnum, OrderStatus
+from app.models.models import LocationEnum, OrderStatus, ServiceType
 from typing import Optional, List
 from jose import JWTError, jwt
 from app.dependencies import get_current_user  # 导入依赖 # Import dependency
@@ -11,9 +11,12 @@ from app.dependencies import get_current_user  # 导入依赖 # Import dependenc
 class PublishOrderRequest(BaseModel):
     title: str
     description: Optional[str] = None
+    service_type: ServiceType
     price: float
     location: LocationEnum
     address: Optional[str] = None
+    service_start_time: Optional[str] = None
+    service_end_time: Optional[str] = None
 
     @validator("title")
     def title_not_empty(cls, v):
@@ -40,6 +43,7 @@ class CancelOrderResponse(BaseModel):
 class OrderSummary(BaseModel):
     id: int
     title: str
+    service_type: str
     status: str
     price: float
     location: str
@@ -47,16 +51,21 @@ class OrderSummary(BaseModel):
 
 class OrderDetail(BaseModel):
     id: int
+    customer_id: int
+    provider_id: Optional[int]
     title: str
     description: Optional[str]
+    service_type: str
     status: str
     price: float
     location: str
     address: Optional[str]
+    service_start_time: Optional[str]
+    service_end_time: Optional[str]
+    payment_status: str
     created_at: str
     updated_at: str
-    provider_id: Optional[int]
-    review: Optional[dict] = None  # 新增
+    review: Optional[dict] = None
 
 class ReviewOrderRequest(BaseModel):
     order_id: int
@@ -76,7 +85,7 @@ class ReviewOrderResponse(BaseModel):
     content: Optional[str]
     message: str
 
-orders_router = APIRouter(prefix='/customer/orders', tags=['orders'])
+orders_router = APIRouter(prefix='/api/v1/customer/orders', tags=['orders'])
 
 @orders_router.post("/publish", response_model=PublishOrderResponse)
 async def publish_order_route(
@@ -127,6 +136,7 @@ async def list_my_orders(
         OrderSummary(
             id=o.id,
             title=o.title,
+            service_type=o.service_type.value,
             status=o.status.value,
             price=float(o.price),
             location=o.location.value,
@@ -156,6 +166,7 @@ async def list_order_history(
         OrderSummary(
             id=o.id,
             title=o.title,
+            service_type=o.service_type.value,
             status=o.status.value,
             price=float(o.price),
             location=o.location.value,

@@ -172,8 +172,7 @@ async def get_order_detail_for_provider(
     order_id: int,
 ) -> Optional[dict]:
     """
-    Get order detail for a provider-owned order. If the order status is reviewed,
-    include the review content; otherwise, the review field is None.
+    Get order detail for a provider-owned order. Include the review if it exists.
     """
     result = await db.execute(
         select(Order).where(Order.id == order_id, Order.provider_id == provider_id)
@@ -183,29 +182,34 @@ async def get_order_detail_for_provider(
         return None
 
     review_data = None
-    if order.status == OrderStatus.reviewed:
-        review_result = await db.execute(
-            select(Review).where(Review.order_id == order_id)
-        )
-        review = review_result.scalars().first()
-        if review:
-            review_data = {
-                "review_id": review.id,
-                "stars": review.stars,
-                "content": review.content,
-                "created_at": str(review.created_at),
-            }
+    # 查询评价（如果存在）
+    review_result = await db.execute(
+        select(Review).where(Review.order_id == order_id)
+    )
+    review = review_result.scalars().first()
+    if review:
+        review_data = {
+            "review_id": review.id,
+            "stars": review.stars,
+            "content": review.content,
+            "created_at": str(review.created_at),
+        }
 
     return {
         "id": order.id,
+        "customer_id": order.customer_id,
+        "provider_id": order.provider_id,
         "title": order.title,
         "description": order.description,
+        "service_type": order.service_type.value,
         "status": order.status.value,
         "price": float(order.price) if order.price is not None else 0.0,
         "location": order.location.value,
         "address": order.address,
+        "service_start_time": str(order.service_start_time) if order.service_start_time else None,
+        "service_end_time": str(order.service_end_time) if order.service_end_time else None,
+        "payment_status": order.payment_status.value,
         "created_at": str(order.created_at),
         "updated_at": str(order.updated_at),
-        "provider_id": order.provider_id,
         "review": review_data,
     }

@@ -1,0 +1,65 @@
+==================================================================================================================================
+GENERATED PAYMENTS
+==================================================================================================================================
+
+Payment ID   Order ID   Customer ID   Provider ID   Amount     Status       Transaction ID           
+----------------------------------------------------------------------------------------------------------------------------------
+1            2          15            13            $681.98    completed    TXN2DEFE2DCA347CA23B4A8  
+2            3          48            18            $348.50    completed    TXNDD11670009CD5F7BF4AE  
+3            7          6             30            $674.48    completed    TXNA19AD281360B3593D844  
+4            10         48            29            $127.62    completed    TXN712741B6380603B1EB5F  
+5            11         26            46            $395.01    failed       TXN0F131C58FCB235A8D5FE  
+6            13         15            29            $645.77    completed    TXNCB3DEBAED71F49BAD22B  
+7            14         34            5             $595.82    pending      TXNC3A9ABD24B8D1E1FBEFC  
+8            15         34            13            $698.02    completed    TXNE4641D6D30EC8C41FCEC  
+9            17         6             36            $175.78    completed    TXN12D1BC25D6B7CFE3E064  
+10           18         41            4             $194.92    completed    TXND00FADD34CD8445F6A5B  
+11           19         6             17            $144.07    completed    TXNCAC1358C87CCFB9BD0F1  
+12           21         11            None          $683.22    failed       TXN27B44179F101A06B4F5F  
+13           23         26            38            $405.01    pending      TXN0B34C11E94934EAAEA3F  
+14           27         43            46            $582.94    failed       TXN78913A1E14FD5606CD08  
+15           28         37            None          $181.25    pending      TXN07F1F918DEAB7E05F8E7  
+16           29         6             38            $695.57    completed    TXN271E06B6DA29F644BDD4  
+17           31         47            7             $733.26    pending      TXN7721163F7BAFA06EE11C  
+18           32         42            30            $480.76    completed    TXN02A40264C92AE103C1EB  
+19           35         8             44            $707.50    completed    TXN663266561D25844BF6D1  
+20           37         26            44            $310.74    completed    TXN9AD765FEF964274248AD  
+21           38         31            35            $209.39    pending      TXN91D5CE28D20303F211AE  
+22           39         42            40            $83.92     completed    TXN7B96477DB78B112A89FF  
+23           41         43            4             $160.67    completed    TXN83DBF1F7921AC118B19C  
+24           44         31            46            $731.44    pending      TXN561AE39F1749A629B85B  
+25           46         9             28            $214.05    pending      TXNE7EC86F317C7D92436FB  
+26           47         11            24            $55.67     completed    TXND5FCF9B6EFA067658B27  
+27           51         26            44            $283.95    completed    TXNA98E544D48073B990DC7  
+28           53         23            40            $432.87    completed    TXNBD5DDDC0646E0DF3B9C6  
+29           57         21            46            $345.21    completed    TXNFABCD6BB7FC7A40FB4F9  
+30           60         49            19            $175.01    completed    TXNFD8D007C695001E1BC75  
+31           62         11            35            $151.63    completed    TXN0ED002CDFAD71835FDD3  
+32           63         33            25            $218.21    completed    TXN233B8D973DE599659CF2  
+33           64         42            20            $477.27    completed    TXN909566AE9ECB83272D0B  
+34           65         49            29            $616.90    pending      TXN5DE4C628484776F344A9  
+35           67         8             10            $586.84    completed    TXNE6E9FD22F75262724371  
+36           69         34            32            $293.90    completed    TXN1DF59F0C4181DD34B2BC  
+37           70         23            None          $755.46    pending      TXNE65124F84559220D685D  
+38           73         8             46            $515.75    completed    TXN06900182CCE3CC7A4C63  
+39           75         34            32            $701.64    completed    TXN2CB4D143D8518E9023BE  
+40           77         33            14            $75.25     pending      TXNAF38A220D94F45787431  
+41           83         23            28            $316.24    completed    TXNABBA02B4D680A8476177  
+42           85         48            14            $96.73     completed    TXNF92FCD777C2B496D4FE5  
+43           88         31            5             $642.20    completed    TXNA7928C63DAC833AF9281  
+44           90         26            5             $301.06    completed    TXND8A323FCDAC698FF15C6  
+45           92         23            25            $623.92    completed    TXNEA4CA0F2BB05B94464A0  
+46           93         37            10            $506.13    completed    TXN12917FF3FFE12ED8F86C  
+47           94         49            29            $229.70    completed    TXNBBE4DDDEF7E519AFAD81  
+48           96         6             44            $424.42    completed    TXNE808083E46822EA7402E  
+----------------------------------------------------------------------------------------------------------------------------------
+
+Total payments generated: 48
+Total amount: $19687.65
+
+Payment Status Distribution:
+  completed: 35
+  failed: 3
+  pending: 10
+
+Generation date: 2025-10-25 14:07:03 UTC

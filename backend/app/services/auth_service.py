@@ -76,6 +76,15 @@ async def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def create_access_token_with_role(user_id: int, role_id: int):
+    """创建包含 role 字段的 JWT Token"""
+    payload = {
+        "sub": str(user_id),
+        "role": role_id,
+        "exp": datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
 async def logout_user():
     # JWT 无法在服务端失效，通常前端清除 token 即可
     # JWT cannot be invalidated on server side, usually frontend just clears the token

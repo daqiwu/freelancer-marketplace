@@ -7,15 +7,28 @@ from app.services.notification_service import send_customer_notification, send_p
 
 async def publish_order(db: AsyncSession, customer_id: int, data):
     # 数据校验已在 Pydantic 层完成  # Data validation is done in Pydantic layer
+    from datetime import datetime as dt
+    
+    # 解析时间字符串
+    service_start_time = None
+    service_end_time = None
+    if data.service_start_time:
+        service_start_time = dt.fromisoformat(data.service_start_time.replace('Z', '+00:00'))
+    if data.service_end_time:
+        service_end_time = dt.fromisoformat(data.service_end_time.replace('Z', '+00:00'))
+    
     order = Order(
         customer_id=customer_id,
         title=data.title,
         description=data.description,
+        service_type=data.service_type,
         price=data.price,
         location=data.location,
         address=data.address,
-        status=OrderStatus.pending,
-        payment_status=PaymentStatus.unpaid,  # 新增，默认未支付  # New, default unpaid
+        service_start_time=service_start_time,
+        service_end_time=service_end_time,
+        status=OrderStatus.pending_review,  # 默认状态改为 pending_review
+        payment_status=PaymentStatus.unpaid,
         created_at=datetime.now(UTC),
         updated_at=datetime.now(UTC)
     )
@@ -25,9 +38,8 @@ async def publish_order(db: AsyncSession, customer_id: int, data):
     # 通知客户
     await send_customer_notification(
         db, customer_id, order.id,
-        f"You have successfully published the order: {order.id}."
+        "您的订单已发布，等待管理员审核"
     )
-    # TODO: 发送通知到客户 inbox，可在此扩展  # TODO: Send notification to customer inbox, can be extended here
     return order
 
 async def cancel_order(db: AsyncSession, customer_id: int, order_id: int):
@@ -36,8 +48,8 @@ async def cancel_order(db: AsyncSession, customer_id: int, order_id: int):
     order = result.scalars().first()
     if not order:
         raise ValueError("Order not found or permission denied.")
-    # 只有 pending 或 accepted 状态可取消  # Only orders with pending or accepted status can be cancelled
-    if order.status not in [OrderStatus.pending, OrderStatus.accepted]:
+    # 允许取消 pending_review 和 pending 状态的订单
+    if order.status not in [OrderStatus.pending_review, OrderStatus.pending]:
         raise ValueError("The order can not be cancelled!")
     prev_status = order.status
     order.status = OrderStatus.cancelled
@@ -47,13 +59,13 @@ async def cancel_order(db: AsyncSession, customer_id: int, order_id: int):
     # 通知客户
     await send_customer_notification(
         db, customer_id, order.id,
-        f"You have successfully cancelled the order: {order.id}."
+        f"订单已取消"
     )
-    # 如果之前是 accepted，还要通知服务商
-    if prev_status == OrderStatus.accepted and order.provider_id:
+    # 如果订单已被接单，通知服务商
+    if order.provider_id:
         await send_provider_notification(
             db, order.provider_id, order.id,
-            f"Your order has been cancelled by the customer: {customer_id}."
+            f"订单 #{order_id} 已被客户取消"
         )
     return order
 
@@ -63,6 +75,7 @@ async def get_my_orders(db: AsyncSession, customer_id: int) -> List[Order]:
         .where(
             Order.customer_id == customer_id,
             Order.status.in_([
+                OrderStatus.pending_review,
                 OrderStatus.pending,
                 OrderStatus.accepted,
                 OrderStatus.in_progress
@@ -84,31 +97,36 @@ async def get_order_detail(db: AsyncSession, customer_id: int, order_id: int) ->
         return None
 
     review_data = None
-    if order.status == OrderStatus.reviewed:
-        review_result = await db.execute(
-            select(Review).where(Review.order_id == order_id)
-        )
-        review = review_result.scalars().first()
-        if review:
-            review_data = {
-                "review_id": review.id,
-                "stars": review.stars,
-                "content": review.content,
-                "created_at": str(review.created_at)
-            }
+    # 查询评价（如果存在）
+    review_result = await db.execute(
+        select(Review).where(Review.order_id == order_id)
+    )
+    review = review_result.scalars().first()
+    if review:
+        review_data = {
+            "review_id": review.id,
+            "stars": review.stars,
+            "content": review.content,
+            "created_at": str(review.created_at)
+        }
 
     return {
         "id": order.id,
+        "customer_id": order.customer_id,
+        "provider_id": order.provider_id,
         "title": order.title,
         "description": order.description,
+        "service_type": order.service_type.value,
         "status": order.status.value,
         "price": float(order.price),
         "location": order.location.value,
         "address": order.address,
+        "service_start_time": str(order.service_start_time) if order.service_start_time else None,
+        "service_end_time": str(order.service_end_time) if order.service_end_time else None,
+        "payment_status": order.payment_status.value,
         "created_at": str(order.created_at),
         "updated_at": str(order.updated_at),
-        "provider_id": order.provider_id,
-        "review": review_data  # 如果没有评价则为 None
+        "review": review_data
     }
 
 async def get_order_history(db: AsyncSession, customer_id: int) -> List[Order]:
@@ -138,8 +156,8 @@ async def review_order(db: AsyncSession, customer_id: int, data: ReviewData):
     if not order:
         raise ValueError("Order not found or permission denied.")
     # 仅允许已完成且已支付订单评价  # Only allow review for completed and paid orders
-    if order.status != OrderStatus.completed or order.payment_status != PaymentStatus.paid:
-        raise ValueError("Only completed and paid orders can be reviewed!")
+    if order.payment_status != PaymentStatus.paid:
+        raise ValueError("Only paid orders can be reviewed!")
     # 检查是否已评价  # Check if already reviewed
     review_result = await db.execute(
         select(Review).where(Review.order_id == data.order_id)
@@ -156,21 +174,12 @@ async def review_order(db: AsyncSession, customer_id: int, data: ReviewData):
         created_at=datetime.now(UTC)
     )
     db.add(review)
-    # 更新订单状态为 reviewed  # Update order status to reviewed
-    order.status = OrderStatus.reviewed
-    order.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(review)
-    await db.refresh(order)
-    # 通知客户
-    await send_customer_notification(
-        db, customer_id, order.id,
-        f"You have successfully reviewed the order: {order.id}."
-    )
     # 通知服务商
     if order.provider_id:
         await send_provider_notification(
             db, order.provider_id, order.id,
-            f"The customer: {customer_id} has reviewed your order: {order.id}."
+            f"客户对订单 #{order.id} 进行了评价（{data.stars}星）"
         )
     return review
