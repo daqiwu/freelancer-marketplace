@@ -4,9 +4,9 @@ from app.config import get_db
 from app.models.models import CustomerInbox, ProviderInbox
 from app.dependencies import get_current_user
 
-notification_router = APIRouter(prefix="/api/v1/notification", tags=["notification"])
+notification_router = APIRouter(prefix="/notification", tags=["notification"])
 
-@notification_router.get("/customer_inbox")
+@notification_router.get("/customer/inbox")
 async def get_customer_inbox(
     db: AsyncSession = Depends(get_db),
     current_user_id: int = Depends(get_current_user)
@@ -15,9 +15,10 @@ async def get_customer_inbox(
         CustomerInbox.__table__.select().where(CustomerInbox.customer_id == current_user_id).order_by(CustomerInbox.created_at.desc())
     )
     rows = result.fetchall()
-    return [dict(row._mapping) for row in rows]
+    items = [dict(row._mapping) for row in rows]
+    return {"items": items, "total": len(items)}
 
-@notification_router.get("/provider_inbox")
+@notification_router.get("/provider/inbox")
 async def get_provider_inbox(
     db: AsyncSession = Depends(get_db),
     current_user_id: int = Depends(get_current_user)
@@ -26,4 +27,5 @@ async def get_provider_inbox(
         ProviderInbox.__table__.select().where(ProviderInbox.provider_id == current_user_id).order_by(ProviderInbox.created_at.desc())
     )
     rows = result.fetchall()
-    return [dict(row._mapping) for row in rows]
+    items = [dict(row._mapping) for row in rows]
+    return {"items": items, "total": len(items)}

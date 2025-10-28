@@ -154,3 +154,65 @@ class ProviderInbox(Base):
     message = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     is_read = Column(Boolean, default=False)
+
+class SecurityIssueType(enum.Enum):
+    """Security issue classification types"""
+    SCA = "SCA"  # Software Composition Analysis
+    SAST = "SAST"  # Static Application Security Testing
+    DAST = "DAST"  # Dynamic Application Security Testing
+    UNKNOWN = "UNKNOWN"
+
+class SecuritySeverity(enum.Enum):
+    """Security issue severity levels"""
+    CRITICAL = "CRITICAL"
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
+    INFO = "INFO"
+
+class SecurityIssueStatus(enum.Enum):
+    """Security issue status"""
+    OPEN = "OPEN"
+    IN_PROGRESS = "IN_PROGRESS"
+    RESOLVED = "RESOLVED"
+    DISMISSED = "DISMISSED"
+
+class SecurityIssue(Base):
+    """Security issue tracking and classification"""
+    __tablename__ = "security_issues"
+    
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    title = Column(String(500), nullable=False)
+    description = Column(Text, nullable=False)
+    
+    # AI Classification Results
+    issue_type = Column(Enum(SecurityIssueType), nullable=False)
+    severity = Column(Enum(SecuritySeverity), nullable=False)
+    confidence_score = Column(DECIMAL(5, 2), nullable=False)
+    
+    # Issue Details
+    affected_component = Column(String(500))
+    vulnerability_id = Column(String(100))
+    
+    # Classification Details
+    detection_method = Column(String(100))
+    tags = Column(Text)
+    
+    # Remediation
+    remediation_suggestion = Column(Text)
+    remediation_priority = Column(Integer)
+    estimated_effort = Column(String(50))
+    
+    # Tracking
+    status = Column(Enum(SecurityIssueStatus), default=SecurityIssueStatus.OPEN)
+    reported_by = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    assigned_to = Column(BigInteger, ForeignKey("users.id"))
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    resolved_at = Column(DateTime)
+    
+    # Relationships
+    reporter = relationship("User", foreign_keys=[reported_by])
+    assignee = relationship("User", foreign_keys=[assigned_to])

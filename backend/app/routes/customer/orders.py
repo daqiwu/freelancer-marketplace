@@ -45,6 +45,7 @@ class OrderSummary(BaseModel):
     title: str
     service_type: str
     status: str
+    payment_status: str
     price: float
     location: str
     created_at: str
@@ -85,7 +86,7 @@ class ReviewOrderResponse(BaseModel):
     content: Optional[str]
     message: str
 
-orders_router = APIRouter(prefix='/api/v1/customer/orders', tags=['orders'])
+orders_router = APIRouter(prefix='/customer/orders', tags=['orders'])
 
 @orders_router.post("/publish", response_model=PublishOrderResponse)
 async def publish_order_route(
@@ -138,6 +139,7 @@ async def list_my_orders(
             title=o.title,
             service_type=o.service_type.value,
             status=o.status.value,
+            payment_status=o.payment_status.value,
             price=float(o.price),
             location=o.location.value,
             created_at=str(o.created_at)
@@ -168,6 +170,7 @@ async def list_order_history(
             title=o.title,
             service_type=o.service_type.value,
             status=o.status.value,
+            payment_status=o.payment_status.value,
             price=float(o.price),
             location=o.location.value,
             created_at=str(o.created_at)

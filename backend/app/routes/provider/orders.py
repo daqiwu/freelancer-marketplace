@@ -34,7 +34,7 @@ class BrowseOrdersResponse(BaseModel):
     total: int
 
 
-provider_orders_router = APIRouter(prefix="/api/v1/provider/orders", tags=["provider-orders"])
+provider_orders_router = APIRouter(prefix="/provider/orders", tags=["provider-orders"])
 
 
 @provider_orders_router.get("/available", response_model=BrowseOrdersResponse)

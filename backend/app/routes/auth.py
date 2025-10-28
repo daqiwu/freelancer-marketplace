@@ -33,7 +33,7 @@ class UserMeResponse(BaseModel):
     email: str
     role_id: int
 
-auth_router = APIRouter(prefix='/api/v1/auth', tags=['auth'])
+auth_router = APIRouter(prefix='/auth', tags=['auth'])
 
 @auth_router.post("/register", response_model=RegisterResponse)
 async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):

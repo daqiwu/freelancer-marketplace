@@ -17,22 +17,19 @@ async def get_customer_profile(db: AsyncSession, user_id: int):
     user = result.scalars().first()
     if not user or not user.customer_profile:
         return None
+    # 返回扁平化结构，方便前端直接使用
     return {
         "id": user.id,
+        "user_id": user.id,
         "username": user.username,
         "email": user.email,
         "role": user.role.role_name if user.role else None,
+        "location": getattr(user.customer_profile.location, "value", user.customer_profile.location),
+        "address": user.customer_profile.address,
+        "budget_preference": float(user.customer_profile.budget_preference or 0),
+        "balance": float(user.customer_profile.balance or 0),
         "created_at": str(user.created_at),
-        "updated_at": str(user.updated_at),
-        "customer_profile": {
-            "id": user.customer_profile.id,
-            "location": getattr(user.customer_profile.location, "value", user.customer_profile.location),
-            "address": user.customer_profile.address,
-            "budget_preference": float(user.customer_profile.budget_preference or 0),
-            "balance": float(user.customer_profile.balance or 0),
-            "created_at": str(user.customer_profile.created_at) if hasattr(user.customer_profile, "created_at") else None,
-            "updated_at": str(user.customer_profile.updated_at) if hasattr(user.customer_profile, "updated_at") else None
-        }
+        "updated_at": str(user.updated_at)
     }
 
 async def get_provider_profile(db: AsyncSession, user_id: int):
@@ -48,22 +45,19 @@ async def get_provider_profile(db: AsyncSession, user_id: int):
     user = result.scalars().first()
     if not user or not user.provider_profile:
         return None
+    # 返回扁平化结构，方便前端直接使用
     return {
         "id": user.id,
+        "user_id": user.id,
         "username": user.username,
         "email": user.email,
         "role": user.role.role_name if user.role else None,
+        "skills": user.provider_profile.skills,
+        "experience_years": user.provider_profile.experience_years,
+        "hourly_rate": float(user.provider_profile.hourly_rate or 0),
+        "availability": user.provider_profile.availability,
         "created_at": str(user.created_at),
-        "updated_at": str(user.updated_at),
-        "provider_profile": {
-            "id": user.provider_profile.id,
-            "skills": user.provider_profile.skills,
-            "experience_years": user.provider_profile.experience_years,
-            "hourly_rate": float(user.provider_profile.hourly_rate or 0),
-            "availability": user.provider_profile.availability,
-            "created_at": str(user.provider_profile.created_at) if hasattr(user.provider_profile, "created_at") else None,
-            "updated_at": str(user.provider_profile.updated_at) if hasattr(user.provider_profile, "updated_at") else None
-        }
+        "updated_at": str(user.updated_at)
     }
 
 async def get_admin_profile(db: AsyncSession, user_id: int):

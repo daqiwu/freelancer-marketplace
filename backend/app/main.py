@@ -16,6 +16,8 @@ from app.routes.profile import profile_router
 from app.routes.admin.orders import admin_orders_router
 from app.routes.admin.users import admin_users_router
 from app.routes.notification import notification_router
+from app.routes.review import review_router
+from app.routes.security import security_router
 
 app = FastAPI(title='FREELANCER MARKETPLACE', description='welcome to FREELANCER MARKETPLACE')
 
@@ -38,6 +40,8 @@ app.include_router(profile_router)
 app.include_router(admin_orders_router)
 app.include_router(admin_users_router)
 app.include_router(notification_router)
+app.include_router(review_router)
+app.include_router(security_router)
 
 # 启动时创建数据库表
 @app.on_event("startup")
