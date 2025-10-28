@@ -1,0 +1,110 @@
+name: Backend SAST (AI Security Classification)
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - gaorongrong
+    paths:
+      - 'backend/**/*.py'
+  
+  pull_request:
+    branches:
+      - main
+      - develop
+
+  workflow_dispatch:
+  
+  # Run daily at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  sast-scan:
+    name: Static Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install security scanning tools
+        run: |
+          pip install --upgrade pip
+          pip install bandit==1.7.8 safety==3.0.0
+
+      - name: Run Bandit (SAST)
+        working-directory: backend
+        run: |
+          echo "Running Bandit Static Application Security Testing..."
+          bandit -r app/ \
+            --exclude '*/tests/*,*/alembic/*' \
+            --format json \
+            --output bandit-sast-report.json \
+            --severity-level high \
+            --confidence-level high
+        continue-on-error: true
+
+      - name: Run Safety (SCA - Dependency Check)
+        working-directory: backend
+        run: |
+          echo "Running Safety Software Composition Analysis..."
+          safety check --json --output safety-sca-report.json || true
+        continue-on-error: true
+
+      - name: Display SAST Summary
+        if: always()
+        working-directory: backend
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  SAST & SCA Security Scan Results"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📊 Bandit SAST Results:"
+          bandit -r app/ \
+            --exclude '*/tests/*,*/alembic/*' \
+            --format screen \
+            --severity-level high \
+            --confidence-level high || true
+          echo ""
+          echo "📊 Safety SCA Results:"
+          safety check || true
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        continue-on-error: true
+
+      - name: Upload SAST Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-report
+          path: backend/bandit-sast-report.json
+          retention-days: 90
+
+      - name: Upload SCA Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-report
+          path: backend/safety-sca-report.json
+          retention-days: 90
+
+      - name: Security Summary
+        if: always()
+        run: |
+          echo "✅ Security scans completed!"
+          echo ""
+          echo "This workflow demonstrates AI-powered security classification:"
+          echo "  • SAST (Static Application Security Testing) - Bandit"
+          echo "  • SCA (Software Composition Analysis) - Safety"
+          echo "  • DAST would require runtime testing in a deployed environment"
+          echo ""
+          echo "Check artifacts for detailed JSON reports that can be"
+          echo "analyzed by the AI Security Classifier API endpoint."
+
