@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, UTC
 from app.services.notification_service import send_customer_notification, send_provider_notification
 
-payments_router = APIRouter(prefix='/api/v1/customer/payments', tags=['payments'])
+payments_router = APIRouter(prefix='/customer/payments', tags=['payments'])
 
 class RechargeRequest(BaseModel):
     amount: float

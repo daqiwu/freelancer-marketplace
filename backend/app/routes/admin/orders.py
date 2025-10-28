@@ -26,7 +26,7 @@ class AdminOrdersResponse(BaseModel):
 	items: List[AdminOrderItem]
 	total: int
 
-admin_orders_router = APIRouter(prefix="/api/v1/admin", tags=["admin-orders"])
+admin_orders_router = APIRouter(prefix="/admin", tags=["admin-orders"])
 
 
 

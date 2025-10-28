@@ -12,8 +12,9 @@ from app.services.profile_service import (
 )
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
+from typing import Optional
 
-profile_router = APIRouter(prefix="/api/v1/profile", tags=["profile"])
+profile_router = APIRouter(prefix="/profile", tags=["profile"])
 
 @profile_router.get("/me")
 async def get_my_profile(
@@ -48,10 +49,10 @@ async def get_my_profile(
     return profile
 
 class UpdateCustomerProfileRequest(BaseModel):
-    location: str
-    address: str
-    budget_preference: float
-    balance: float
+    location: Optional[str] = None
+    address: Optional[str] = None
+    budget_preference: Optional[float] = None
+    balance: Optional[float] = None
 
 @profile_router.put("/update_customer_profile")
 async def update_customer_profile_api(
@@ -64,25 +65,59 @@ async def update_customer_profile_api(
     Update customer profile API
     """
     # 只允许当前用户更新自己的 profile
-    from app.models.models import User
+    from app.models.models import User, CustomerProfile, LocationEnum
     result = await db.execute(select(User).where(User.id == current_user_id))
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在  // User not found")
-    profile = await update_customer_profile(
-        db, current_user_id, data.location, data.address, data.budget_preference, data.balance
+    
+    # 获取现有资料
+    profile_result = await db.execute(
+        select(CustomerProfile).where(CustomerProfile.id == current_user_id)
     )
-    return {"msg": "客户资料更新成功  // Customer profile updated", "profile_id": profile.id}
+    profile = profile_result.scalars().first()
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="客户资料不存在  // Customer profile not found")
+    
+    # 只更新提供的字段
+    try:
+        if data.location is not None:
+            # 验证并转换 location
+            if hasattr(LocationEnum, data.location):
+                profile.location = LocationEnum[data.location]
+            else:
+                profile.location = data.location  # 如果是字符串直接赋值
+        
+        if data.address is not None:
+            profile.address = data.address
+        
+        if data.budget_preference is not None:
+            profile.budget_preference = data.budget_preference
+        
+        if data.balance is not None:
+            profile.balance = data.balance
+        
+        # 标记对象已修改并提交
+        db.add(profile)
+        await db.flush()  # 先 flush 确保更改被检测
+        await db.commit()
+        await db.refresh(profile)
+        
+        return {"msg": "客户资料更新成功  // Customer profile updated", "profile_id": profile.id}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"更新失败: {str(e)}")
 
 class UpdateUserInfoRequest(BaseModel):
     username: str
     email: str
 
 class UpdateProviderProfileRequest(BaseModel):
-    skills: str
-    experience_years: int
-    hourly_rate: float
-    availability: str
+    skills: Optional[str] = None
+    experience_years: Optional[int] = None
+    hourly_rate: Optional[float] = None
+    availability: Optional[str] = None
 
 @profile_router.put("/update_provider_profile")
 async def update_provider_profile_api(
@@ -95,15 +130,45 @@ async def update_provider_profile_api(
     Update provider profile API
     """
     # 只允许当前用户更新自己的 profile
-    from app.models.models import User
+    from app.models.models import User, ProviderProfile
     result = await db.execute(select(User).where(User.id == current_user_id))
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在  // User not found")
-    profile = await update_provider_profile(
-        db, current_user_id, data.skills, data.experience_years, data.hourly_rate, data.availability
+    
+    # 获取现有资料
+    profile_result = await db.execute(
+        select(ProviderProfile).where(ProviderProfile.id == current_user_id)
     )
-    return {"msg": "服务商资料更新成功  // Provider profile updated", "profile_id": profile.id}
+    profile = profile_result.scalars().first()
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="服务商资料不存在  // Provider profile not found")
+    
+    # 只更新提供的字段
+    try:
+        if data.skills is not None:
+            profile.skills = data.skills
+        
+        if data.experience_years is not None:
+            profile.experience_years = data.experience_years
+        
+        if data.hourly_rate is not None:
+            profile.hourly_rate = data.hourly_rate
+        
+        if data.availability is not None:
+            profile.availability = data.availability
+        
+        # 标记对象已修改并提交
+        db.add(profile)
+        await db.flush()  # 先 flush 确保更改被检测
+        await db.commit()
+        await db.refresh(profile)
+        
+        return {"msg": "服务商资料更新成功  // Provider profile updated", "profile_id": profile.id}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"更新失败: {str(e)}")
 
 @profile_router.put("/update_user_info")
 async def update_user_info_api(
