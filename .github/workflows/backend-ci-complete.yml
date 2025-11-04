@@ -98,29 +98,33 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
+          cache: "poetry"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
         working-directory: backend
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov httpx aiosqlite
+          poetry install --with dev
 
       - name: Run unit tests with coverage
         working-directory: backend
         env:
           DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           JWT_SECRET_KEY: "test-secret-key-for-ci"
+          ENVIRONMENT: "test"
         run: |
           echo "🧪 Running unit tests with coverage..."
-          pytest tests/ -v \
-            --cov=app.services.security_classifier_service \
-            --cov=app.routes.security \
+          poetry run pytest tests/ app/test/ -v \
+            --cov=app \
             --cov-report=term-missing \
             --cov-report=xml \
             --cov-report=html \
-            --cov-fail-under=80
+            --cov-fail-under=70 \
+            --tb=short
 
       - name: Upload coverage report (XML)
         if: always()
@@ -242,19 +246,30 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "poetry"
 
-      - name: Install Safety (SCA Tool)
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install pip-audit (SCA Tool - No Login Required)
         run: |
           pip install --upgrade pip
-          pip install safety==3.0.0
+          pip install pip-audit
 
-      - name: Run Safety Check
+      - name: Install project dependencies for SCA scan
         working-directory: backend
         run: |
-          echo "📦 Running Safety SCA for dependency vulnerabilities..."
-          safety check --json > safety-sca-report.json 2>&1 || echo '{"scan_results": [], "error": "No vulnerabilities or scan failed"}' > safety-sca-report.json
-          if [ ! -f safety-sca-report.json ]; then
-            echo '{"scan_results": [], "status": "no_file_generated"}' > safety-sca-report.json
+          poetry install --with dev
+
+      - name: Run pip-audit Check
+        working-directory: backend
+        run: |
+          echo "📦 Running pip-audit SCA for dependency vulnerabilities..."
+          pip-audit --format json --output pip-audit-report.json || echo '{"dependencies": [], "vulnerabilities": []}' > pip-audit-report.json
+          if [ ! -f pip-audit-report.json ]; then
+            echo '{"dependencies": [], "vulnerabilities": [], "status": "no_file_generated"}' > pip-audit-report.json
           fi
         continue-on-error: true
 
@@ -267,7 +282,7 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "📊 Dependency Vulnerabilities:"
-          safety check || echo "✅ No known vulnerabilities in dependencies!"
+          pip-audit --desc || echo "✅ No known vulnerabilities in dependencies!"
           echo ""
         continue-on-error: true
 
@@ -276,14 +291,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sca-report
-          path: backend/safety-sca-report.json
+          path: backend/pip-audit-report.json
           retention-days: 90
 
       - name: SCA Summary
         if: always()
         run: |
-          echo "✅ SCA scan completed!"
-          echo "📁 Report uploaded: safety-sca-report.json"
+          echo "✅ SCA scan completed with pip-audit (no login required)!"
+          echo "📁 Report uploaded: pip-audit-report.json"
 
   # ============================================
   # Job 5: DAST Simulation - API Security Testing
@@ -301,21 +316,27 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "poetry"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
         working-directory: backend
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          poetry install --with dev
 
       - name: Start FastAPI Application
         working-directory: backend
         env:
           DATABASE_URL: "sqlite+aiosqlite:///:memory:"
           JWT_SECRET_KEY: "test-secret-key-for-ci"
+          ENVIRONMENT: "test"
         run: |
           echo "🌐 Starting FastAPI application for DAST testing..."
-          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 &
           sleep 5
           echo "✅ Application started on http://localhost:8000"
 

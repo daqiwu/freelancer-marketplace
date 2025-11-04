@@ -34,6 +34,7 @@ test = [
     "pytest (>=8.4.2,<9.0.0)",
     "pytest-asyncio (>=1.2.0,<2.0.0)", # 使用较新的版本，并删除了冲突的旧版本
     "httpx (>=0.28.1,<0.29.0)",      # 使用较新的版本
+    "aiosqlite (>=0.20.0,<1.0.0)",   # For in-memory SQLite testing
 ]
 
 [tool.poetry]
@@ -46,6 +47,7 @@ httpx = "^0.28.1"
 pytest-asyncio = "^1.2.0"
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
+aiosqlite = "^0.20.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
