@@ -1,0 +1,71 @@
+# Poetry virtual environment (we use Poetry inside Docker, not local venv)
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Poetry cache
+.poetry/
+poetry.lock.bak
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Test files and scripts
+test/
+tests/
+*_test.py
+test_*.py
+run_tests.py
+run_integration_tests.py
+run_integration_tests.ps1
+run_integration_tests.bat
+quick_integration_test.py
+
+# Development scripts
+start.sh
+start.ps1
+ci-local-backend.sh
+
+# Alembic (optional - uncomment if you manage migrations separately)
+# alembic/
+# alembic.ini
