@@ -275,12 +275,22 @@ jobs:
         continue-on-error: true
 
       - name: Upload SARIF to GitHub Security
-        if: always()
+        if: always() && (github.repository_visibility == 'public' || github.repository_owner == 'github')
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: backend/bandit-report.sarif
           category: bandit-sast
         continue-on-error: true
+
+      - name: Note about SARIF Upload
+        if: github.repository_visibility != 'public'
+        run: |
+          echo "ℹ️  SARIF upload skipped (requires GitHub Advanced Security for private repos)"
+          echo "   SARIF report is available as artifact: bandit-report.sarif"
+          echo "   For private repos, you can:"
+          echo "   1. Enable GitHub Advanced Security (paid feature)"
+          echo "   2. Download SARIF artifact and upload manually"
+          echo "   3. Use JSON reports (already uploaded as artifacts)"
 
       - name: Display SAST Results
         if: always()
@@ -307,6 +317,7 @@ jobs:
           path: |
             backend/bandit-sast-high.json
             backend/bandit-sast-full.json
+            backend/bandit-report.sarif
           retention-days: 90
 
       - name: SAST Summary
