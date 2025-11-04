@@ -2,22 +2,36 @@
 Script to generate 100 random orders and insert them into the database
 Standalone version with minimal dependencies
 """
+
 import asyncio
-import random
-import os
-from datetime import datetime, timedelta
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select, Column, Integer, BigInteger, String, Text, ForeignKey, Enum, DECIMAL, TIMESTAMP, DateTime
-from sqlalchemy.orm import declarative_base
-from dotenv import load_dotenv
 import enum
+import os
+import random
+from datetime import datetime, timedelta
+
+from dotenv import load_dotenv
+from sqlalchemy import (
+    DECIMAL,
+    TIMESTAMP,
+    BigInteger,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    select,
+)
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Load environment variables
 load_dotenv()
 
 # Define models
 Base = declarative_base()
+
 
 class ServiceType(enum.Enum):
     cleaning_repair = "cleaning_repair"
@@ -27,6 +41,7 @@ class ServiceType(enum.Enum):
     design_consulting = "design_consulting"
     other = "other"
 
+
 class OrderStatus(enum.Enum):
     pending_review = "pending_review"
     pending = "pending"
@@ -35,6 +50,7 @@ class OrderStatus(enum.Enum):
     completed = "completed"
     cancelled = "cancelled"
 
+
 class LocationEnum(enum.Enum):
     NORTH = "NORTH"
     SOUTH = "SOUTH"
@@ -42,9 +58,11 @@ class LocationEnum(enum.Enum):
     WEST = "WEST"
     MID = "MID"
 
+
 class PaymentStatus(enum.Enum):
-    unpaid = "unpaid"  
+    unpaid = "unpaid"
     paid = "paid"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -56,6 +74,7 @@ class User(Base):
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
 
+
 class Order(Base):
     __tablename__ = "orders"
     id = Column(BigInteger, primary_key=True)
@@ -64,15 +83,20 @@ class Order(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text)
     service_type = Column(Enum(ServiceType), nullable=False)
-    status = Column(Enum(OrderStatus), default=OrderStatus.pending_review, nullable=False)
-    price = Column(DECIMAL(10,2), nullable=False)
+    status = Column(
+        Enum(OrderStatus), default=OrderStatus.pending_review, nullable=False
+    )
+    price = Column(DECIMAL(10, 2), nullable=False)
     location = Column(Enum(LocationEnum), nullable=False)
     address = Column(String(255))
     service_start_time = Column(DateTime)
     service_end_time = Column(DateTime)
-    payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.unpaid, nullable=False)
+    payment_status = Column(
+        Enum(PaymentStatus), default=PaymentStatus.unpaid, nullable=False
+    )
     created_at = Column(TIMESTAMP)
     updated_at = Column(TIMESTAMP)
+
 
 # Service templates for different service types
 SERVICE_TEMPLATES = {
@@ -135,10 +159,22 @@ SERVICE_TEMPLATES = {
         ("Gardening", "Garden maintenance and landscaping"),
         ("Car Detailing", "Complete car cleaning and detailing"),
         ("Handyman Service", "General handyman work"),
-    ]
+    ],
 }
 
-STREETS = ["Main", "Oak", "Pine", "Maple", "Cedar", "Elm", "Park", "Washington", "Lake", "Hill"]
+STREETS = [
+    "Main",
+    "Oak",
+    "Pine",
+    "Maple",
+    "Cedar",
+    "Elm",
+    "Park",
+    "Washington",
+    "Lake",
+    "Hill",
+]
+
 
 def get_database_url():
     """Get database URL from environment"""
@@ -147,61 +183,75 @@ def get_database_url():
         return aws_url.strip()
     use_docker = os.getenv("USE_DOCKER", "false").lower() == "true"
     if use_docker:
-        return os.getenv("DOCKER_DATABASE_URL", "mysql+aiomysql://root:password@db:3306/freelancer_marketplace").strip()
-    return os.getenv("LOCAL_DATABASE_URL", "sqlite+aiosqlite:///./freelancer.db").strip()
+        return os.getenv(
+            "DOCKER_DATABASE_URL",
+            "mysql+aiomysql://root:password@db:3306/freelancer_marketplace",
+        ).strip()
+    return os.getenv(
+        "LOCAL_DATABASE_URL", "sqlite+aiosqlite:///./freelancer.db"
+    ).strip()
+
 
 async def generate_orders():
     """Generate 100 random orders and insert into database"""
     database_url = get_database_url()
     print(f"Using database: {database_url}")
-    
+
     engine = create_async_engine(database_url, echo=False)
-    AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    
+    AsyncSessionLocal = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+
     async with AsyncSessionLocal() as db:
         try:
             # Get all users by role
             result = await db.execute(select(User))
             all_users = result.scalars().all()
-            
+
             if not all_users:
-                print("Error: No users found in database. Please run user generation first.")
+                print(
+                    "Error: No users found in database. Please run user generation first."
+                )
                 return
-            
+
             # Separate users by role (1=customer, 2=provider, 3=admin)
             customers = [u for u in all_users if u.role_id == 1]
             providers = [u for u in all_users if u.role_id == 2]
-            
+
             print(f"Found {len(customers)} customers and {len(providers)} providers")
-            
+
             if not customers:
                 print("Error: No customers found in database.")
                 return
-            
+
             if not providers:
                 print("Error: No providers found in database.")
                 return
-            
+
             # List to store generated orders info
             orders_info = []
-            
+
             # Generate 100 orders
             for i in range(100):
                 # Randomly select customer
                 customer = random.choice(customers)
-                
+
                 # Randomly select service type
                 service_type = random.choice(list(ServiceType))
-                
+
                 # Get random service from templates
                 service_templates = SERVICE_TEMPLATES[service_type]
                 title, description = random.choice(service_templates)
-                
+
                 # Randomly determine order status and assign provider accordingly
                 status = random.choice(list(OrderStatus))
-                
+
                 # Orders with certain statuses need a provider
-                if status in [OrderStatus.accepted, OrderStatus.in_progress, OrderStatus.completed]:
+                if status in [
+                    OrderStatus.accepted,
+                    OrderStatus.in_progress,
+                    OrderStatus.completed,
+                ]:
                     provider = random.choice(providers)
                     provider_id = provider.id
                     provider_username = provider.username
@@ -212,29 +262,33 @@ async def generate_orders():
                 else:
                     provider_id = None
                     provider_username = "None"
-                
+
                 # Generate random price
                 price = round(random.uniform(50, 800), 2)
-                
+
                 # Random location
                 location = random.choice(list(LocationEnum))
-                
+
                 # Random address
                 address = f"{random.randint(1, 9999)} {random.choice(STREETS)} Street"
-                
+
                 # Generate service times
                 days_ahead = random.randint(1, 30)
-                service_start = datetime.utcnow() + timedelta(days=days_ahead, hours=random.randint(8, 18))
+                service_start = datetime.utcnow() + timedelta(
+                    days=days_ahead, hours=random.randint(8, 18)
+                )
                 service_end = service_start + timedelta(hours=random.randint(1, 8))
-                
+
                 # Payment status based on order status
                 if status == OrderStatus.completed:
                     payment_status = PaymentStatus.paid
                 elif status in [OrderStatus.in_progress, OrderStatus.accepted]:
-                    payment_status = random.choice([PaymentStatus.paid, PaymentStatus.unpaid])
+                    payment_status = random.choice(
+                        [PaymentStatus.paid, PaymentStatus.unpaid]
+                    )
                 else:
                     payment_status = PaymentStatus.unpaid
-                
+
                 # Create order
                 new_order = Order(
                     customer_id=customer.id,
@@ -250,101 +304,114 @@ async def generate_orders():
                     service_end_time=service_end,
                     payment_status=payment_status,
                     created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
+                    updated_at=datetime.utcnow(),
                 )
-                
+
                 db.add(new_order)
                 await db.flush()  # Get the order ID
-                
+
                 # Store order info
-                orders_info.append({
-                    "order_id": new_order.id,
-                    "customer": customer.username,
-                    "provider": provider_username,
-                    "title": title,
-                    "service_type": service_type.value,
-                    "status": status.value,
-                    "price": price,
-                    "payment_status": payment_status.value
-                })
-                
-                print(f"Created order {i+1}/100: {title} - {status.value}")
-            
+                orders_info.append(
+                    {
+                        "order_id": new_order.id,
+                        "customer": customer.username,
+                        "provider": provider_username,
+                        "title": title,
+                        "service_type": service_type.value,
+                        "status": status.value,
+                        "price": price,
+                        "payment_status": payment_status.value,
+                    }
+                )
+
+                print(f"Created order {i + 1}/100: {title} - {status.value}")
+
             # Commit all orders
             await db.commit()
-            print("\n" + "="*120)
+            print("\n" + "=" * 120)
             print("✓ Successfully created 100 orders!")
-            print("="*120 + "\n")
-            
+            print("=" * 120 + "\n")
+
             # Print all orders
             print("GENERATED ORDERS:")
             print("-" * 120)
-            print(f"{'ID':<5} {'Customer':<20} {'Provider':<20} {'Title':<30} {'Status':<18} {'Price':<10} {'Payment':<10}")
+            print(
+                f"{'ID':<5} {'Customer':<20} {'Provider':<20} {'Title':<30} {'Status':<18} {'Price':<10} {'Payment':<10}"
+            )
             print("-" * 120)
-            
+
             for order in orders_info:
-                print(f"{order['order_id']:<5} {order['customer']:<20} {order['provider']:<20} "
-                      f"{order['title']:<30} {order['status']:<18} ${order['price']:<9.2f} {order['payment_status']:<10}")
-            
+                print(
+                    f"{order['order_id']:<5} {order['customer']:<20} {order['provider']:<20} "
+                    f"{order['title']:<30} {order['status']:<18} ${order['price']:<9.2f} {order['payment_status']:<10}"
+                )
+
             print("-" * 120)
-            
+
             # Calculate statistics
             status_counts = {}
             for order in orders_info:
-                status = order['status']
+                status = order["status"]
                 status_counts[status] = status_counts.get(status, 0) + 1
-            
+
             service_type_counts = {}
             for order in orders_info:
-                stype = order['service_type']
+                stype = order["service_type"]
                 service_type_counts[stype] = service_type_counts.get(stype, 0) + 1
-            
+
             # Save orders to file
             output_file = "generated_orders.txt"
             with open(output_file, "w", encoding="utf-8") as f:
                 f.write("=" * 120 + "\n")
                 f.write("GENERATED ORDERS\n")
                 f.write("=" * 120 + "\n\n")
-                f.write(f"{'ID':<5} {'Customer':<20} {'Provider':<20} {'Title':<30} {'Status':<18} {'Price':<10} {'Payment':<10}\n")
+                f.write(
+                    f"{'ID':<5} {'Customer':<20} {'Provider':<20} {'Title':<30} {'Status':<18} {'Price':<10} {'Payment':<10}\n"
+                )
                 f.write("-" * 120 + "\n")
-                
+
                 for order in orders_info:
-                    f.write(f"{order['order_id']:<5} {order['customer']:<20} {order['provider']:<20} "
-                           f"{order['title']:<30} {order['status']:<18} ${order['price']:<9.2f} {order['payment_status']:<10}\n")
-                
+                    f.write(
+                        f"{order['order_id']:<5} {order['customer']:<20} {order['provider']:<20} "
+                        f"{order['title']:<30} {order['status']:<18} ${order['price']:<9.2f} {order['payment_status']:<10}\n"
+                    )
+
                 f.write("-" * 120 + "\n")
                 f.write(f"\nTotal orders generated: {len(orders_info)}\n\n")
-                
+
                 f.write("Order Status Distribution:\n")
                 for status, count in sorted(status_counts.items()):
                     f.write(f"  {status}: {count}\n")
-                
+
                 f.write("\nService Type Distribution:\n")
                 for stype, count in sorted(service_type_counts.items()):
                     f.write(f"  {stype}: {count}\n")
-                
-                f.write(f"\nGeneration date: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n")
-            
+
+                f.write(
+                    f"\nGeneration date: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n"
+                )
+
             print(f"\n✓ Order details saved to: {output_file}")
-            
+
             print("\nOrder Statistics:")
             print("Status Distribution:")
             for status, count in sorted(status_counts.items()):
                 print(f"  {status}: {count}")
-            
+
             print("\nService Type Distribution:")
             for stype, count in sorted(service_type_counts.items()):
                 print(f"  {stype}: {count}")
-            
+
         except Exception as e:
             await db.rollback()
             print(f"✗ Error occurred: {e}")
             import traceback
+
             traceback.print_exc()
         finally:
             await engine.dispose()
 
+
 if __name__ == "__main__":
     print("Starting order generation...\n")
     asyncio.run(generate_orders())
-

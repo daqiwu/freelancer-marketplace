@@ -1,6 +1,8 @@
+import time
+
 import pytest
 from httpx import AsyncClient
-import time
+
 
 @pytest.mark.asyncio
 async def test_register_success():
@@ -15,7 +17,7 @@ async def test_register_success():
             "username": username,
             "email": f"apitestuser_{timestamp}@example.com",
             "password": "apitestpass",
-            "role_id": 1
+            "role_id": 1,
         }
         reg_resp = await ac.post("/auth/register", json=register_data)
         print("register:", reg_resp.text)
@@ -24,14 +26,27 @@ async def test_register_success():
         assert resp_json["username"] == username
         assert resp_json["email"] == f"apitestuser_{timestamp}@example.com"
 
+
 @pytest.mark.asyncio
 async def test_login_success():
+    timestamp = int(time.time())
     async with AsyncClient(base_url="http://localhost:8000") as ac:
-        # 登录
-        login_data = {
-            "email": "apitestuser@example.com",
-            "password": "apitestpass"
+        # 清理并注册测试用户
+        username = f"loginapitest_{timestamp}"
+        email = f"loginapitest_{timestamp}@example.com"
+        await ac.delete("/auth/test/cleanup", params={"username": username})
+
+        register_data = {
+            "username": username,
+            "email": email,
+            "password": "apitestpass",
+            "role_id": 1,
         }
+        reg_resp = await ac.post("/auth/register", json=register_data)
+        assert reg_resp.status_code == 200
+
+        # 登录
+        login_data = {"email": email, "password": "apitestpass"}
         login_resp = await ac.post("/auth/login", json=login_data)
         print("login:", login_resp.text)
         assert login_resp.status_code == 200

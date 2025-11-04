@@ -1,8 +1,9 @@
-from fastapi import HTTPException, Request, Depends
+from fastapi import HTTPException, Request
 from jose import JWTError, jwt
 
 SECRET_KEY = "your_secret_key"  # 推荐从环境变量读取  # Recommended to read from environment variable
 ALGORITHM = "HS256"
+
 
 def get_current_user(request: Request):
     """

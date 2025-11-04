@@ -12,7 +12,9 @@ class EarningsResponse(BaseModel):
     currency: str = "USD"  # TBD: make configurable when integrating payments
 
 
-provider_earnings_router = APIRouter(prefix="/provider/earnings", tags=["provider-earnings"])
+provider_earnings_router = APIRouter(
+    prefix="/provider/earnings", tags=["provider-earnings"]
+)
 
 
 @provider_earnings_router.get("/total", response_model=EarningsResponse)
