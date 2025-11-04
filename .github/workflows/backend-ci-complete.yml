@@ -131,9 +131,9 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml \
             --cov-report=html \
-            --cov-fail-under=50 \
+            --cov-fail-under=85 \
             --tb=short
-          
+
           echo ""
           echo "⚠️  Integration tests that require running server are skipped in CI"
           echo "   (admin_test, service_test, orders_test, profile_test)"
@@ -155,14 +155,65 @@ jobs:
           path: backend/htmlcov/
           retention-days: 30
 
+      - name: Generate Coverage Badge
+        if: always()
+        working-directory: backend
+        run: |
+          # Extract coverage percentage from coverage.xml
+          if [ -f coverage.xml ]; then
+            COVERAGE=$(python3 -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(f\"{float(root.attrib['line-rate']) * 100:.1f}\")")
+            echo "COVERAGE_PERCENT=$COVERAGE" >> $GITHUB_ENV
+            echo "📊 Test Coverage: $COVERAGE%"
+          else
+            echo "COVERAGE_PERCENT=0" >> $GITHUB_ENV
+          fi
+
+      - name: Coverage Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const coverage = process.env.COVERAGE_PERCENT;
+            const emoji = coverage >= 80 ? '✅' : coverage >= 50 ? '⚠️' : '❌';
+            const body = `## ${emoji} Test Coverage Report
+
+            **Coverage:** ${coverage}%
+            **Threshold:** 50% (CI minimum) / 85% (target)
+
+            ${coverage >= 85 ? '🎉 Excellent! Coverage exceeds target!' : coverage >= 50 ? '⚠️ Coverage meets CI minimum but below 85% target' : '❌ Coverage below minimum threshold'}
+
+            📊 [View detailed coverage report in artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
       - name: Test Summary
         if: always()
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  Unit Tests Completed"
+          echo "  Test Results Summary"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "✅ Test coverage threshold: ≥ 80%"
-          echo "📊 Coverage reports uploaded to artifacts"
+          echo "✅ Test coverage threshold: ≥ 85%"
+          echo "📊 Current coverage: ${COVERAGE_PERCENT}%"
+          echo "� Coverage reports uploaded to artifacts"
+
+          # Add to GitHub Actions Summary
+          {
+            echo "## 🧪 Test Coverage Report"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| Coverage | **${COVERAGE_PERCENT}%** |"
+            echo "| Threshold | 85% |"
+            echo "| Status | $([ $(echo "$COVERAGE_PERCENT >= 85" | bc -l) -eq 1 ] && echo '✅ Passed' || echo '⚠️ Below Target') |"
+            echo ""
+            echo "📊 [Download detailed HTML report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Job 3: SAST - Static Application Security Testing
@@ -210,6 +261,27 @@ jobs:
             --confidence-level medium || echo '{"results": [], "errors": []}' > bandit-sast-full.json
         continue-on-error: true
 
+      - name: Generate SARIF Report for GitHub Security
+        working-directory: backend
+        run: |
+          pip install bandit[sarif]
+          echo "📝 Generating SARIF report for GitHub Security tab..."
+          bandit -r . \
+            --exclude '*/__pycache__/*,*/.venv/*,*/venv/*,*/htmlcov/*,*/.pytest_cache/*,*/alembic/*' \
+            --format sarif \
+            --output bandit-report.sarif \
+            --severity-level medium \
+            --confidence-level medium || echo '{"version": "2.1.0", "$schema": "https://json.schemastore.org/sarif-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Bandit"}}, "results": []}]}' > bandit-report.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: backend/bandit-report.sarif
+          category: bandit-sast
+        continue-on-error: true
+
       - name: Display SAST Results
         if: always()
         working-directory: backend
@@ -239,9 +311,33 @@ jobs:
 
       - name: SAST Summary
         if: always()
+        working-directory: backend
         run: |
           echo "✅ SAST scan completed!"
-          echo "📁 Reports uploaded: bandit-sast-high.json, bandit-sast-full.json"
+          echo "📁 Reports uploaded: bandit-sast-high.json, bandit-sast-full.json, bandit-report.sarif"
+
+          # Count issues from JSON report
+          if [ -f bandit-sast-full.json ]; then
+            TOTAL_ISSUES=$(python3 -c "import json; data=json.load(open('bandit-sast-full.json')); print(len(data.get('results', [])))")
+            HIGH_ISSUES=$(python3 -c "import json; data=json.load(open('bandit-sast-high.json')); print(len(data.get('results', [])))")
+          else
+            TOTAL_ISSUES=0
+            HIGH_ISSUES=0
+          fi
+
+          # Add to GitHub Actions Summary
+          {
+            echo "## 🔒 SAST Security Scan"
+            echo ""
+            echo "| Severity | Count |"
+            echo "|----------|-------|"
+            echo "| High | **${HIGH_ISSUES}** |"
+            echo "| Total (Medium+) | **${TOTAL_ISSUES}** |"
+            echo ""
+            echo "🔍 [View SARIF report in Security tab](https://github.com/${{ github.repository }}/security/code-scanning)"
+            echo ""
+            echo "📁 [Download JSON reports](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Job 4: SCA - Software Composition Analysis
@@ -276,7 +372,6 @@ jobs:
         working-directory: backend
         run: poetry install --with dev --no-interaction
 
-
       - name: Run pip-audit Check
         working-directory: backend
         run: |
@@ -310,9 +405,30 @@ jobs:
 
       - name: SCA Summary
         if: always()
+        working-directory: backend
         run: |
           echo "✅ SCA scan completed with pip-audit (no login required)!"
           echo "📁 Report uploaded: pip-audit-report.json"
+
+          # Count vulnerabilities from pip-audit report
+          if [ -f pip-audit-report.json ]; then
+            VULN_COUNT=$(python3 -c "import json; data=json.load(open('pip-audit-report.json')); print(len(data.get('vulnerabilities', [])))" 2>/dev/null || echo "0")
+          else
+            VULN_COUNT=0
+          fi
+
+          # Add to GitHub Actions Summary
+          {
+            echo "## 📦 SCA Dependency Scan"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| Tool | pip-audit |"
+            echo "| Vulnerabilities Found | **${VULN_COUNT}** |"
+            echo "| Status | $([ $VULN_COUNT -eq 0 ] && echo '✅ No vulnerabilities' || echo '⚠️ Review required') |"
+            echo ""
+            echo "📁 [Download SCA report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Job 5: DAST Simulation - API Security Testing
@@ -503,8 +619,9 @@ jobs:
           echo "  • Code formatting: Black (200 char line length)"
           echo "  • Import sorting: isort (black profile)"
           echo "  • Style guide: Flake8 (custom .flake8 config)"
-          echo "  • Test coverage: ≥ 80%"
+          echo "  • Test coverage: ≥ 85%"
           echo "  • Security scans: SAST + SCA + DAST"
+          echo "  • SARIF reports: Uploaded to Security tab"
           echo ""
           echo "✅ Pipeline execution completed!"
 
