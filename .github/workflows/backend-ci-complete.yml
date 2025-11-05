@@ -6,7 +6,6 @@ on:
       - main
       - develop
       - gaorongrong
-      - bala
     paths:
       - "backend/**/*.py"
       - "backend/requirements.txt"
