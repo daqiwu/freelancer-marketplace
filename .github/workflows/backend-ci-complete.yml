@@ -6,6 +6,7 @@ on:
       - main
       - develop
       - gaorongrong
+      - bala
     paths:
       - "backend/**/*.py"
       - "backend/requirements.txt"
@@ -649,3 +650,52 @@ jobs:
           fi
           echo ""
           exit 1
+
+  # ============================================
+  # Job 7: Docker Build and Push
+  # ============================================
+  build-and-push:
+    name: 🐳 Docker Build and Push
+    runs-on: ubuntu-latest
+    needs:
+      [
+        lint,
+        unit-tests,
+        sast-scan,
+        sca-scan,
+        dast-simulation,
+        ai-security-classification,
+      ]
+    if: success() && github.event_name == 'push'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: balachander20
+          password: dckr_pat_JAGPIR8cUkQhmN7m3ueafsv7v_I
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_URI=balachander20/freelancer-marketplace:latest
+
+          echo "🚀 Starting Docker build process for Freelancer Marketplace"
+          echo "📦 Building image: $IMAGE_URI"
+          echo "📁 Build context: ./backend/"
+          echo "----------------------------------------"
+
+          # Build the Docker image
+          docker build -t $IMAGE_URI ./backend/
+
+          echo "✅ Docker image built successfully!"
+          echo "🚀 Pushing image to Docker Hub registry..."
+
+          # Push the image to Docker Hub
+          docker push $IMAGE_URI
+
+          echo "🎉 SUCCESS: Image pushed to Docker Hub!"
+          echo "📍 Image location: $IMAGE_URI"
+          echo "🌐 Ready for deployment on Render!"
+          echo "✨ Deployment ready!"
