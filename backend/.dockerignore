@@ -14,9 +14,12 @@ poetry.lock.bak
 # Testing and coverage
 .pytest_cache/
 .coverage
+.coveragerc
 htmlcov/
 *.cover
 .hypothesis/
+pytest.ini
+.tox/
 
 # IDE and editor files
 .vscode/
@@ -56,15 +59,42 @@ tests/
 *_test.py
 test_*.py
 run_tests.py
+run_tests.sh
+run_tests.bat
 run_integration_tests.py
 run_integration_tests.ps1
 run_integration_tests.bat
 quick_integration_test.py
+test_api_directly.py
+debug_login.py
+
+# Generated test data files
+generated_*.txt
+generated_users_credentials.txt
+generated_inbox_messages.txt
+generated_orders.txt
+generated_payments.txt
+generated_reviews.txt
+
+# Database setup scripts (not needed in production)
+setup_database.sh
+setup_database.bat
+init_db.py
+generate_*.py
 
 # Development scripts
 start.sh
 start.ps1
+start_backend.bat
 ci-local-backend.sh
+
+# Documentation files
+*.md
+!README.md
+START_PROJECT.md
+DATABASE_SETUP_GUIDE.md
+MIGRATION_CHANGES.md
+MONOLITH_MIGRATION_COMPLETE_GUIDE.md
 
 # Alembic (optional - uncomment if you manage migrations separately)
 # alembic/

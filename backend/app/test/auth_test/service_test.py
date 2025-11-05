@@ -3,11 +3,12 @@ import time
 import pytest
 from httpx import AsyncClient
 
+DEPLOY_URL = "https://freelancer-marketplace-api.onrender.com"
 
 @pytest.mark.asyncio
 async def test_register_success():
     timestamp = int(time.time())
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url=DEPLOY_URL, timeout=30.0) as ac:
         # 清理测试用户
         username = f"apitestuser_{timestamp}"
         await ac.delete("/auth/test/cleanup", params={"username": username})
@@ -30,7 +31,7 @@ async def test_register_success():
 @pytest.mark.asyncio
 async def test_login_success():
     timestamp = int(time.time())
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url=DEPLOY_URL, timeout=30.0) as ac:
         # 清理并注册测试用户
         username = f"loginapitest_{timestamp}"
         email = f"loginapitest_{timestamp}@example.com"

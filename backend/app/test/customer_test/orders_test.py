@@ -3,16 +3,17 @@ import time
 import pytest
 from httpx import AsyncClient
 
+DEPLOY_URL = "https://freelancer-marketplace-api.onrender.com"
 
 @pytest.mark.asyncio
 async def test_publish_order_api():
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url=DEPLOY_URL, timeout=30.0) as ac:
         # 注册并登录获取token  # Register and login to get token
         timestamp = str(int(time.time()))
         username = f"orderapitestuser_{timestamp}"
         email = f"orderapitestuser_{timestamp}@example.com"
 
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"{DEPLOY_URL}/auth/test/cleanup?username={username}")
         register_data = {
             "username": username,
             "email": email,
@@ -20,7 +21,7 @@ async def test_publish_order_api():
             "role_id": 1,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            f"{DEPLOY_URL}/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
 
@@ -28,7 +29,7 @@ async def test_publish_order_api():
             "email": email,
             "password": "orderapitestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post(f"{DEPLOY_URL}/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
 
@@ -43,7 +44,7 @@ async def test_publish_order_api():
         }
         headers = {"Authorization": f"Bearer {token}"}
         publish_resp = await ac.post(
-            "http://localhost:8000/customer/orders/publish",
+            f"{DEPLOY_URL}/customer/orders/publish",
             json=order_data,
             headers=headers,
         )
@@ -59,13 +60,13 @@ async def test_publish_order_api():
 
 @pytest.mark.asyncio
 async def test_cancel_order_api():
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url=DEPLOY_URL, timeout=30.0) as ac:
         # 注册并登录获取token  # Register and login to get token
         timestamp = str(int(time.time()))
         username = f"ordercanceltest_{timestamp}"
         email = f"ordercanceltest_{timestamp}@example.com"
 
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"{DEPLOY_URL}/auth/test/cleanup?username={username}")
         register_data = {
             "username": username,
             "email": email,
@@ -73,7 +74,7 @@ async def test_cancel_order_api():
             "role_id": 1,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            f"{DEPLOY_URL}/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
 
@@ -81,7 +82,7 @@ async def test_cancel_order_api():
             "email": email,
             "password": "orderapitestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post(f"{DEPLOY_URL}/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
@@ -96,7 +97,7 @@ async def test_cancel_order_api():
             "service_type": "cleaning_repair",
         }
         publish_resp = await ac.post(
-            "http://localhost:8000/customer/orders/publish",
+            f"{DEPLOY_URL}/customer/orders/publish",
             json=order_data,
             headers=headers,
         )
@@ -105,7 +106,7 @@ async def test_cancel_order_api():
 
         # 取消订单  # Cancel order
         cancel_resp = await ac.post(
-            f"http://localhost:8000/customer/orders/cancel/{order_id}", headers=headers
+            f"{DEPLOY_URL}/customer/orders/cancel/{order_id}", headers=headers
         )
         print(cancel_resp.text)  # 调试用  # For debugging
         assert cancel_resp.status_code == 200
@@ -118,13 +119,13 @@ async def test_cancel_order_api():
 
 @pytest.mark.asyncio
 async def test_list_my_orders_api():
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url="DEPLOY_URL") as ac:
         # 清理测试用户  # Clean up test user
         timestamp = str(int(time.time()))
         username = f"orderlisttest_{timestamp}"
         email = f"orderlisttest_{timestamp}@example.com"
 
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"{DEPLOY_URL}/auth/test/cleanup?username={username}")
         # 注册  # Register
         register_data = {
             "username": username,
@@ -133,7 +134,7 @@ async def test_list_my_orders_api():
             "role_id": 1,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            f"{DEPLOY_URL}/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
 
@@ -142,7 +143,7 @@ async def test_list_my_orders_api():
             "email": email,
             "password": "orderapitestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post(f"{DEPLOY_URL}/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
@@ -165,12 +166,12 @@ async def test_list_my_orders_api():
             "service_type": "life_health",
         }
         resp1 = await ac.post(
-            "http://localhost:8000/customer/orders/publish",
+            f"{DEPLOY_URL}/customer/orders/publish",
             json=order_data_1,
             headers=headers,
         )
         resp2 = await ac.post(
-            "http://localhost:8000/customer/orders/publish",
+            f"{DEPLOY_URL}/customer/orders/publish",
             json=order_data_2,
             headers=headers,
         )
@@ -179,7 +180,7 @@ async def test_list_my_orders_api():
 
         # 查询订单列表  # Query order list
         list_resp = await ac.get(
-            "http://localhost:8000/customer/orders/my", headers=headers
+            f"{DEPLOY_URL}/customer/orders/my", headers=headers
         )
         print(list_resp.text)  # 调试用  # For debugging
         assert list_resp.status_code == 200
@@ -196,13 +197,13 @@ async def test_list_my_orders_api():
 
 @pytest.mark.asyncio
 async def test_get_my_order_detail_api():
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url="DEPLOY_URL") as ac:
         # 清理测试用户  # Clean up test user
         timestamp = str(int(time.time()))
         username = f"orderdetailtest_{timestamp}"
         email = f"orderdetailtest_{timestamp}@example.com"
 
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"{DEPLOY_URL}/auth/test/cleanup?username={username}")
         # 注册  # Register
         register_data = {
             "username": username,
@@ -211,7 +212,7 @@ async def test_get_my_order_detail_api():
             "role_id": 1,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            f"{DEPLOY_URL}/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
 
@@ -220,7 +221,7 @@ async def test_get_my_order_detail_api():
             "email": email,
             "password": "orderapitestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post(f"{DEPLOY_URL}/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
@@ -235,7 +236,7 @@ async def test_get_my_order_detail_api():
             "address": "Addr Detail",
         }
         publish_resp = await ac.post(
-            "http://localhost:8000/customer/orders/publish",
+            f"{DEPLOY_URL}/customer/orders/publish",
             json=order_data,
             headers=headers,
         )
@@ -244,7 +245,7 @@ async def test_get_my_order_detail_api():
 
         # 查询订单详情  # Query order detail
         detail_resp = await ac.get(
-            f"http://localhost:8000/customer/orders/my/{order_id}", headers=headers
+            f"{DEPLOY_URL}/customer/orders/my/{order_id}", headers=headers
         )
         print(detail_resp.text)  # 调试用  # For debugging
         assert detail_resp.status_code == 200
@@ -258,13 +259,13 @@ async def test_get_my_order_detail_api():
 
 @pytest.mark.asyncio
 async def test_list_order_history_api():
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url="DEPLOY_URL") as ac:
         # 清理测试用户  # Clean up test user
         timestamp = str(int(time.time()))
         username = f"orderhistorytest_{timestamp}"
         email = f"orderhistorytest_{timestamp}@example.com"
 
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"{DEPLOY_URL}/auth/test/cleanup?username={username}")
         # 注册  # Register
         register_data = {
             "username": username,
@@ -273,7 +274,7 @@ async def test_list_order_history_api():
             "role_id": 1,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            f"{DEPLOY_URL}/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
 
@@ -282,7 +283,7 @@ async def test_list_order_history_api():
             "email": email,
             "password": "orderhistorytestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post(f"{DEPLOY_URL}/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
@@ -305,12 +306,12 @@ async def test_list_order_history_api():
             "service_type": "it_technology",
         }
         resp1 = await ac.post(
-            "http://localhost:8000/customer/orders/publish",
+            f"{DEPLOY_URL}/customer/orders/publish",
             json=order_data_1,
             headers=headers,
         )
         resp2 = await ac.post(
-            "http://localhost:8000/customer/orders/publish",
+            f"{DEPLOY_URL}/customer/orders/publish",
             json=order_data_2,
             headers=headers,
         )
@@ -320,14 +321,14 @@ async def test_list_order_history_api():
         # 取消其中一个订单，制造不同状态  # Cancel one order to create different status
         order_id_2 = resp2.json()["order_id"]
         cancel_resp = await ac.post(
-            f"http://localhost:8000/customer/orders/cancel/{order_id_2}",
+            f"{DEPLOY_URL}/customer/orders/cancel/{order_id_2}",
             headers=headers,
         )
         assert cancel_resp.status_code == 200
 
         # 查询历史订单  # Query order history
         history_resp = await ac.get(
-            "http://localhost:8000/customer/orders/history", headers=headers
+            f"{DEPLOY_URL}/customer/orders/history", headers=headers
         )
         print(history_resp.text)  # 调试用  # For debugging
         assert history_resp.status_code == 200

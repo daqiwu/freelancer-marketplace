@@ -7,10 +7,10 @@ from httpx import AsyncClient
 @pytest.mark.asyncio
 async def test_admin_list_users():
     timestamp = int(time.time())
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url="https://freelancer-marketplace-api.onrender.com", timeout=30.0) as ac:
         # Register and login as admin
         username = f"admintestuser_{timestamp}"
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"https://freelancer-marketplace-api.onrender.com/auth/test/cleanup?username={username}")
         register_data = {
             "username": username,
             "email": f"admintestuser_{timestamp}@example.com",
@@ -18,20 +18,20 @@ async def test_admin_list_users():
             "role_id": 3,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            "https://freelancer-marketplace-api.onrender.com/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
         login_data = {
             "email": f"admintestuser_{timestamp}@example.com",
             "password": "admintestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post("https://freelancer-marketplace-api.onrender.com/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
         # List users
-        resp = await ac.get("http://localhost:8000/admin/users/", headers=headers)
+        resp = await ac.get("https://freelancer-marketplace-api.onrender.com/admin/users/", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "items" in data and "total" in data
@@ -41,10 +41,10 @@ async def test_admin_list_users():
 @pytest.mark.asyncio
 async def test_admin_get_user():
     timestamp = int(time.time()) + 1
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url="https://freelancer-marketplace-api.onrender.com", timeout=30.0) as ac:
         # Register and login as admin
         username = f"admintestuser2_{timestamp}"
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"https://freelancer-marketplace-api.onrender.com/auth/test/cleanup?username={username}")
         register_data = {
             "username": username,
             "email": f"admintestuser2_{timestamp}@example.com",
@@ -52,14 +52,14 @@ async def test_admin_get_user():
             "role_id": 3,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            "https://freelancer-marketplace-api.onrender.com/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
         login_data = {
             "email": f"admintestuser2_{timestamp}@example.com",
             "password": "admintestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post("https://freelancer-marketplace-api.onrender.com/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
@@ -69,11 +69,11 @@ async def test_admin_get_user():
         if not user_id:
             # fallback: list users and get id
             list_resp = await ac.get(
-                "http://localhost:8000/admin/users/", headers=headers
+                "https://freelancer-marketplace-api.onrender.com/admin/users/", headers=headers
             )
             user_id = list_resp.json()["items"][0]["id"]
         resp = await ac.get(
-            f"http://localhost:8000/admin/users/{user_id}", headers=headers
+            f"https://freelancer-marketplace-api.onrender.com/admin/users/{user_id}", headers=headers
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -84,10 +84,10 @@ async def test_admin_get_user():
 @pytest.mark.asyncio
 async def test_admin_delete_user():
     timestamp = int(time.time()) + 2
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url="https://freelancer-marketplace-api.onrender.com", timeout=30.0) as ac:
         # Register and login as admin
         username = f"admintestuser3_{timestamp}"
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"https://freelancer-marketplace-api.onrender.com/auth/test/cleanup?username={username}")
         register_data = {
             "username": username,
             "email": f"admintestuser3_{timestamp}@example.com",
@@ -95,20 +95,20 @@ async def test_admin_delete_user():
             "role_id": 3,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            "https://freelancer-marketplace-api.onrender.com/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
         login_data = {
             "email": f"admintestuser3_{timestamp}@example.com",
             "password": "admintestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post("https://freelancer-marketplace-api.onrender.com/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
         # List users and get id
-        list_resp = await ac.get("http://localhost:8000/admin/users/", headers=headers)
+        list_resp = await ac.get("https://freelancer-marketplace-api.onrender.com/admin/users/", headers=headers)
         user_id = None
         for u in list_resp.json()["items"]:
             if u["username"] == username:
@@ -117,7 +117,7 @@ async def test_admin_delete_user():
 
         # Delete user
         del_resp = await ac.delete(
-            f"http://localhost:8000/admin/users/{user_id}", headers=headers
+            f"https://freelancer-marketplace-api.onrender.com/admin/users/{user_id}", headers=headers
         )
         assert del_resp.status_code == 200
         data = del_resp.json()
@@ -130,10 +130,10 @@ async def test_admin_delete_user():
 @pytest.mark.asyncio
 async def test_admin_list_orders():
     timestamp = int(time.time()) + 3
-    async with AsyncClient(base_url="http://localhost:8000") as ac:
+    async with AsyncClient(base_url="https://freelancer-marketplace-api.onrender.com", timeout=30.0) as ac:
         # Register and login as admin
         username = f"admintestuser4_{timestamp}"
-        await ac.delete(f"http://localhost:8000/auth/test/cleanup?username={username}")
+        await ac.delete(f"https://freelancer-marketplace-api.onrender.com/auth/test/cleanup?username={username}")
         register_data = {
             "username": username,
             "email": f"admintestuser4_{timestamp}@example.com",
@@ -141,20 +141,20 @@ async def test_admin_list_orders():
             "role_id": 3,
         }
         reg_resp = await ac.post(
-            "http://localhost:8000/auth/register", json=register_data
+            "https://freelancer-marketplace-api.onrender.com/auth/register", json=register_data
         )
         assert reg_resp.status_code == 200
         login_data = {
             "email": f"admintestuser4_{timestamp}@example.com",
             "password": "admintestpass",
         }
-        login_resp = await ac.post("http://localhost:8000/auth/login", json=login_data)
+        login_resp = await ac.post("https://freelancer-marketplace-api.onrender.com/auth/login", json=login_data)
         assert login_resp.status_code == 200
         token = login_resp.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
         # List orders
-        resp = await ac.get("http://localhost:8000/admin/orders", headers=headers)
+        resp = await ac.get("https://freelancer-marketplace-api.onrender.com/admin/orders", headers=headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "items" in data and "total" in data

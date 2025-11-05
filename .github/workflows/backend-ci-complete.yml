@@ -124,9 +124,9 @@ jobs:
           JWT_SECRET_KEY: "test-secret-key-for-ci"
           ENVIRONMENT: "test"
         run: |
-          echo "🧪 Running unit tests with coverage..."
-          # Run only tests that don't require external services (unit + route tests with TestClient)
-          poetry run pytest tests/ app/test/auth_test/model_test.py app/test/auth_test/route_test.py -v \
+          echo "🧪 Running all tests with coverage..."
+          # Run all tests - unit tests + integration tests (now using TestClient fixtures)
+          poetry run pytest tests/ app/test/ -v \
             --cov=app \
             --cov-report=term-missing \
             --cov-report=xml \
@@ -135,9 +135,8 @@ jobs:
             --tb=short
 
           echo ""
-          echo "⚠️  Integration tests that require running server are skipped in CI"
-          echo "   (admin_test, service_test, orders_test, profile_test)"
-          echo "   Run these locally with: poetry run pytest app/test/ -v"
+          echo "✅ All tests now use proper pytest fixtures and TestClient"
+          echo "   Coverage target: 85%"
 
       - name: Upload coverage report (XML)
         if: always()

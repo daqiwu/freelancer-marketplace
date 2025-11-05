@@ -1,16 +1,12 @@
 # Multi-stage build for production deployment with AWS RDS support
-# Using Poetry as the build tool for dependency management
+# Using pip with pyproject.toml (PEP 621 format)
 FROM python:3.12-slim as builder
 
-# Set environment variables for Python and Poetry
+# Set environment variables for Python
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    POETRY_VERSION=1.7.1 \
-    POETRY_HOME=/opt/poetry \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install build dependencies (including MySQL client libraries)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -21,21 +17,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry (official installer)
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry && \
-    poetry --version
-
 WORKDIR /app
 
-# Copy Poetry configuration files
-# NOTE: Using Poetry as the build tool (not pip/requirements.txt)
-COPY pyproject.toml poetry.lock ./
+# Copy pyproject.toml and app directory for dependency installation
+COPY pyproject.toml ./
+COPY app ./app
 
-# Install production dependencies using Poetry
-# --only main: Install only main dependencies (no dev dependencies)
-# --no-root: Don't install the project itself, just dependencies
-RUN poetry install --no-interaction --no-ansi --no-root --only main
+# Install production dependencies using pip with PEP 621 format
+# This installs only the main dependencies listed in [project.dependencies]
+# Dev dependencies in [project.optional-dependencies] are excluded
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir . && \
+    rm -rf /root/.cache/pip
 
 # Production stage
 FROM python:3.12-slim
