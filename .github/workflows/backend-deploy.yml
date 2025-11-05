@@ -8,6 +8,7 @@ on:
       - bala
     paths:
       - "backend/**"
+      - ".github/workflows/backend-deploy.yml"
 
   workflow_dispatch: # Manual trigger
 
@@ -23,7 +24,6 @@ jobs:
         with:
           username: balachander20
           password: dckr_pat_JAGPIR8cUkQhmN7m3ueafsv7v_I
-          
 
       - name: Build and push Docker image
         run: |
