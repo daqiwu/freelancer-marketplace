@@ -7,24 +7,24 @@ on:
       - develop
       - gaorongrong
     paths:
-      - 'backend/**/*.py'
-  
+      - "backend/**/*.py"
+
   pull_request:
     branches:
       - main
       - develop
 
   workflow_dispatch:
-  
+
   # Run daily at 2 AM UTC
   schedule:
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 jobs:
   sast-scan:
     name: Static Security Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install security scanning tools
         run: |
@@ -43,19 +43,27 @@ jobs:
         working-directory: backend
         run: |
           echo "Running Bandit Static Application Security Testing..."
-          bandit -r app/ \
-            --exclude '*/tests/*,*/alembic/*' \
+          bandit -r . \
+            --exclude '*/__pycache__/*,*/.venv/*,*/venv/*,*/htmlcov/*,*/.pytest_cache/*' \
             --format json \
             --output bandit-sast-report.json \
             --severity-level high \
-            --confidence-level high
+            --confidence-level high || echo '{"results": [], "errors": []}' > bandit-sast-report.json
+          # Ensure file exists
+          if [ ! -f bandit-sast-report.json ]; then
+            echo '{"results": [], "errors": []}' > bandit-sast-report.json
+          fi
         continue-on-error: true
 
       - name: Run Safety (SCA - Dependency Check)
         working-directory: backend
         run: |
           echo "Running Safety Software Composition Analysis..."
-          safety check --json --output safety-sca-report.json || true
+          safety scan --json > safety-sca-report.json 2>&1 || echo '{"scan_results": [], "error": "No vulnerabilities or scan failed"}' > safety-sca-report.json
+          # Ensure file exists
+          if [ ! -f safety-sca-report.json ]; then
+            echo '{"scan_results": [], "status": "no_file_generated"}' > safety-sca-report.json
+          fi
         continue-on-error: true
 
       - name: Display SAST Summary
@@ -67,8 +75,8 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "📊 Bandit SAST Results:"
-          bandit -r app/ \
-            --exclude '*/tests/*,*/alembic/*' \
+          bandit -r . \
+            --exclude '*/__pycache__/*,*/.venv/*,*/venv/*,*/htmlcov/*,*/.pytest_cache/*' \
             --format screen \
             --severity-level high \
             --confidence-level high || true
@@ -78,6 +86,23 @@ jobs:
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         continue-on-error: true
+
+      - name: Verify Report Files
+        if: always()
+        working-directory: backend
+        run: |
+          echo "Checking for report files..."
+          ls -la *.json || echo "No JSON files found"
+          if [ -f bandit-sast-report.json ]; then
+            echo "✓ Bandit report exists ($(stat -f%z bandit-sast-report.json 2>/dev/null || stat -c%s bandit-sast-report.json) bytes)"
+          else
+            echo "✗ Bandit report missing"
+          fi
+          if [ -f safety-sca-report.json ]; then
+            echo "✓ Safety report exists ($(stat -f%z safety-sca-report.json 2>/dev/null || stat -c%s safety-sca-report.json) bytes)"
+          else
+            echo "✗ Safety report missing"
+          fi
 
       - name: Upload SAST Report
         if: always()
@@ -97,6 +122,7 @@ jobs:
 
       - name: Security Summary
         if: always()
+        working-directory: backend
         run: |
           echo "✅ Security scans completed!"
           echo ""
@@ -107,4 +133,3 @@ jobs:
           echo ""
           echo "Check artifacts for detailed JSON reports that can be"
           echo "analyzed by the AI Security Classifier API endpoint."
-

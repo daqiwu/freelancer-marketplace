@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,11 +8,11 @@ from app.config import get_db
 from app.dependencies import get_current_user
 from app.models.models import LocationEnum, OrderStatus
 from app.services.provider_service import (
-    list_available_orders,
     accept_order,
-    update_order_status,
-    list_provider_order_history,
     get_order_detail_for_provider,
+    list_available_orders,
+    list_provider_order_history,
+    update_order_status,
 )
 
 
@@ -45,7 +45,9 @@ async def browse_available_orders(
     location: Optional[LocationEnum] = Query(default=None),
     min_price: Optional[float] = Query(default=None, ge=0),
     max_price: Optional[float] = Query(default=None, ge=0),
-    keyword: Optional[str] = Query(default=None, description="Search in title/description"),
+    keyword: Optional[str] = Query(
+        default=None, description="Search in title/description"
+    ),
 ):
     orders = await list_available_orders(
         db,
@@ -192,8 +194,9 @@ async def get_my_order_detail_for_provider(
     db: AsyncSession = Depends(get_db),
     current_user_id: int = Depends(get_current_user),
 ):
-    order = await get_order_detail_for_provider(db, provider_id=current_user_id, order_id=order_id)
+    order = await get_order_detail_for_provider(
+        db, provider_id=current_user_id, order_id=order_id
+    )
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
-

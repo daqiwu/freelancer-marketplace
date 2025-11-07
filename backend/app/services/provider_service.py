@@ -1,12 +1,15 @@
+from datetime import UTC, datetime
 from typing import List, Optional
-from datetime import datetime, UTC
 
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
 
-from app.models.models import Order, OrderStatus, LocationEnum, PaymentStatus, Review
-from app.services.notification_service import send_customer_notification, send_provider_notification
+from app.models.models import LocationEnum, Order, OrderStatus, PaymentStatus, Review
+from app.services.notification_service import (
+    send_customer_notification,
+    send_provider_notification,
+)
 
 
 async def list_available_orders(
@@ -31,7 +34,9 @@ async def list_available_orders(
         query = query.where(Order.price <= max_price)
     if keyword:
         like_expr = f"%{keyword.strip()}%"
-        query = query.where((Order.title.ilike(like_expr)) | (Order.description.ilike(like_expr)))
+        query = query.where(
+            (Order.title.ilike(like_expr)) | (Order.description.ilike(like_expr))
+        )
 
     result = await db.execute(query.order_by(Order.created_at.desc()))
     return list(result.scalars().all())
@@ -64,13 +69,17 @@ async def accept_order(
     await db.refresh(order)
     # 通知客户
     await send_customer_notification(
-        db, order.customer_id, order.id,
-        f"Your order: {order.id} has been accepted by the provider: {provider_id}."
+        db,
+        order.customer_id,
+        order.id,
+        f"Your order: {order.id} has been accepted by the provider: {provider_id}.",
     )
     # 通知服务商
     await send_provider_notification(
-        db, provider_id, order.id,
-        f"You have successfully accepted the order: {order.id}."
+        db,
+        provider_id,
+        order.id,
+        f"You have successfully accepted the order: {order.id}.",
     )
     return order
 
@@ -103,7 +112,9 @@ async def update_order_status(
     # Validate state transitions
     if new_status == OrderStatus.in_progress and order.status != OrderStatus.accepted:
         raise ValueError("Order must be accepted before starting.")
-    if new_status == OrderStatus.completed and order.status not in {OrderStatus.in_progress}:
+    if new_status == OrderStatus.completed and order.status not in {
+        OrderStatus.in_progress
+    }:
         raise ValueError("Order must be in progress before completing.")
 
     order.status = new_status
@@ -113,21 +124,29 @@ async def update_order_status(
     # 通知逻辑
     if new_status == OrderStatus.in_progress:
         await send_customer_notification(
-            db, order.customer_id, order.id,
-            f"The status of your order: {order.id} has been updated to ‘in_progress’ by the provider: {provider_id}."
+            db,
+            order.customer_id,
+            order.id,
+            f"The status of your order: {order.id} has been updated to ‘in_progress’ by the provider: {provider_id}.",
         )
         await send_provider_notification(
-            db, provider_id, order.id,
-            f"You have successfully updated the status of the order: {order.id} to ‘in_progress’."
+            db,
+            provider_id,
+            order.id,
+            f"You have successfully updated the status of the order: {order.id} to ‘in_progress’.",
         )
     elif new_status == OrderStatus.completed:
         await send_customer_notification(
-            db, order.customer_id, order.id,
-            f"The status of your order: {order.id} has been updated to ‘completed’ by the provider: {provider_id}."
+            db,
+            order.customer_id,
+            order.id,
+            f"The status of your order: {order.id} has been updated to ‘completed’ by the provider: {provider_id}.",
         )
         await send_provider_notification(
-            db, provider_id, order.id,
-            f"You have successfully updated the status of the order: {order.id} to ‘completed’."
+            db,
+            provider_id,
+            order.id,
+            f"You have successfully updated the status of the order: {order.id} to ‘completed’.",
         )
     return order
 
@@ -141,7 +160,9 @@ async def list_provider_order_history(
     Return all orders associated with the provider, ordered by most recent update.
     """
     result = await db.execute(
-        select(Order).where(Order.provider_id == provider_id).order_by(Order.updated_at.desc())
+        select(Order)
+        .where(Order.provider_id == provider_id)
+        .order_by(Order.updated_at.desc())
     )
     return list(result.scalars().all())
 
@@ -183,9 +204,7 @@ async def get_order_detail_for_provider(
 
     review_data = None
     # 查询评价（如果存在）
-    review_result = await db.execute(
-        select(Review).where(Review.order_id == order_id)
-    )
+    review_result = await db.execute(select(Review).where(Review.order_id == order_id))
     review = review_result.scalars().first()
     if review:
         review_data = {
@@ -206,8 +225,12 @@ async def get_order_detail_for_provider(
         "price": float(order.price) if order.price is not None else 0.0,
         "location": order.location.value,
         "address": order.address,
-        "service_start_time": str(order.service_start_time) if order.service_start_time else None,
-        "service_end_time": str(order.service_end_time) if order.service_end_time else None,
+        "service_start_time": (
+            str(order.service_start_time) if order.service_start_time else None
+        ),
+        "service_end_time": (
+            str(order.service_end_time) if order.service_end_time else None
+        ),
         "payment_status": order.payment_status.value,
         "created_at": str(order.created_at),
         "updated_at": str(order.updated_at),

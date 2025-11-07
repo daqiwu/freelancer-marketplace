@@ -1,8 +1,10 @@
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from app.models.models import User, CustomerProfile, ProviderProfile, Role
-from fastapi import HTTPException
+
+from app.models.models import CustomerProfile, ProviderProfile, Role, User
+
 
 async def get_customer_profile(db: AsyncSession, user_id: int):
     """
@@ -24,13 +26,16 @@ async def get_customer_profile(db: AsyncSession, user_id: int):
         "username": user.username,
         "email": user.email,
         "role": user.role.role_name if user.role else None,
-        "location": getattr(user.customer_profile.location, "value", user.customer_profile.location),
+        "location": getattr(
+            user.customer_profile.location, "value", user.customer_profile.location
+        ),
         "address": user.customer_profile.address,
         "budget_preference": float(user.customer_profile.budget_preference or 0),
         "balance": float(user.customer_profile.balance or 0),
         "created_at": str(user.created_at),
-        "updated_at": str(user.updated_at)
+        "updated_at": str(user.updated_at),
     }
+
 
 async def get_provider_profile(db: AsyncSession, user_id: int):
     """
@@ -57,8 +62,9 @@ async def get_provider_profile(db: AsyncSession, user_id: int):
         "hourly_rate": float(user.provider_profile.hourly_rate or 0),
         "availability": user.provider_profile.availability,
         "created_at": str(user.created_at),
-        "updated_at": str(user.updated_at)
+        "updated_at": str(user.updated_at),
     }
+
 
 async def get_admin_profile(db: AsyncSession, user_id: int):
     """
@@ -66,9 +72,7 @@ async def get_admin_profile(db: AsyncSession, user_id: int):
     Get admin profile info
     """
     result = await db.execute(
-        select(User)
-        .options(selectinload(User.role))
-        .where(User.id == user_id)
+        select(User).options(selectinload(User.role)).where(User.id == user_id)
     )
     user = result.scalars().first()
     if not user or (user.role and user.role.role_name != "admin"):
@@ -79,15 +83,25 @@ async def get_admin_profile(db: AsyncSession, user_id: int):
         "email": user.email,
         "role": user.role.role_name if user.role else None,
         "created_at": str(user.created_at),
-        "updated_at": str(user.updated_at)
+        "updated_at": str(user.updated_at),
     }
 
-async def update_customer_profile(db: AsyncSession, user_id: int, location: str, address: str, budget_preference: float, balance: float):
+
+async def update_customer_profile(
+    db: AsyncSession,
+    user_id: int,
+    location: str,
+    address: str,
+    budget_preference: float,
+    balance: float,
+):
     """
     更新客户资料（首次更新即为创建，后续为更新）
     Update customer profile (create if not exists, else update)
     """
-    result = await db.execute(select(CustomerProfile).where(CustomerProfile.id == user_id))
+    result = await db.execute(
+        select(CustomerProfile).where(CustomerProfile.id == user_id)
+    )
     profile = result.scalars().first()
     if not profile:
         # 首次创建
@@ -96,7 +110,7 @@ async def update_customer_profile(db: AsyncSession, user_id: int, location: str,
             location=location,
             address=address,
             budget_preference=budget_preference,
-            balance=balance
+            balance=balance,
         )
         db.add(profile)
     else:
@@ -109,12 +123,22 @@ async def update_customer_profile(db: AsyncSession, user_id: int, location: str,
     await db.refresh(profile)
     return profile
 
-async def update_provider_profile(db: AsyncSession, user_id: int, skills: str, experience_years: int, hourly_rate: float, availability: str):
+
+async def update_provider_profile(
+    db: AsyncSession,
+    user_id: int,
+    skills: str,
+    experience_years: int,
+    hourly_rate: float,
+    availability: str,
+):
     """
     更新服务商资料（首次更新即为创建，后续为更新）
     Update provider profile (create if not exists, else update)
     """
-    result = await db.execute(select(ProviderProfile).where(ProviderProfile.id == user_id))
+    result = await db.execute(
+        select(ProviderProfile).where(ProviderProfile.id == user_id)
+    )
     profile = result.scalars().first()
     if not profile:
         # 首次创建
@@ -123,7 +147,7 @@ async def update_provider_profile(db: AsyncSession, user_id: int, skills: str, e
             skills=skills,
             experience_years=experience_years,
             hourly_rate=hourly_rate,
-            availability=availability
+            availability=availability,
         )
         db.add(profile)
     else:

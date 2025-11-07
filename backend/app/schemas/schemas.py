@@ -1,10 +1,12 @@
 from pydantic import BaseModel, EmailStr
 
+
 # 用于用户注册的请求体模型
 class UserCreate(BaseModel):
-    username: str 
+    username: str
     email: EmailStr
     password: str
+
 
 # 用于用户注册的响应体模型
 class UserCreateResponse(BaseModel):
@@ -13,12 +15,14 @@ class UserCreateResponse(BaseModel):
     email: EmailStr
 
     class Config:
-        orm_mode = True # 允许从 ORM 对象（SQLAlchemy 模型）转换
+        orm_mode = True  # 允许从 ORM 对象（SQLAlchemy 模型）转换
+
 
 # 用于用户登录的请求体模型
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 # 用于用户登录的响应体模型
 class UserLoginResponse(BaseModel):

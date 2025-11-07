@@ -1,11 +1,17 @@
 # app/test/user_test/model_test.py (最终正确版)
 
-import pytest
 from datetime import datetime
+
+import pytest
 from pydantic import ValidationError
 
 from app.models.models import User
-from app.routes.auth import RegisterRequest, RegisterResponse, LoginRequest, TokenResponse
+from app.routes.auth import (
+    LoginRequest,
+    RegisterRequest,
+    RegisterResponse,
+    TokenResponse,
+)
 
 
 class TestUserORMModel:
@@ -20,7 +26,7 @@ class TestUserORMModel:
             password_hash="hashedpassword",
             role_id=2,
             created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            updated_at=datetime.utcnow(),
         )
         assert user.id == 1
         assert user.username == "testuser"
@@ -39,7 +45,7 @@ class TestAuthPydanticModels:
             username="testuser",
             email="test@example.com",
             password="password123",
-            role_id=1
+            role_id=1,
         )
         assert req.username == "testuser"
         assert req.email == "test@example.com"
@@ -48,7 +54,9 @@ class TestAuthPydanticModels:
 
     def test_register_request_validation_error(self):
         with pytest.raises(ValidationError):
-            RegisterRequest(username="testuser", email="test@example.com", password="password123")
+            RegisterRequest(
+                username="testuser", email="test@example.com", password="password123"
+            )
         with pytest.raises(ValidationError):
             RegisterRequest(username="testuser", email="test@example.com", role_id=1)
         with pytest.raises(ValidationError):
