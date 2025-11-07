@@ -5,63 +5,55 @@
 模拟前端请求，检查后端响应
 """
 
-import requests
 import json
+
+import requests
+
 
 def test_login():
     print("=" * 70)
     print("  直接测试后端 API 登录")
     print("=" * 70)
     print()
-    
+
     # 配置
     backend_url = "http://localhost:8000/api/v1/auth/login"
     email = "yamatoya311@mail.com"
     password = "aMKA3P744"
-    
+
     print(f"🌐 后端地址: {backend_url}")
     print(f"📧 邮箱: {email}")
     print(f"🔑 密码: {password}")
     print()
-    
+
     # 准备请求数据
-    payload = {
-        "email": email,
-        "password": password
-    }
-    
-    headers = {
-        "Content-Type": "application/json"
-    }
-    
+    payload = {"email": email, "password": password}
+
+    headers = {"Content-Type": "application/json"}
+
     print("📤 发送登录请求...")
     print(f"   请求体: {json.dumps(payload, indent=2)}")
     print()
-    
+
     try:
         # 发送请求
-        response = requests.post(
-            backend_url,
-            json=payload,
-            headers=headers,
-            timeout=5
-        )
-        
+        response = requests.post(backend_url, json=payload, headers=headers, timeout=5)
+
         print(f"📥 收到响应:")
         print(f"   状态码: {response.status_code}")
         print(f"   响应头: {dict(response.headers)}")
         print()
-        
+
         # 解析响应
         try:
             response_data = response.json()
             print(f"   响应体:")
             print(f"   {json.dumps(response_data, indent=2)}")
-        except:
+        except Exception:
             print(f"   响应体（原始）: {response.text}")
-        
+
         print()
-        
+
         # 判断结果
         if response.status_code == 200:
             print("✅ 登录成功！")
@@ -88,7 +80,7 @@ def test_login():
             print()
             print("💡 其他错误，查看响应详情")
             return False
-            
+
     except requests.exceptions.ConnectionError:
         print("❌ 连接错误: 无法连接到后端服务器")
         print()
@@ -100,20 +92,21 @@ def test_login():
         print("🔧 解决方案:")
         print("   启动后端: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000")
         return False
-        
+
     except requests.exceptions.Timeout:
         print("❌ 请求超时")
         print("   后端响应太慢或未响应")
         return False
-        
+
     except Exception as e:
         print(f"❌ 未知错误: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     print()
     test_login()
     print()
-
