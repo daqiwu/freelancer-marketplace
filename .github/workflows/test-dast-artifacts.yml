@@ -1,0 +1,259 @@
+name: Test DAST Artifact Upload
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches:
+      - bala
+      - test-dast-artifacts
+    paths:
+      - ".github/workflows/test-dast-artifacts.yml"
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+jobs:
+  test-dast-reports:
+    name: 🧪 Test DAST Report Generation & Upload
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Display Environment Info
+        run: |
+          echo "╔════════════════════════════════════════════════════════════════╗"
+          echo "║              DAST ARTIFACT UPLOAD TEST                         ║"
+          echo "╚════════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "📍 GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "📍 PWD: $(pwd)"
+          echo "📍 Runner workspace: $RUNNER_WORKSPACE"
+          echo ""
+      
+      - name: Create Test Reports Directory
+        run: |
+          echo "📁 Creating zap-reports directory..."
+          mkdir -p "$GITHUB_WORKSPACE/zap-reports"
+          echo "✅ Directory created at: $GITHUB_WORKSPACE/zap-reports"
+          ls -la "$GITHUB_WORKSPACE" | grep zap
+      
+      - name: Run OWASP ZAP Full Scan
+        run: |
+          echo "🔎 Starting ZAP full scan..."
+          echo "📁 Reports will be saved to: $GITHUB_WORKSPACE/zap-reports/"
+          echo ""
+          
+          set -x  # Enable command echo for debugging
+          
+          docker run -v "$GITHUB_WORKSPACE":/zap/wrk/:rw \
+            -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py \
+            -t https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com \
+            -r /zap/wrk/zap-reports/report.html \
+            -J /zap/wrk/zap-reports/report.json \
+            -w /zap/wrk/zap-reports/report.md || true
+          
+          set +x  # Disable command echo
+          echo ""
+          echo "🔚 ZAP scan finished"
+        continue-on-error: true
+      
+      - name: Verify Reports Were Generated
+        if: always()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  📊 REPORT VERIFICATION"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          
+          # Check if directory exists
+          if [ -d "$GITHUB_WORKSPACE/zap-reports" ]; then
+            echo "✅ zap-reports directory EXISTS"
+            echo ""
+            echo "📁 Directory contents:"
+            ls -lah "$GITHUB_WORKSPACE/zap-reports"
+            echo ""
+            
+            # Check each report file
+            if [ -f "$GITHUB_WORKSPACE/zap-reports/report.html" ]; then
+              HTML_SIZE=$(du -h "$GITHUB_WORKSPACE/zap-reports/report.html" | cut -f1)
+              echo "✅ report.html EXISTS (Size: $HTML_SIZE)"
+            else
+              echo "❌ report.html NOT FOUND"
+            fi
+            
+            if [ -f "$GITHUB_WORKSPACE/zap-reports/report.json" ]; then
+              JSON_SIZE=$(du -h "$GITHUB_WORKSPACE/zap-reports/report.json" | cut -f1)
+              echo "✅ report.json EXISTS (Size: $JSON_SIZE)"
+            else
+              echo "❌ report.json NOT FOUND"
+            fi
+            
+            if [ -f "$GITHUB_WORKSPACE/zap-reports/report.md" ]; then
+              MD_SIZE=$(du -h "$GITHUB_WORKSPACE/zap-reports/report.md" | cut -f1)
+              echo "✅ report.md EXISTS (Size: $MD_SIZE)"
+            else
+              echo "❌ report.md NOT FOUND"
+            fi
+            
+          else
+            echo "❌ zap-reports directory NOT FOUND at $GITHUB_WORKSPACE/zap-reports"
+          fi
+          echo ""
+          
+          # Show workspace root contents
+          echo "📂 Workspace root contents:"
+          ls -lah "$GITHUB_WORKSPACE" | head -n 30
+      
+      - name: Display Sample Report Content
+        if: always()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  📄 SAMPLE REPORT CONTENT"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          
+          if [ -f "$GITHUB_WORKSPACE/zap-reports/report.html" ]; then
+            echo "📄 First 50 lines of report.html:"
+            echo "---"
+            head -n 50 "$GITHUB_WORKSPACE/zap-reports/report.html"
+            echo "---"
+          fi
+          echo ""
+          
+          if [ -f "$GITHUB_WORKSPACE/zap-reports/report.json" ]; then
+            echo "📄 First 30 lines of report.json:"
+            echo "---"
+            head -n 30 "$GITHUB_WORKSPACE/zap-reports/report.json"
+            echo "---"
+          fi
+      
+      - name: Test Artifact Upload (Method 1 - Relative Path)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-zap-reports-relative
+          path: zap-reports/**
+          retention-days: 7
+          if-no-files-found: warn
+      
+      - name: Test Artifact Upload (Method 2 - Absolute Path)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-zap-reports-absolute
+          path: ${{ github.workspace }}/zap-reports/**
+          retention-days: 7
+          if-no-files-found: warn
+      
+      - name: Test Artifact Upload (Method 3 - Individual Files)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-zap-reports-individual
+          path: |
+            zap-reports/report.html
+            zap-reports/report.json
+            zap-reports/report.md
+          retention-days: 7
+          if-no-files-found: warn
+      
+      - name: Generate Test Summary
+        if: always()
+        run: |
+          {
+            echo "# 🧪 DAST Artifact Upload Test Results"
+            echo ""
+            echo "## 📊 Test Overview"
+            echo ""
+            echo "This workflow tests whether OWASP ZAP DAST reports are:"
+            echo "1. ✅ Generated successfully by the ZAP Docker container"
+            echo "2. ✅ Saved to the correct directory (\`\$GITHUB_WORKSPACE/zap-reports/\`)"
+            echo "3. ✅ Uploaded as GitHub Actions artifacts"
+            echo ""
+            
+            # Check if reports exist
+            HTML_EXISTS="❌"
+            JSON_EXISTS="❌"
+            MD_EXISTS="❌"
+            
+            if [ -f "$GITHUB_WORKSPACE/zap-reports/report.html" ]; then
+              HTML_EXISTS="✅"
+              HTML_SIZE=$(du -h "$GITHUB_WORKSPACE/zap-reports/report.html" | cut -f1)
+            else
+              HTML_SIZE="N/A"
+            fi
+            
+            if [ -f "$GITHUB_WORKSPACE/zap-reports/report.json" ]; then
+              JSON_EXISTS="✅"
+              JSON_SIZE=$(du -h "$GITHUB_WORKSPACE/zap-reports/report.json" | cut -f1)
+            else
+              JSON_SIZE="N/A"
+            fi
+            
+            if [ -f "$GITHUB_WORKSPACE/zap-reports/report.md" ]; then
+              MD_EXISTS="✅"
+              MD_SIZE=$(du -h "$GITHUB_WORKSPACE/zap-reports/report.md" | cut -f1)
+            else
+              MD_SIZE="N/A"
+            fi
+            
+            echo "## 📁 Report Generation Status"
+            echo ""
+            echo "| Report File | Status | Size |"
+            echo "|-------------|--------|------|"
+            echo "| report.html | ${HTML_EXISTS} | ${HTML_SIZE} |"
+            echo "| report.json | ${JSON_EXISTS} | ${JSON_SIZE} |"
+            echo "| report.md | ${MD_EXISTS} | ${MD_SIZE} |"
+            echo ""
+            
+            echo "## 📦 Artifact Upload Methods Tested"
+            echo ""
+            echo "Three different upload methods were tested:"
+            echo ""
+            echo "1. **Relative Path** (\`zap-reports/**\`)"
+            echo "   - Artifact name: \`test-zap-reports-relative\`"
+            echo ""
+            echo "2. **Absolute Path** (\`\${{ github.workspace }}/zap-reports/**\`)"
+            echo "   - Artifact name: \`test-zap-reports-absolute\`"
+            echo ""
+            echo "3. **Individual Files** (explicit file list)"
+            echo "   - Artifact name: \`test-zap-reports-individual\`"
+            echo ""
+            
+            echo "## 🔍 How to Verify"
+            echo ""
+            echo "1. Check the **Artifacts** section at the bottom of this workflow run"
+            echo "2. Download each artifact to verify contents"
+            echo "3. Compare which method worked best"
+            echo ""
+            
+            echo "## 🎯 Target Application"
+            echo ""
+            echo "- **URL**: \`https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com\`"
+            echo "- **Scan Type**: OWASP ZAP Full Scan"
+            echo "- **Tool Version**: \`ghcr.io/zaproxy/zaproxy:stable\`"
+            echo ""
+            
+            echo "---"
+            echo ""
+            echo "### ✅ Test Recommendations"
+            echo ""
+            if [ "$HTML_EXISTS" = "✅" ] && [ "$JSON_EXISTS" = "✅" ]; then
+              echo "**Status**: 🎉 All reports generated successfully!"
+              echo ""
+              echo "The current DAST configuration in \`backend-ci-complete.yml\` is working correctly."
+            else
+              echo "**Status**: ⚠️ Some reports are missing!"
+              echo ""
+              echo "**Troubleshooting steps**:"
+              echo "1. Check the ZAP scan logs in the workflow output"
+              echo "2. Verify the Docker volume mount is correct"
+              echo "3. Ensure the target URL is accessible"
+              echo "4. Check ZAP container permissions"
+            fi
+          } >> $GITHUB_STEP_SUMMARY
