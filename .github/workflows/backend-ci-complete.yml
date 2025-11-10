@@ -739,32 +739,44 @@ jobs:
       
       - name: Run OWASP ZAP Full Scan
         run: |
-          mkdir -p zap-reports
-          docker run -v $(pwd):/zap/wrk/:rw \
+          echo "📁 Ensuring zap-reports directory exists under GITHUB_WORKSPACE"
+          mkdir -p "$GITHUB_WORKSPACE/zap-reports"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+          echo "🔎 Starting ZAP full scan (logs will be saved to zap-reports/)"
+          set -x
+          docker run -v "$GITHUB_WORKSPACE":/zap/wrk/:rw \
             -t ghcr.io/zaproxy/zaproxy:stable \
             zap-full-scan.py \
             -t https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com \
             -r /zap/wrk/zap-reports/report.html \
             -J /zap/wrk/zap-reports/report.json \
             -w /zap/wrk/zap-reports/report.md || true
+          echo "🔚 ZAP run finished"
         continue-on-error: true
       
       - name: Check generated reports
         if: always()
         run: |
-          echo "📁 Checking for ZAP reports..."
-          ls -lah zap-reports/ || echo "zap-reports directory not found"
+          echo "📁 Checking for ZAP reports under GITHUB_WORKSPACE/zap-reports..."
+          ls -lah "$GITHUB_WORKSPACE/zap-reports" || echo "zap-reports directory not found in $GITHUB_WORKSPACE"
           echo ""
-          echo "Files in current directory:"
-          ls -lah
+          echo "Files in repository root:" 
+          ls -lah "$GITHUB_WORKSPACE" | head -n 200
+          echo ""
+          if [ -f "$GITHUB_WORKSPACE/zap-reports/report.html" ]; then
+            echo "--- Start of report.html (first 200 lines) ---"
+            sed -n '1,200p' "$GITHUB_WORKSPACE/zap-reports/report.html" || true
+            echo "--- End of sample ---"
+          fi
 
       - name: Upload DAST Reports to Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-dast-reports
-          path: zap-reports/
-          retention-days: 30
+          path: |
+            zap-reports/**
+          retention-days: 90
           if-no-files-found: warn
       
       - name: Generate DAST Summary
