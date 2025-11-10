@@ -1,0 +1,23 @@
+name: DAST Scan
+
+on:
+  push:
+    branches:
+      - bala  # Run this workflow on every push to bala branch
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run OWASP ZAP Simple Scan
+        uses: zaproxy/action-full-scan@v0.8.0
+        with:
+          target: "https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com"
+          format: "html"
+          report_name: "dast-report.html"
+
+      - name: Upload DAST Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-dast-report
+          path: dast-report.html
