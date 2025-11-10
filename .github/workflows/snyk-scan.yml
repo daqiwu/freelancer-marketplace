@@ -10,6 +10,7 @@ on:
       - "backend/**/*.py"
       - "backend/requirements.txt"
       - "backend/pytest.ini"
+      - ".github/workflows/*"
   workflow_dispatch:
 
 jobs:
