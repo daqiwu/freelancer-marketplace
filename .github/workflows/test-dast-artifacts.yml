@@ -41,10 +41,36 @@ jobs:
           echo "✅ Directory created at: $GITHUB_WORKSPACE/zap-reports"
           ls -la "$GITHUB_WORKSPACE" | grep zap
       
+      - name: Create Dummy Reports for Testing
+        run: |
+          echo "📝 Creating dummy test reports first..."
+          mkdir -p "$GITHUB_WORKSPACE/zap-reports"
+          
+          # Create dummy HTML report
+          echo '<!DOCTYPE html>' > "$GITHUB_WORKSPACE/zap-reports/report.html"
+          echo '<html><head><title>Test DAST Report</title></head><body>' >> "$GITHUB_WORKSPACE/zap-reports/report.html"
+          echo '<h1>OWASP ZAP Test Report</h1>' >> "$GITHUB_WORKSPACE/zap-reports/report.html"
+          echo '<p>This is a test report to verify artifact upload.</p>' >> "$GITHUB_WORKSPACE/zap-reports/report.html"
+          echo '<p>Target: https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com</p>' >> "$GITHUB_WORKSPACE/zap-reports/report.html"
+          echo '</body></html>' >> "$GITHUB_WORKSPACE/zap-reports/report.html"
+          
+          # Create dummy JSON report
+          echo '{"test": true, "target": "https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com", "scan_type": "full_scan", "alerts": []}' > "$GITHUB_WORKSPACE/zap-reports/report.json"
+          
+          # Create dummy MD report
+          echo '# OWASP ZAP Test Report' > "$GITHUB_WORKSPACE/zap-reports/report.md"
+          echo '' >> "$GITHUB_WORKSPACE/zap-reports/report.md"
+          echo 'Target: https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com' >> "$GITHUB_WORKSPACE/zap-reports/report.md"
+          echo 'Scan Type: Full Scan' >> "$GITHUB_WORKSPACE/zap-reports/report.md"
+          echo 'Status: Test Mode - Dummy reports for artifact upload verification' >> "$GITHUB_WORKSPACE/zap-reports/report.md"
+          
+          echo "✅ Dummy reports created!"
+          ls -lah "$GITHUB_WORKSPACE/zap-reports/"
+      
       - name: Run OWASP ZAP Full Scan
         run: |
           echo "🔎 Starting ZAP full scan..."
-          echo "📁 Reports will be saved to: $GITHUB_WORKSPACE/zap-reports/"
+          echo "📁 Real reports will overwrite dummy reports at: $GITHUB_WORKSPACE/zap-reports/"
           echo ""
           
           set -x  # Enable command echo for debugging
@@ -60,6 +86,7 @@ jobs:
           set +x  # Disable command echo
           echo ""
           echo "🔚 ZAP scan finished"
+          echo "Note: If ZAP scan failed, dummy reports are still available for artifact upload testing"
         continue-on-error: true
       
       - name: Verify Reports Were Generated
