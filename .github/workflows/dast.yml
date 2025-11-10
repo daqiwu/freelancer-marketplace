@@ -20,26 +20,33 @@ jobs:
       
       - name: Run OWASP ZAP Full Scan
         run: |
+          mkdir -p zap-reports
           docker run -v $(pwd):/zap/wrk/:rw \
             -t ghcr.io/zaproxy/zaproxy:stable \
             zap-full-scan.py \
             -t https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com \
-            -r report_html.html \
-            -J report_json.json \
-            -w report_md.md \
-            -a -j -l INFO || true
+            -r /zap/wrk/zap-reports/report.html \
+            -J /zap/wrk/zap-reports/report.json \
+            -w /zap/wrk/zap-reports/report.md || true
         continue-on-error: true
+      
+      - name: Check generated reports
+        if: always()
+        run: |
+          echo "📁 Checking for ZAP reports..."
+          ls -lah zap-reports/ || echo "zap-reports directory not found"
+          echo ""
+          echo "Files in current directory:"
+          ls -lah
 
-      - name: Upload DAST Report
+      - name: Upload DAST Reports to Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-dast-report
-          path: |
-            report_html.html
-            report_json.json
-            report_md.md
+          name: zap-dast-reports
+          path: zap-reports/
           retention-days: 30
+          if-no-files-found: warn
       
       - name: Generate DAST Summary
         if: always()
