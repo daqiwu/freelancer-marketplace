@@ -1,0 +1,57 @@
+name: Snyk Scan
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - bala
+    paths:
+      - "backend/**/*.py"
+      - "backend/requirements.txt"
+      - "backend/pytest.ini"
+  workflow_dispatch:
+
+jobs:
+  snyk-scan:
+    name: 🔍 Snyk Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install Dependencies
+        working-directory: backend
+        run: poetry install
+
+      - name: Authenticate Snyk
+        env:
+          SNYK_TOKEN: dffc014b-e093-416d-9444-106a69d4b344
+        run: snyk auth $SNYK_TOKEN
+
+      - name: Run Snyk Test
+        working-directory: backend
+        run: poetry run snyk test --file=poetry.lock --package-manager=poetry > snyk-report.txt
+        continue-on-error: true
+
+      - name: Upload to Snyk Dashboard
+        working-directory: backend
+        run: poetry run snyk monitor --file=poetry.lock --package-manager=poetry
+
+      - name: Upload Snyk Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-report
+          path: backend/snyk-report.txt
+          retention-days: 90
+          if-no-files-found: warn

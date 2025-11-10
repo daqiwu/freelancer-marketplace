@@ -6,8 +6,6 @@ on:
       - main
       - develop
       - gaorongrong
-      - bala
-      
     paths:
       - "backend/**/*.py"
       - "backend/requirements.txt"
@@ -607,7 +605,7 @@ jobs:
     name: 🔍 DAST Security Scan
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: always() && (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
+    if: success()
     permissions:
       issues: write
       security-events: write
@@ -642,12 +640,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dast-reports
-          path: |
-            zap-reports/report.html
-            zap-reports/report.json
-            zap-reports/report.md
-          retention-days: 90
+          name: zap-dast-reports
+          path: zap-reports/
+          retention-days: 30
           if-no-files-found: warn
       
       - name: Generate DAST Summary
@@ -683,7 +678,7 @@ jobs:
             echo "### 📁 Detailed Reports:"
             echo "Download the full HTML/JSON/MD reports from the workflow artifacts."
             echo ""
-            echo "📊 **Artifact Name:** \`dast-reports\`"
+            echo "📊 **Artifact Name:** \`zap-dast-reports\`"
             echo ""
             echo "The artifact contains:"
             echo "- \`report.html\` - Interactive HTML report (recommended)"
