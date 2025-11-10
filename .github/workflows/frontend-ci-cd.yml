@@ -222,65 +222,62 @@ jobs:
 
       - name: List build files
         run: |
-          echo "� Build files to be uploaded:"
+          echo "📁 Build files to be zipped:"
           ls -lah dist/
           echo ""
           echo "📊 Total build size:"
           du -sh dist/
 
-      - name: Upload to S3
-      
+      - name: Create ZIP archive
         run: |
-          echo "📤 Uploading frontend build to S3..."
-          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
-            --delete \
-            --cache-control "public,max-age=31536000,immutable" \
-            --exclude "index.html" \
-            --exclude "*.map"
-          
-          echo "📄 Uploading index.html with no-cache..."
-          aws s3 cp dist/index.html s3://${{ env.S3_BUCKET }}/index.html \
-            --cache-control "no-cache,no-store,must-revalidate"
-          
-          echo "✅ Frontend build uploaded successfully!"
+          echo "� Creating ZIP archive of build files..."
+          cd dist
+          zip -r ../frontend-build-${{ github.sha }}.zip .
+          cd ..
+          echo "✅ ZIP file created: frontend-build-${{ github.sha }}.zip"
+          ls -lh frontend-build-${{ github.sha }}.zip
 
-      - name: Invalidate CloudFront Cache (if configured)
+      - name: Upload ZIP to S3
         run: |
-          echo "� Checking for CloudFront distribution..."
-          # Add CloudFront invalidation if you have a distribution ID
-          # aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
-          echo "⚠️ CloudFront invalidation skipped (not configured)"
-        continue-on-error: true
+          echo "� Uploading ZIP file to S3..."
+          aws s3 cp frontend-build-${{ github.sha }}.zip s3://${{ env.S3_BUCKET }}/builds/frontend-build-${{ github.sha }}.zip
+          
+          echo "📤 Uploading as latest version..."
+          aws s3 cp frontend-build-${{ github.sha }}.zip s3://${{ env.S3_BUCKET }}/builds/frontend-build-latest.zip
+          
+          echo "✅ ZIP files uploaded successfully!"
+          echo "   📦 Versioned: builds/frontend-build-${{ github.sha }}.zip"
+          echo "   📦 Latest: builds/frontend-build-latest.zip"
 
       - name: Generate Upload Summary
         if: always()
         run: |
+          ZIP_SIZE=$(ls -lh frontend-build-${{ github.sha }}.zip | awk '{print $5}')
           {
-            echo "## 🚀 S3 Upload Summary"
+            echo "## 🚀 S3 ZIP Upload Summary"
             echo ""
             echo "### 📦 Upload Details"
-            echo "- **S3 Bucket**: \`s3://${{ env.S3_BUCKET }}/\`"
+            echo "- **S3 Bucket**: \`s3://${{ env.S3_BUCKET }}/builds/\`"
             echo "- **Region**: \`${{ env.AWS_REGION }}\`"
-            echo "- **Build Source**: \`${{ env.FRONTEND_DIR }}/dist/\`"
-            echo "- **Sync Mode**: Delete old files, upload new/changed files"
+            echo "- **ZIP File Size**: ${ZIP_SIZE}"
+            echo "- **Format**: ZIP archive of entire dist/ folder"
             echo ""
-            echo "### 🔧 Cache Configuration"
-            echo "- **Static Assets**: \`max-age=31536000\` (1 year)"
-            echo "- **index.html**: \`no-cache\` (always fresh)"
-            echo "- **Source Maps**: Excluded from upload"
+            echo "### � Uploaded Files"
+            echo "- **Versioned Build**: \`builds/frontend-build-${{ github.sha }}.zip\`"
+            echo "- **Latest Build**: \`builds/frontend-build-latest.zip\`"
             echo ""
-            echo "### 📅 Upload Information"
+            echo "### 📅 Build Information"
             echo "- **Commit SHA**: \`${{ github.sha }}\`"
             echo "- **Branch**: \`${{ github.ref_name }}\`"
             echo "- **Triggered by**: \`${{ github.actor }}\`"
             echo "- **Workflow**: \`${{ github.workflow }}\`"
             echo ""
-            echo "### 🔗 Access"
-            echo "If configured with CloudFront or S3 static hosting:"
-            echo "- http://${{ env.S3_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
+            echo "### � Download Links"
+            echo "- Versioned: \`s3://${{ env.S3_BUCKET }}/builds/frontend-build-${{ github.sha }}.zip\`"
+            echo "- Latest: \`s3://${{ env.S3_BUCKET }}/builds/frontend-build-latest.zip\`"
             echo ""
             echo "---"
-            echo "✅ **Status**: Frontend build successfully uploaded to S3"
+            echo "✅ **Status**: Frontend build ZIP successfully uploaded to S3"
           } >> $GITHUB_STEP_SUMMARY
 
   # ============================================
