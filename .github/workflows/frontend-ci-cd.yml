@@ -229,6 +229,7 @@ jobs:
           du -sh dist/
 
       - name: Upload to S3
+      
         run: |
           echo "📤 Uploading frontend build to S3..."
           aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
