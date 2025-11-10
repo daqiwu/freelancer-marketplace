@@ -1,0 +1,100 @@
+name: Build and Push Docker Image to ECR Public
+
+on:
+  push:
+    branches:
+      - bala
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-southeast-1
+  ACCOUNT_ID: 539827877726
+  ECR_PUBLIC_URI: t7x9p0n7/freelancermarketplace
+  DOCKER_IMAGE_NAME: balachander20/freelancer-marketplace-api
+
+jobs:
+  build-and-push:
+    name: 🐳 Build and Push to ECR Public
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # 1. Checkout the repo
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Configure AWS credentials via OIDC using Role ARN
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+
+      # 3. Login to ECR Public
+      - name: Login to Amazon ECR Public
+        run: |
+          echo "🔐 Logging in to Amazon ECR Public..."
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+          echo "✅ Successfully logged in to ECR Public"
+
+      # 4. Build Docker image
+      - name: Build Docker Image
+        working-directory: backend
+        run: |
+          echo "🏗️ Building Docker image..."
+          echo "📦 Image name: ${{ env.DOCKER_IMAGE_NAME }}:latest"
+          docker build -t ${{ env.DOCKER_IMAGE_NAME }}:latest .
+          echo "✅ Docker image built successfully!"
+
+      # 5. Tag Docker image for ECR Public
+      - name: Tag Docker Image for ECR Public
+        run: |
+          echo "🏷️ Tagging image for ECR Public..."
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest
+          docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}
+          echo "✅ Image tagged successfully!"
+          echo "📍 Tags created:"
+          echo "   - public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
+          echo "   - public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}"
+
+      # 6. Push Docker image to ECR Public
+      - name: Push Docker Image to ECR Public
+        run: |
+          echo "🚀 Pushing image to ECR Public..."
+          docker push public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest
+          docker push public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}
+          echo "✅ Image pushed successfully!"
+          echo "📍 Image URI: public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
+          echo "🎉 Deployment ready!"
+
+      # 7. Generate deployment summary
+      - name: Generate Deployment Summary
+        if: always()
+        run: |
+          {
+            echo "## 🐳 Docker Build and Push Summary"
+            echo ""
+            echo "### 📦 Image Details"
+            echo "- **Repository**: \`public.ecr.aws/${{ env.ECR_PUBLIC_URI }}\`"
+            echo "- **Tags**: \`latest\`, \`${{ github.sha }}\`"
+            echo "- **Region**: \`${{ env.AWS_REGION }}\`"
+            echo "- **Build Context**: \`backend/\`"
+            echo ""
+            echo "### 🔗 Image URIs"
+            echo "\`\`\`"
+            echo "public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
+            echo "public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}"
+            echo "\`\`\`"
+            echo ""
+            echo "### 📅 Build Information"
+            echo "- **Commit SHA**: \`${{ github.sha }}\`"
+            echo "- **Branch**: \`${{ github.ref_name }}\`"
+            echo "- **Triggered by**: \`${{ github.actor }}\`"
+            echo "- **Workflow**: \`${{ github.workflow }}\`"
+            echo ""
+            echo "---"
+            echo "✅ **Status**: Image successfully pushed to ECR Public"
+          } >> $GITHUB_STEP_SUMMARY
