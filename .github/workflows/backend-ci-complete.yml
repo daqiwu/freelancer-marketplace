@@ -6,6 +6,7 @@ on:
       - main
       - develop
       - gaorongrong
+      - bala
     paths:
       - "backend/**/*.py"
       - "backend/requirements.txt"
@@ -57,16 +58,29 @@ jobs:
       - name: Run Black (Code Formatting)
         working-directory: backend
         run: |
-          echo "🔍 Checking code formatting with Black..."
-          black --check --line-length 200 app/ tests/
-        continue-on-error: true
+          echo "🎨 Formatting code with Black..."
+          black --line-length 200 app/ tests/
+          echo "✅ Black formatting completed!"
 
       - name: Run isort (Import Sorting)
         working-directory: backend
         run: |
-          echo "🔍 Checking import sorting with isort..."
-          isort --check-only --profile black --line-length 200 app/ tests/
-        continue-on-error: true
+          echo "� Sorting imports with isort..."
+          isort --profile black --line-length 200 app/ tests/
+          echo "✅ Import sorting completed!"
+
+      - name: Check for formatting changes
+        working-directory: backend
+        run: |
+          echo "🔍 Checking if formatting made any changes..."
+          if git diff --quiet; then
+            echo "✅ No formatting changes needed"
+          else
+            echo "⚠️ Code was auto-formatted. Differences:"
+            git diff --stat
+            echo ""
+            echo "💡 Tip: Run 'black --line-length 200 .' and 'isort --profile black .' locally"
+          fi
 
       - name: Run Flake8 (Style Guide)
         working-directory: backend
@@ -86,12 +100,12 @@ jobs:
           echo "✅ Flake8 - Style guide: Using .flake8 config"
 
   # ============================================
-  # Job 2: Unit Tests with Coverage
+  # Job 2: Unit Tests & Coverage
   # ============================================
   unit-tests:
     name: 🧪 Unit Tests & Coverage
     runs-on: ubuntu-latest
-    needs: lint
+    # Removed dependency on lint - runs in parallel for faster execution
 
     steps:
       - name: Checkout code
@@ -223,7 +237,7 @@ jobs:
   sast-scan:
     name: 🔒 SAST - Static Security Analysis
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests]
+    # Removed dependencies - runs in parallel for faster execution
     permissions:
       security-events: write  # Required for SARIF upload
       contents: read          # Required to checkout code
@@ -362,7 +376,7 @@ jobs:
   sca-scan:
     name: 📦 SCA - Dependency Vulnerability Scan
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests]
+    # Removed dependencies - runs in parallel for faster execution
 
     steps:
       - name: Checkout code
@@ -453,7 +467,7 @@ jobs:
   snyk-scan:
     name: 🔍 Snyk Security Scan
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests]
+    # Removed dependencies - runs in parallel for faster execution
 
     steps:
       - name: Checkout Code
@@ -624,7 +638,8 @@ jobs:
   build-and-push:
     name: 🐳 Build and Push to ECR Public
     runs-on: ubuntu-latest
-    needs: [sast-scan, sca-scan, snyk-scan]
+    # Wait for all quality gates to pass before building
+    needs: [lint, unit-tests, sast-scan, sca-scan, snyk-scan]
     if: success() && github.event_name == 'push'
 
     steps:
