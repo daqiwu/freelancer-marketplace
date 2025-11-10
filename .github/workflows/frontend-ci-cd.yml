@@ -22,7 +22,7 @@ env:
   FRONTEND_DIR: frontend
   AWS_REGION: ap-southeast-1
   ACCOUNT_ID: 539827877726
-  ECR_PUBLIC_URI: t7x9p0n7/freelancer-frontend
+  S3_BUCKET: freelancer-frontend
 
 jobs:
   # ============================================
@@ -196,10 +196,10 @@ jobs:
           } >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # Job 4: Docker Build & Push to ECR Public
+  # Job 4: Upload Build to S3
   # ============================================
-  docker-build:
-    name: 🐳 Build and Push to ECR Public
+  upload-to-s3:
+    name: � Upload Build to S3
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/bala')
@@ -212,7 +212,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: ${{ env.FRONTEND_DIR }}/dist
+          path: dist
 
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
@@ -220,64 +220,66 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/github-actions-role
 
-      - name: Login to Amazon ECR Public
+      - name: List build files
         run: |
-          echo "🔐 Logging in to Amazon ECR Public..."
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-          echo "✅ Successfully logged in to ECR Public"
+          echo "� Build files to be uploaded:"
+          ls -lah dist/
+          echo ""
+          echo "📊 Total build size:"
+          du -sh dist/
 
-      - name: Build Docker Image
-        working-directory: ${{ env.FRONTEND_DIR }}
+      - name: Upload to S3
         run: |
-          echo "🏗️ Building Docker image..."
-          echo "📦 Image: public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
-          docker build -t public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest .
-          echo "✅ Docker image built successfully!"
+          echo "📤 Uploading frontend build to S3..."
+          aws s3 sync dist/ s3://freelancer-marketplace-frontend/ \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html" \
+            --exclude "*.map"
+          
+          echo "📄 Uploading index.html with no-cache..."
+          aws s3 cp dist/index.html s3://freelancer-marketplace-frontend/index.html \
+            --cache-control "no-cache,no-store,must-revalidate"
+          
+          echo "✅ Frontend build uploaded successfully!"
 
-      - name: Tag Docker Image for ECR Public
+      - name: Invalidate CloudFront Cache (if configured)
         run: |
-          echo "🏷️ Tagging image for ECR Public..."
-          docker tag public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}
-          echo "✅ Image tagged successfully!"
-          echo "📍 Tags created:"
-          echo "   - public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
-          echo "   - public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}"
+          echo "� Checking for CloudFront distribution..."
+          # Add CloudFront invalidation if you have a distribution ID
+          # aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
+          echo "⚠️ CloudFront invalidation skipped (not configured)"
+        continue-on-error: true
 
-      - name: Push Docker Image to ECR Public
-        run: |
-          echo "🚀 Pushing image to ECR Public..."
-          docker push public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest
-          docker push public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}
-          echo "✅ Image pushed successfully!"
-          echo "📍 Image URI: public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
-          echo "🎉 Deployment ready!"
-
-      - name: Generate Deployment Summary
+      - name: Generate Upload Summary
         if: always()
         run: |
           {
-            echo "## 🐳 Docker Build and Push Summary"
+            echo "## � S3 Upload Summary"
             echo ""
-            echo "### 📦 Image Details"
-            echo "- **Repository**: \`public.ecr.aws/${{ env.ECR_PUBLIC_URI }}\`"
-            echo "- **Tags**: \`latest\`, \`${{ github.sha }}\`"
+            echo "### 📦 Upload Details"
+            echo "- **S3 Bucket**: \`s3://freelancer-marketplace-frontend/\`"
             echo "- **Region**: \`${{ env.AWS_REGION }}\`"
-            echo "- **Build Context**: \`${{ env.FRONTEND_DIR }}/\`"
+            echo "- **Build Source**: \`${{ env.FRONTEND_DIR }}/dist/\`"
+            echo "- **Sync Mode**: Delete old files, upload new/changed files"
             echo ""
-            echo "### 🔗 Image URIs"
-            echo "\`\`\`"
-            echo "public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
-            echo "public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}"
-            echo "\`\`\`"
+            echo "### 🔧 Cache Configuration"
+            echo "- **Static Assets**: \`max-age=31536000\` (1 year)"
+            echo "- **index.html**: \`no-cache\` (always fresh)"
+            echo "- **Source Maps**: Excluded from upload"
             echo ""
-            echo "### 📅 Build Information"
+            echo "### 📅 Upload Information"
             echo "- **Commit SHA**: \`${{ github.sha }}\`"
             echo "- **Branch**: \`${{ github.ref_name }}\`"
             echo "- **Triggered by**: \`${{ github.actor }}\`"
             echo "- **Workflow**: \`${{ github.workflow }}\`"
             echo ""
+            echo "### 🔗 Access"
+            echo "If configured with CloudFront or S3 static hosting:"
+            echo "- http://freelancer-marketplace-frontend.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
+            echo ""
             echo "---"
-            echo "✅ **Status**: Frontend image successfully pushed to ECR Public"
+            echo "✅ **Status**: Frontend build successfully uploaded to S3"
           } >> $GITHUB_STEP_SUMMARY
 
   # ============================================
