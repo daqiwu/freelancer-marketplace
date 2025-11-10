@@ -260,8 +260,8 @@ class SecurityClassifierService:
         if cve_match:
             return cve_match.group(0).upper()
 
-        # Look for other common vulnerability IDs
-        vuln_match = re.search(r"(GHSA|SNYK|OSV)-[\w-]+", text, re.IGNORECASE)
+        # Look for other common vulnerability IDs (GHSA, OSV)
+        vuln_match = re.search(r"(GHSA|OSV)-[\w-]+", text, re.IGNORECASE)
         if vuln_match:
             return vuln_match.group(0).upper()
 

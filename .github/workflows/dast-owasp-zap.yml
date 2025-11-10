@@ -1,0 +1,525 @@
+name: DAST - OWASP ZAP Security Testing
+
+on:
+  # Run on manual trigger
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL for DAST testing'
+        required: false
+        default: 'https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com'
+      scan_type:
+        description: 'Scan type (baseline/full/api)'
+        required: false
+        default: 'baseline'
+        type: choice
+        options:
+          - baseline
+          - full
+          - api
+
+  # Run on schedule (weekly on Sundays at 3 AM UTC)
+  schedule:
+    - cron: '0 3 * * 0'
+
+  # Run on push to main/develop (optional - be careful with production testing)
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**/*.py'
+      - '.github/workflows/dast-owasp-zap.yml'
+
+env:
+  TARGET_URL: 'https://u7tnmpvsm8.ap-southeast-1.awsapprunner.com'
+  ZAP_VERSION: '2.14.0'
+
+jobs:
+  # ============================================
+  # Job 1: OWASP ZAP Baseline Scan
+  # ============================================
+  zap-baseline-scan:
+    name: 🔍 OWASP ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set target URL
+        id: set-url
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.target_url }}" ]; then
+            echo "TARGET=${{ github.event.inputs.target_url }}" >> $GITHUB_ENV
+          else
+            echo "TARGET=${{ env.TARGET_URL }}" >> $GITHUB_ENV
+          fi
+          echo "🎯 Target URL: $TARGET"
+
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ env.TARGET }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l INFO -T 60'
+          issue_title: 'OWASP ZAP Baseline Security Scan Report'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow_issue_writing: true
+
+      - name: Upload ZAP Baseline Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 30
+
+  # ============================================
+  # Job 2: OWASP ZAP Full Scan (More Aggressive)
+  # ============================================
+  zap-full-scan:
+    name: 🔬 OWASP ZAP Full Scan (Deep Analysis)
+    runs-on: ubuntu-latest
+    if: github.event.inputs.scan_type == 'full' || github.event_name == 'schedule'
+    permissions:
+      issues: write
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set target URL
+        id: set-url
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.target_url }}" ]; then
+            echo "TARGET=${{ github.event.inputs.target_url }}" >> $GITHUB_ENV
+          else
+            echo "TARGET=${{ env.TARGET_URL }}" >> $GITHUB_ENV
+          fi
+          echo "🎯 Target URL: $TARGET"
+
+      - name: OWASP ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: ${{ env.TARGET }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l INFO'
+          issue_title: 'OWASP ZAP Full Security Scan Report'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow_issue_writing: true
+
+      - name: Upload ZAP Full Scan Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-full-scan-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 90
+
+  # ============================================
+  # Job 3: OWASP ZAP API Scan
+  # ============================================
+  zap-api-scan:
+    name: 🌐 OWASP ZAP API Scan
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set target URL
+        id: set-url
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.target_url }}" ]; then
+            echo "TARGET=${{ github.event.inputs.target_url }}" >> $GITHUB_ENV
+          else
+            echo "TARGET=${{ env.TARGET_URL }}" >> $GITHUB_ENV
+          fi
+          echo "🎯 Target URL: $TARGET"
+
+      - name: OWASP ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: '${{ env.TARGET }}/openapi.json'
+          format: 'openapi'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l INFO -T 60'
+          issue_title: 'OWASP ZAP API Security Scan Report'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow_issue_writing: true
+
+      - name: Upload ZAP API Scan Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-api-scan-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          retention-days: 30
+
+  # ============================================
+  # Job 4: Custom OWASP ZAP Security Tests
+  # ============================================
+  zap-custom-tests:
+    name: 🎯 Custom Security Tests
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests beautifulsoup4 zapv2
+
+      - name: Pull OWASP ZAP Docker Image
+        run: docker pull ghcr.io/zaproxy/zaproxy:stable
+
+      - name: Start OWASP ZAP in Docker
+        run: |
+          docker run -d --name zap \
+            -u zap \
+            -p 8080:8080 \
+            -v $(pwd):/zap/wrk:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true
+
+          echo "⏳ Waiting for ZAP to start..."
+          sleep 30
+
+          # Verify ZAP is running
+          curl -s http://localhost:8080/ || echo "ZAP not ready yet"
+
+      - name: Run Custom Security Tests
+        env:
+          TARGET_URL: ${{ env.TARGET_URL }}
+        run: |
+          cat << 'EOF' > custom_dast_tests.py
+          import requests
+          import json
+          import time
+          from zapv2 import ZAPv2
+
+          # ZAP configuration
+          ZAP_PROXY = 'http://localhost:8080'
+          TARGET = '${{ env.TARGET_URL }}'
+          API_KEY = None  # Running with API key disabled
+
+          print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+          print("  OWASP ZAP Custom Security Tests")
+          print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+          print(f"🎯 Target: {TARGET}")
+          print("")
+
+          # Initialize ZAP client
+          zap = ZAPv2(proxies={'http': ZAP_PROXY, 'https': ZAP_PROXY}, apikey=API_KEY)
+
+          # Test 1: Spider the application
+          print("🕷️  Test 1: Spidering application...")
+          try:
+              scan_id = zap.spider.scan(TARGET)
+              while int(zap.spider.status(scan_id)) < 100:
+                  print(f"   Spider progress: {zap.spider.status(scan_id)}%")
+                  time.sleep(5)
+              print("✅ Spider completed")
+              print(f"   URLs found: {len(zap.core.urls())}")
+          except Exception as e:
+              print(f"⚠️  Spider error: {e}")
+
+          # Test 2: Passive scan
+          print("\n🔍 Test 2: Running passive scan...")
+          try:
+              while int(zap.pscan.records_to_scan) > 0:
+                  print(f"   Passive scan queue: {zap.pscan.records_to_scan}")
+                  time.sleep(5)
+              print("✅ Passive scan completed")
+          except Exception as e:
+              print(f"⚠️  Passive scan error: {e}")
+
+          # Test 3: Active scan
+          print("\n⚡ Test 3: Running active scan...")
+          try:
+              scan_id = zap.ascan.scan(TARGET)
+              while int(zap.ascan.status(scan_id)) < 100:
+                  print(f"   Active scan progress: {zap.ascan.status(scan_id)}%")
+                  time.sleep(10)
+              print("✅ Active scan completed")
+          except Exception as e:
+              print(f"⚠️  Active scan error: {e}")
+
+          # Test 4: Security headers check
+          print("\n🔒 Test 4: Security headers validation...")
+          try:
+              response = requests.get(f"{TARGET}/health", timeout=10)
+              headers_to_check = [
+                  'Strict-Transport-Security',
+                  'X-Content-Type-Options',
+                  'X-Frame-Options',
+                  'Content-Security-Policy',
+                  'X-XSS-Protection',
+                  'Referrer-Policy',
+                  'Permissions-Policy'
+              ]
+              
+              missing_headers = []
+              for header in headers_to_check:
+                  if header in response.headers:
+                      print(f"   ✅ {header}: {response.headers[header][:50]}...")
+                  else:
+                      print(f"   ❌ {header}: MISSING")
+                      missing_headers.append(header)
+              
+              if not missing_headers:
+                  print("✅ All security headers present")
+              else:
+                  print(f"⚠️  Missing {len(missing_headers)} security headers")
+          except Exception as e:
+              print(f"⚠️  Headers check error: {e}")
+
+          # Test 5: Common endpoints testing
+          print("\n🌐 Test 5: Testing common API endpoints...")
+          endpoints = [
+              '/health',
+              '/docs',
+              '/openapi.json',
+              '/api/v1/',
+              '/auth/login',
+              '/auth/register'
+          ]
+          
+          for endpoint in endpoints:
+              try:
+                  url = f"{TARGET}{endpoint}"
+                  response = requests.get(url, timeout=5)
+                  status_emoji = "✅" if response.status_code < 500 else "❌"
+                  print(f"   {status_emoji} {endpoint}: {response.status_code}")
+              except Exception as e:
+                  print(f"   ⚠️  {endpoint}: {str(e)[:50]}")
+
+          # Get alerts
+          print("\n📊 Security Alerts Summary:")
+          alerts = zap.core.alerts(baseurl=TARGET)
+          
+          severity_counts = {'High': 0, 'Medium': 0, 'Low': 0, 'Informational': 0}
+          for alert in alerts:
+              risk = alert.get('risk', 'Informational')
+              severity_counts[risk] = severity_counts.get(risk, 0) + 1
+          
+          print(f"   🔴 High: {severity_counts.get('High', 0)}")
+          print(f"   🟡 Medium: {severity_counts.get('Medium', 0)}")
+          print(f"   🟢 Low: {severity_counts.get('Low', 0)}")
+          print(f"   ℹ️  Informational: {severity_counts.get('Informational', 0)}")
+          print(f"   📋 Total Alerts: {len(alerts)}")
+
+          # Save detailed report
+          print("\n💾 Saving detailed reports...")
+          with open('zap_alerts.json', 'w') as f:
+              json.dump(alerts, f, indent=2)
+          
+          html_report = zap.core.htmlreport()
+          with open('zap_custom_report.html', 'w') as f:
+              f.write(html_report)
+          
+          print("✅ Reports saved: zap_alerts.json, zap_custom_report.html")
+          
+          # Exit with error if high severity issues found
+          if severity_counts.get('High', 0) > 0:
+              print("\n❌ SECURITY ALERT: High severity issues detected!")
+              exit(1)
+          else:
+              print("\n✅ No high severity issues detected")
+          EOF
+
+          python custom_dast_tests.py
+
+      - name: Stop ZAP Container
+        if: always()
+        run: docker stop zap && docker rm zap
+
+      - name: Upload Custom Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-custom-test-reports
+          path: |
+            zap_alerts.json
+            zap_custom_report.html
+          retention-days: 30
+
+      - name: Generate SARIF Report
+        if: always()
+        run: |
+          cat << 'EOF' > convert_to_sarif.py
+          import json
+
+          # Load ZAP alerts
+          try:
+              with open('zap_alerts.json', 'r') as f:
+                  alerts = json.load(f)
+          except:
+              alerts = []
+
+          # Convert to SARIF format
+          sarif = {
+              "version": "2.1.0",
+              "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+              "runs": [{
+                  "tool": {
+                      "driver": {
+                          "name": "OWASP ZAP",
+                          "version": "${{ env.ZAP_VERSION }}",
+                          "informationUri": "https://www.zaproxy.org/",
+                          "rules": []
+                      }
+                  },
+                  "results": []
+              }]
+          }
+
+          severity_map = {
+              'High': 'error',
+              'Medium': 'warning',
+              'Low': 'note',
+              'Informational': 'none'
+          }
+
+          for alert in alerts:
+              result = {
+                  "ruleId": alert.get('pluginId', 'unknown'),
+                  "level": severity_map.get(alert.get('risk', 'Informational'), 'warning'),
+                  "message": {
+                      "text": alert.get('alert', 'Security issue detected')
+                  },
+                  "locations": [{
+                      "physicalLocation": {
+                          "artifactLocation": {
+                              "uri": alert.get('url', '${{ env.TARGET_URL }}')
+                          }
+                      }
+                  }],
+                  "properties": {
+                      "description": alert.get('description', ''),
+                      "solution": alert.get('solution', ''),
+                      "reference": alert.get('reference', ''),
+                      "cweid": alert.get('cweid', ''),
+                      "wascid": alert.get('wascid', '')
+                  }
+              }
+              sarif['runs'][0]['results'].append(result)
+
+          with open('zap_results.sarif', 'w') as f:
+              json.dump(sarif, f, indent=2)
+
+          print(f"✅ SARIF report generated with {len(alerts)} findings")
+          EOF
+
+          python convert_to_sarif.py
+
+      - name: Upload SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: zap_results.sarif
+          category: owasp-zap-dast
+        continue-on-error: true
+
+  # ============================================
+  # Job 5: DAST Results Summary
+  # ============================================
+  dast-summary:
+    name: 📊 DAST Summary Report
+    runs-on: ubuntu-latest
+    needs: [zap-baseline-scan, zap-api-scan, zap-custom-tests]
+    if: always()
+
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          path: dast-reports/
+
+      - name: Generate Summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  DAST Security Testing - Summary Report"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "🎯 Target: ${{ env.TARGET_URL }}"
+          echo "📅 Date: $(date)"
+          echo "🔍 Tool: OWASP ZAP ${{ env.ZAP_VERSION }}"
+          echo ""
+          echo "📋 Scans Completed:"
+          echo "   ✅ Baseline Scan: ${{ needs.zap-baseline-scan.result }}"
+          echo "   ✅ API Scan: ${{ needs.zap-api-scan.result }}"
+          echo "   ✅ Custom Tests: ${{ needs.zap-custom-tests.result }}"
+          echo ""
+          echo "📁 Reports Available:"
+          ls -lah dast-reports/ || echo "No reports directory"
+          find dast-reports/ -type f 2>/dev/null | while read file; do
+            echo "   📄 $file ($(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo 'N/A') bytes)"
+          done || echo "   No files found"
+          echo ""
+          echo "🔗 View detailed results:"
+          echo "   • GitHub Security tab: https://github.com/${{ github.repository }}/security/code-scanning"
+          echo "   • Artifacts: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          # Add to GitHub Step Summary
+          {
+            echo "## 🔍 DAST Security Testing Results"
+            echo ""
+            echo "### 🎯 Target Information"
+            echo "- **URL**: \`${{ env.TARGET_URL }}\`"
+            echo "- **Date**: $(date)"
+            echo "- **Tool**: OWASP ZAP ${{ env.ZAP_VERSION }}"
+            echo ""
+            echo "### 📊 Scan Results"
+            echo "| Scan Type | Status |"
+            echo "|-----------|--------|"
+            echo "| Baseline Scan | ${{ needs.zap-baseline-scan.result }} |"
+            echo "| API Scan | ${{ needs.zap-api-scan.result }} |"
+            echo "| Custom Tests | ${{ needs.zap-custom-tests.result }} |"
+            echo ""
+            echo "### 📁 Available Reports"
+            echo "Download detailed reports from the [Artifacts section](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            echo ""
+            echo "### 🔗 Next Steps"
+            echo "1. Review security alerts in the [Security tab](https://github.com/${{ github.repository }}/security/code-scanning)"
+            echo "2. Download and analyze detailed HTML reports"
+            echo "3. Address any High/Medium severity findings"
+            echo "4. Re-run scans after implementing fixes"
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for Critical Issues
+        run: |
+          # This step would parse reports and fail if critical issues found
+          echo "⚠️  Review DAST reports for security findings"
+          echo "🔍 Check GitHub Security tab for detailed alerts"

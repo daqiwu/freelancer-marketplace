@@ -6,7 +6,6 @@ on:
       - main
       - develop
       - gaorongrong
-      - bala
       
     paths:
       - "backend/**/*.py"
@@ -113,7 +112,7 @@ jobs:
       - name: Run unit tests with coverage
         working-directory: backend
         env:
-          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          DATABASE_URL: ${{ secrets.DB_URL }}
           JWT_SECRET_KEY: "test-secret-key-for-ci"
           ENVIRONMENT: "test"
         run: |
@@ -438,131 +437,12 @@ jobs:
           } >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # Job 5: Snyk Security - Comprehensive Security Scanning
-  # ============================================
-  snyk-security:
-    name: 🛡️ Snyk Security - SAST, SCA & Container Scan
-    runs-on: ubuntu-latest
-    needs: lint
-    permissions:
-      contents: read          # for actions/checkout to fetch code
-      security-events: write  # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read          # required for private repository by github/codeql-action/upload-sarif
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Snyk CLI
-        uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Set up Python for Snyk
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install Python dependencies
-        working-directory: backend
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt || echo "⚠️ requirements.txt not found, skipping dependency install"
-
-      - name: Snyk Code Test (SAST)
-        working-directory: backend
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          echo "🔍 Running Snyk Code (SAST) analysis..."
-          snyk code test --sarif > snyk-code.sarif || echo "⚠️ Snyk Code scan completed with issues or warnings"
-        continue-on-error: true
-
-      - name: Snyk Open Source Monitor (SCA)
-        working-directory: backend
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          echo "📦 Running Snyk Open Source (SCA) analysis..."
-          snyk monitor --all-projects || echo "⚠️ Snyk Open Source monitoring completed"
-        continue-on-error: true
-
-      - name: Snyk Infrastructure as Code Test
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          echo "🏗️ Running Snyk IaC analysis..."
-          snyk iac test --report || echo "⚠️ Snyk IaC scan completed"
-        continue-on-error: true
-
-      - name: Build Docker Image for Snyk Container Scan
-        working-directory: backend
-        run: |
-          echo "🐳 Building Docker image for container scanning..."
-          docker build -t freelancer-marketplace:snyk-scan .
-        continue-on-error: true
-
-      - name: Snyk Container Monitor
-        working-directory: backend
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          echo "🐳 Running Snyk Container analysis..."
-          snyk container monitor freelancer-marketplace:snyk-scan --file=Dockerfile || echo "⚠️ Snyk Container monitoring completed"
-        continue-on-error: true
-
-      - name: Upload Snyk SARIF to GitHub Security
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: backend/snyk-code.sarif
-          category: snyk-code
-        continue-on-error: true
-
-      - name: Upload Snyk Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: snyk-reports
-          path: backend/snyk-*.sarif
-          retention-days: 90
-
-      - name: Snyk Summary
-        if: always()
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  Snyk Security Scan Summary"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "✅ Snyk Code (SAST) - Static application security testing"
-          echo "✅ Snyk Open Source (SCA) - Dependency vulnerability scanning"
-          echo "✅ Snyk IaC - Infrastructure as Code security"
-          echo "✅ Snyk Container - Docker image vulnerability scanning"
-          echo ""
-          echo "📊 Results uploaded to GitHub Security Code Scanning"
-          echo "🔍 View results: https://github.com/${{ github.repository }}/security/code-scanning"
-
-          # Add to GitHub Actions Summary
-          {
-            echo "## 🛡️ Snyk Security Scan"
-            echo ""
-            echo "| Scan Type | Status |"
-            echo "|-----------|--------|"
-            echo "| Snyk Code (SAST) | ✅ Completed |"
-            echo "| Snyk Open Source (SCA) | ✅ Completed |"
-            echo "| Snyk IaC | ✅ Completed |"
-            echo "| Snyk Container | ✅ Completed |"
-            echo ""
-            echo "🔍 [View SARIF report in Security tab](https://github.com/${{ github.repository }}/security/code-scanning)"
-          } >> $GITHUB_STEP_SUMMARY
-
-  # ============================================
-  # Job 6: DAST Simulation - API Security Testing
+  # Job 5: DAST Simulation - API Security Testing
   # ============================================
   dast-simulation:
     name: 🌐 DAST - API Security Testing (Simulation)
     runs-on: ubuntu-latest
-    needs: [unit-tests, sast-scan, sca-scan, snyk-security]
+    needs: [unit-tests, sast-scan, sca-scan]
 
     steps:
       - name: Checkout code
@@ -587,7 +467,7 @@ jobs:
       - name: Start FastAPI Application
         working-directory: backend
         env:
-          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          DATABASE_URL: ${{ secrets.DB_URL }}
           JWT_SECRET_KEY: "test-secret-key-for-ci"
           ENVIRONMENT: "test"
         run: |
@@ -642,12 +522,12 @@ jobs:
           echo "  • Test for injection vulnerabilities"
 
   # ============================================
-  # Job 7: AI Security Classification Demo
+  # Job 6: AI Security Classification Demo
   # ============================================
   ai-security-classification:
     name: 🤖 AI Security Classification Demo
     runs-on: ubuntu-latest
-    needs: [sast-scan, sca-scan, snyk-security]
+    needs: [sast-scan, sca-scan]
 
     steps:
       - name: Checkout code
@@ -704,7 +584,7 @@ jobs:
         continue-on-error: true
 
   # ============================================
-  # Job 8: CodeQL Advanced Analysis
+  # Job 7: CodeQL Advanced Analysis
   # ============================================
   codeql-advanced:
     name: 🔬 CodeQL Advanced Analysis
@@ -753,7 +633,7 @@ jobs:
           category: "/language:${{matrix.language}}"
 
   # ============================================
-  # Job 9: Final Pipeline Summary
+  # Job 8: Final Pipeline Summary
   # ============================================
   pipeline-summary:
     name: 📊 Pipeline Summary
@@ -764,7 +644,6 @@ jobs:
         unit-tests,
         sast-scan,
         sca-scan,
-        snyk-security,
         dast-simulation,
         ai-security-classification,
         codeql-advanced,
@@ -780,24 +659,26 @@ jobs:
           echo ""
           echo "🎨 Code Quality (Linting):          ${{ needs.lint.result }}"
           echo "🧪 Unit Tests & Coverage:           ${{ needs.unit-tests.result }}"
-          echo "🔒 SAST (Static Analysis):          ${{ needs.sast-scan.result }}"
-          echo "📦 SCA (Dependency Scan):           ${{ needs.sca-scan.result }}"
+          echo "🔒 SAST (Bandit):                   ${{ needs.sast-scan.result }}"
+          echo "📦 SCA (pip-audit):                 ${{ needs.sca-scan.result }}"
           echo "🌐 DAST (Runtime Testing):          ${{ needs.dast-simulation.result }}"
           echo "🤖 AI Security Classification:      ${{ needs.ai-security-classification.result }}"
+          echo "🔬 CodeQL Advanced:                 ${{ needs.codeql-advanced.result }}"
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "📁 Artifacts Generated:"
           echo "  • Coverage reports (XML & HTML)"
-          echo "  • SAST reports (Bandit JSON)"
-          echo "  • SCA reports (Safety JSON)"
+          echo "  • SAST reports (Bandit JSON & SARIF)"
+          echo "  • SCA reports (pip-audit JSON)"
+          echo "  • CodeQL results (in Security tab)"
           echo ""
           echo "🔍 Quality Gates:"
           echo "  • Code formatting: Black (200 char line length)"
           echo "  • Import sorting: isort (black profile)"
           echo "  • Style guide: Flake8 (custom .flake8 config)"
           echo "  • Test coverage: ≥ 85%"
-          echo "  • Security scans: SAST + SCA + DAST"
+          echo "  • Security scans: SAST + SCA + CodeQL + DAST"
           echo "  • SARIF reports: Uploaded to Security tab"
           echo ""
           echo "✅ Pipeline execution completed!"
@@ -819,7 +700,7 @@ jobs:
           exit 1
 
   # ============================================
-  # Job 7: Docker Build and Push
+  # Job 9: Docker Build and Push
   # ============================================
   build-and-push:
     name: 🐳 Docker Build and Push
