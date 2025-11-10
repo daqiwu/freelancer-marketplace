@@ -3,7 +3,7 @@ name: DAST Scan
 on:
   push:
     branches:
-      - bala  # Run this workflow on every push to bala branch
+      - bala  # Trigger on pushes to bala branch
 
 jobs:
   dast:
@@ -17,7 +17,7 @@ jobs:
           report_name: "dast-report.html"
 
       - name: Upload DAST Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated version
         with:
           name: zap-dast-report
           path: dast-report.html
