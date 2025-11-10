@@ -26,6 +26,7 @@ on:
   push:
     branches:
       - main
+      - bala
     paths:
       - 'backend/**/*.py'
       - '.github/workflows/dast-owasp-zap.yml'
