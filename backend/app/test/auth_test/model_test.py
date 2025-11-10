@@ -15,7 +15,7 @@ from app.routes.auth import (
 
 
 class TestUserORMModel:
-    """User ORM模型测试"""
+    """User ORM模型测试-User ORM Model Tests"""
 
     def test_user_orm_model_creation(self):
         """测试User ORM模型实例化"""
