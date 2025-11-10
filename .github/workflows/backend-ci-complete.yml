@@ -212,7 +212,7 @@ jobs:
   sast-scan:
     name: 🔒 SAST - Static Security Analysis
     runs-on: ubuntu-latest
-    needs: lint
+    needs: [lint, unit-tests]
     permissions:
       security-events: write  # Required for SARIF upload
       contents: read          # Required to checkout code
@@ -448,9 +448,7 @@ jobs:
         unit-tests,
         sast-scan,
         sca-scan,
-        dast-simulation,
-        ai-security-classification,
-        codeql-advanced,
+        dast-scan,
       ]
     if: always()
 
@@ -465,9 +463,7 @@ jobs:
           echo "🧪 Unit Tests & Coverage:           ${{ needs.unit-tests.result }}"
           echo "🔒 SAST (Bandit):                   ${{ needs.sast-scan.result }}"
           echo "📦 SCA (pip-audit):                 ${{ needs.sca-scan.result }}"
-          echo "🌐 DAST (Runtime Testing):          ${{ needs.dast-simulation.result }}"
-          echo "🤖 AI Security Classification:      ${{ needs.ai-security-classification.result }}"
-          echo "🔬 CodeQL Advanced:                 ${{ needs.codeql-advanced.result }}"
+          echo "🌐 DAST (ZAP Security Scan):        ${{ needs.dast-scan.result }}"
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
@@ -515,9 +511,6 @@ jobs:
         unit-tests,
         sast-scan,
         sca-scan,
-        dast-simulation,
-        ai-security-classification,
-        codeql-advanced,
       ]
     if: success() && github.event_name == 'push'
     steps:

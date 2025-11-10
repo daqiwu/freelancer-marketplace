@@ -96,5 +96,5 @@ jobs:
             echo "- **Workflow**: \`${{ github.workflow }}\`"
             echo ""
             echo "---"
-            echo "✅ **Status**: Image successfully pushed to ECR Public"
+            echo "✅ **Status**: Image successfully pushed to ECR Public "
           } >> $GITHUB_STEP_SUMMARY
