@@ -14,14 +14,6 @@ on:
       - "backend/pytest.ini"
       - ".github/workflows/backend-ci-complete.yml"
 
-  pull_request:
-    branches:
-      - main
-      - develop
-    paths:
-      - "backend/**/*.py"
-      - "backend/requirements.txt"
-      - "backend/pytest.ini"
 
   workflow_dispatch: # Allow manual trigger
 
@@ -591,6 +583,52 @@ jobs:
   # ============================================
   # Job 7: Final Summary
   # ============================================
+  codeql-advanced:
+    name: "CodeQL Advanced"
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: actions
+          build-mode: none
+        - language: javascript-typescript
+          build-mode: none
+        - language: python
+          build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Run manual build steps
+        if: matrix.build-mode == 'manual'
+        shell: bash
+        run: |
+          echo 'If you are using a "manual" build mode for one or more of the'
+          echo 'languages you are analyzing, replace this with the commands to build'
+          echo 'your code, for example:'
+          echo '  make bootstrap'
+          echo '  make release'
+          exit 1
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"
+
   pipeline-summary:
     name: 📊 Pipeline Summary
     runs-on: ubuntu-latest
@@ -602,6 +640,7 @@ jobs:
         sca-scan,
         dast-simulation,
         ai-security-classification,
+        codeql-advanced,
       ]
     if: always()
 
@@ -666,6 +705,7 @@ jobs:
         sca-scan,
         dast-simulation,
         ai-security-classification,
+        codeql-advanced,
       ]
     if: success() && github.event_name == 'push'
     steps:
