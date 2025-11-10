@@ -231,14 +231,14 @@ jobs:
       - name: Upload to S3
         run: |
           echo "📤 Uploading frontend build to S3..."
-          aws s3 sync dist/ s3://freelancer-marketplace-frontend/ \
+          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
             --delete \
             --cache-control "public,max-age=31536000,immutable" \
             --exclude "index.html" \
             --exclude "*.map"
           
           echo "📄 Uploading index.html with no-cache..."
-          aws s3 cp dist/index.html s3://freelancer-marketplace-frontend/index.html \
+          aws s3 cp dist/index.html s3://${{ env.S3_BUCKET }}/index.html \
             --cache-control "no-cache,no-store,must-revalidate"
           
           echo "✅ Frontend build uploaded successfully!"
@@ -255,10 +255,10 @@ jobs:
         if: always()
         run: |
           {
-            echo "## � S3 Upload Summary"
+            echo "## 🚀 S3 Upload Summary"
             echo ""
             echo "### 📦 Upload Details"
-            echo "- **S3 Bucket**: \`s3://freelancer-marketplace-frontend/\`"
+            echo "- **S3 Bucket**: \`s3://${{ env.S3_BUCKET }}/\`"
             echo "- **Region**: \`${{ env.AWS_REGION }}\`"
             echo "- **Build Source**: \`${{ env.FRONTEND_DIR }}/dist/\`"
             echo "- **Sync Mode**: Delete old files, upload new/changed files"
@@ -276,7 +276,7 @@ jobs:
             echo ""
             echo "### 🔗 Access"
             echo "If configured with CloudFront or S3 static hosting:"
-            echo "- http://freelancer-marketplace-frontend.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
+            echo "- http://${{ env.S3_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
             echo ""
             echo "---"
             echo "✅ **Status**: Frontend build successfully uploaded to S3"
