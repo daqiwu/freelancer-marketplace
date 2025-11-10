@@ -6,6 +6,10 @@ on:
       - bala
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   AWS_REGION: ap-southeast-1
   ACCOUNT_ID: 539827877726
@@ -16,9 +20,6 @@ jobs:
   build-and-push:
     name: 🐳 Build and Push to ECR Public
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       # 1. Checkout the repo
@@ -29,9 +30,8 @@ jobs:
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/github-actions-role
           aws-region: ${{ env.AWS_REGION }}
-          role-session-name: GitHubActionsSession
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/github-actions-role
 
       # 3. Login to ECR Public
       - name: Login to Amazon ECR Public
