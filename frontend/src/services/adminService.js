@@ -1,8 +1,8 @@
-// Admin API服务
+// Admin API service
 const API_BASE_URL = 'http://localhost:8000'
 
 class AdminService {
-  // 获取认证头
+  // Get authentication headers
   getAuthHeaders() {
     const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
     return {
@@ -11,7 +11,7 @@ class AdminService {
     }
   }
 
-  // 检查是否为管理员
+  // Check if user is admin
   isAdmin() {
     const user = sessionStorage.getItem('currentUser')
     if (!user) return false
@@ -24,30 +24,30 @@ class AdminService {
     }
   }
 
-  // 检查认证状态
+  // Check authentication status
   isAuthenticated() {
     const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
     return !!token
   }
 
-  // 处理API响应
+  // Handle API response
   async handleResponse(response) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       
-      // 处理认证错误
+      // Handle authentication error
       if (response.status === 401) {
-        // 清除无效token
+        // Clear invalid token
         localStorage.removeItem('access_token')
         sessionStorage.removeItem('access_token')
         sessionStorage.removeItem('currentUser')
         
-        // 跳转到登录页面
+        // Redirect to login page
         if (window.location.pathname !== '/login') {
           window.location.href = '/login'
         }
         
-        throw new Error('认证失败，请重新登录')
+        throw new Error('Authentication failed, please login again')
       }
       
       throw new Error(errorData.detail || `HTTP error! status: ${response.status}`)
@@ -55,16 +55,16 @@ class AdminService {
     return response.json()
   }
 
-  // ==================== 订单管理 API ====================
+  // ==================== Order Management APIs ====================
 
   /**
-   * 获取所有订单
-   * @param {Object} params - 查询参数
-   * @param {string} params.status - 订单状态筛选
-   * @param {number} params.page - 页码
-   * @param {number} params.limit - 每页数量
-   * @param {string} params.sort_by - 排序字段
-   * @param {string} params.order - 排序顺序
+   * Get all orders
+   * @param {Object} params - Query parameters
+   * @param {string} params.status - Order status filter
+   * @param {number} params.page - Page number
+   * @param {number} params.limit - Items per page
+   * @param {string} params.sort_by - Sort field
+   * @param {string} params.order - Sort order
    */
   async getAllOrders(params = {}) {
     const queryParams = new URLSearchParams()
@@ -84,21 +84,21 @@ class AdminService {
       })
       return await this.handleResponse(response)
     } catch (error) {
-      console.error('获取订单列表失败:', error)
+      console.error('Failed to get order list:', error)
       throw error
     }
   }
 
-  // ==================== 用户管理 API ====================
+  // ==================== User Management APIs ====================
 
   /**
-   * 获取所有用户
-   * @param {Object} params - 查询参数
-   * @param {number} params.role_id - 角色筛选 (1=客户, 2=服务提供者)
-   * @param {number} params.page - 页码
-   * @param {number} params.limit - 每页数量
-   * @param {string} params.sort_by - 排序字段
-   * @param {string} params.order - 排序顺序
+   * Get all users
+   * @param {Object} params - Query parameters
+   * @param {number} params.role_id - Role filter (1=customer, 2=provider)
+   * @param {number} params.page - Page number
+   * @param {number} params.limit - Items per page
+   * @param {string} params.sort_by - Sort field
+   * @param {string} params.order - Sort order
    */
   async getAllUsers(params = {}) {
     const queryParams = new URLSearchParams()
@@ -118,14 +118,14 @@ class AdminService {
       })
       return await this.handleResponse(response)
     } catch (error) {
-      console.error('获取用户列表失败:', error)
+      console.error('Failed to get user list:', error)
       throw error
     }
   }
 
   /**
-   * 获取单个用户详情
-   * @param {number} userId - 用户ID
+   * Get user details by ID
+   * @param {number} userId - User ID
    */
   async getUserById(userId) {
     const url = `${API_BASE_URL}/admin/users/${userId}`
@@ -137,14 +137,14 @@ class AdminService {
       })
       return await this.handleResponse(response)
     } catch (error) {
-      console.error('获取用户详情失败:', error)
+      console.error('Failed to get user details:', error)
       throw error
     }
   }
 
   /**
-   * 删除用户
-   * @param {number} userId - 用户ID
+   * Delete user
+   * @param {number} userId - User ID
    */
   async deleteUser(userId) {
     const url = `${API_BASE_URL}/admin/users/${userId}`
@@ -156,58 +156,58 @@ class AdminService {
       })
       return await this.handleResponse(response)
     } catch (error) {
-      console.error('删除用户失败:', error)
+      console.error('Failed to delete user:', error)
       throw error
     }
   }
 
-  // ==================== 工具方法 ====================
+  // ==================== Utility Methods ====================
 
   /**
-   * 格式化订单状态显示
-   * @param {string} status - 订单状态
+   * Format order status display
+   * @param {string} status - Order status
    */
   formatOrderStatus(status) {
     const statusMap = {
-      'pending': '待处理',
-      'accepted': '已接受',
-      'in_progress': '进行中',
-      'completed': '已完成',
-      'reviewed': '已评价',
-      'cancelled': '已取消'
+      'pending': 'Pending',
+      'accepted': 'Accepted',
+      'in_progress': 'In Progress',
+      'completed': 'Completed',
+      'reviewed': 'Reviewed',
+      'cancelled': 'Cancelled'
     }
     return statusMap[status] || status
   }
 
   /**
-   * 格式化角色显示
-   * @param {number} roleId - 角色ID
+   * Format role display
+   * @param {number} roleId - Role ID
    */
   formatRole(roleId) {
     const roleMap = {
-      1: '客户',
-      2: '服务提供者',
-      3: '管理员'
+      1: 'Customer',
+      2: 'Provider',
+      3: 'Admin'
     }
-    return roleMap[roleId] || '未知'
+    return roleMap[roleId] || 'Unknown'
   }
 
   /**
-   * 格式化地点显示
-   * @param {string} location - 地点
+   * Format location display
+   * @param {string} location - Location
    */
   formatLocation(location) {
     const locationMap = {
-      'NORTH': '北区',
-      'SOUTH': '南区',
-      'EAST': '东区',
-      'WEST': '西区',
-      'CENTER': '中区'
+      'NORTH': 'North',
+      'SOUTH': 'South',
+      'EAST': 'East',
+      'WEST': 'West',
+      'CENTER': 'Center'
     }
     return locationMap[location] || location
   }
 }
 
-// 创建单例实例
+// Create singleton instance
 const adminService = new AdminService()
 export default adminService

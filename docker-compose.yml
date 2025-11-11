@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     container_name: freelancer_backend
     restart: always
-    command: ["sleep", "999999"]  # 占位，容器启动后保持运行  # Placeholder, keep container running after start --- IGNORE ---
+    command: ["sleep", "999999"]  # Placeholder, keep container running after start
     env_file:
       - ./backend/.env
     environment:

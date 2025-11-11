@@ -25,7 +25,7 @@ const routes = [
     path: '/task/:id',
     name: 'TaskDetail',
     component: (route) => {
-      // 根据角色参数决定使用哪个组件
+      // Decide which component to use based on role parameter
       const role = route?.query?.role
       if (role === 'customer') {
         return CustomerTaskDetail
