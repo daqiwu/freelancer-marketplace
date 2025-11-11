@@ -17,45 +17,45 @@ depends_on = None
 
 
 def upgrade():
-    # 添加 service_type 枚举类型
+    # Add service_type enum type
     op.execute("""
         ALTER TABLE orders 
         ADD COLUMN service_type ENUM('cleaning_repair', 'it_technology', 'education_training', 'life_health', 'design_consulting', 'other') 
         AFTER description
     """)
     
-    # 添加 service_start_time 和 service_end_time
+    # Add service_start_time and service_end_time
     op.add_column('orders', sa.Column('service_start_time', sa.DateTime(), nullable=True))
     op.add_column('orders', sa.Column('service_end_time', sa.DateTime(), nullable=True))
     
-    # 更新 status 枚举，添加 pending_review，移除 reviewed
+    # Update status enum, add pending_review, remove reviewed
     op.execute("""
         ALTER TABLE orders 
         MODIFY COLUMN status ENUM('pending_review', 'pending', 'accepted', 'in_progress', 'completed', 'cancelled') 
         DEFAULT 'pending_review' NOT NULL
     """)
     
-    # 将现有的 pending 状态改为 pending_review（如果有的话）
+    # Change existing pending status to pending_review (if any)
     op.execute("""
         UPDATE orders 
         SET status = 'pending_review' 
         WHERE status = 'pending'
     """)
     
-    # 为 service_type 设置默认值（对于现有记录）
+    # Set default value for service_type (for existing records)
     op.execute("""
         UPDATE orders 
         SET service_type = 'other' 
         WHERE service_type IS NULL
     """)
     
-    # 将 service_type 设为 NOT NULL
+    # Set service_type to NOT NULL
     op.execute("""
         ALTER TABLE orders 
         MODIFY COLUMN service_type ENUM('cleaning_repair', 'it_technology', 'education_training', 'life_health', 'design_consulting', 'other') NOT NULL
     """)
     
-    # 创建 payments 表
+    # Create payments table
     op.create_table('payments',
         sa.Column('id', sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column('order_id', sa.BigInteger(), nullable=False),
@@ -78,28 +78,28 @@ def upgrade():
     op.create_index('idx_order_id', 'payments', ['order_id'], unique=False)
     op.create_index('idx_provider_id', 'payments', ['provider_id'], unique=False)
     
-    # 为 reviews 表的 order_id 添加唯一约束
+    # Add unique constraint for reviews.order_id
     op.create_unique_constraint('uq_reviews_order_id', 'reviews', ['order_id'])
 
 
 def downgrade():
-    # 删除 payments 表
+    # Drop payments table
     op.drop_index('idx_provider_id', table_name='payments')
     op.drop_index('idx_order_id', table_name='payments')
     op.drop_index('idx_customer_id', table_name='payments')
     op.drop_table('payments')
     
-    # 移除 reviews 表的 order_id 唯一约束
+    # Remove unique constraint from reviews.order_id
     op.drop_constraint('uq_reviews_order_id', 'reviews', type_='unique')
     
-    # 恢复旧的 status 枚举
+    # Restore old status enum
     op.execute("""
         ALTER TABLE orders 
         MODIFY COLUMN status ENUM('pending', 'accepted', 'in_progress', 'completed', 'reviewed', 'cancelled') 
         DEFAULT 'pending' NOT NULL
     """)
     
-    # 删除新增的列
+    # Drop newly added columns
     op.drop_column('orders', 'service_end_time')
     op.drop_column('orders', 'service_start_time')
     op.drop_column('orders', 'service_type')

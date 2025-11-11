@@ -18,7 +18,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from backend.app.models.models import Base  # 假设你的 SQLAlchemy Base 在 models.py
+from backend.app.models.models import Base  # Assumes SQLAlchemy Base is in models.py
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

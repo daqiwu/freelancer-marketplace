@@ -13,10 +13,10 @@
 (12)view my task history, so that I can keep track of the tasks I have completed.
 
 **As a Customer, I want to:**
-(1)register and log in, so that I can access the platform’s services.(能够注册账户并登录系统，以便使用平台的各项功能)
-(2)update my personal profile, so that my information is accurate and up-to-date.(能够更新个人资料，以便保持信息的准确和完整)
-(3)post service or request orders, so that I can find suitable service providers.(能够发布服务订单或需求订单，以便寻找合适的服务提供者)
-(4)view my order status, so that I can track the progress of my services.(能够查看我的订单状态，以便了解服务的进展情况)
-(5)cancel orders that are not yet completed, so that I can adjust my plans if necessary.(能够取消尚未完成的订单，以便在需要时调整计划)
-(6)pay for my orders, so that I can complete the transaction and confirm the service.(能够支付订单，以便完成交易并确认服务)
-(7)view my order history, so that I can review past transactions and services.(能够查看历史订单，以便回顾过往交易和服务记录)
+(1)register and log in, so that I can access the platform's services.
+(2)update my personal profile, so that my information is accurate and up-to-date.
+(3)post service or request orders, so that I can find suitable service providers.
+(4)view my order status, so that I can track the progress of my services.
+(5)cancel orders that are not yet completed, so that I can adjust my plans if necessary.
+(6)pay for my orders, so that I can complete the transaction and confirm the service.
+(7)view my order history, so that I can review past transactions and services.
