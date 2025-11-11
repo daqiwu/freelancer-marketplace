@@ -53,6 +53,8 @@ pytest-asyncio = "^1.2.0"
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
 aiosqlite = "^0.20.0"
+bandit = "^1.8.6"
+safety = "^3.7.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

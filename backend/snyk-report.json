@@ -1,0 +1,2569 @@
+{
+  "vulnerabilities": [
+    {
+      "id": "SNYK-PYTHON-AIOMYSQL-13671310",
+      "title": "External Control of File Name or Path",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N/E:P",
+      "credit": [
+        "KonstantAnxiety"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[,0.3.0)"
+        ]
+      },
+      "exploit": "Proof of Concept",
+      "fixedIn": [
+        "0.3.0"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "high",
+      "cvssScore": 8.2,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "aiomysql",
+      "references": [
+        {
+          "url": "https://github.com/aio-libs/aiomysql/commit/32c4520dae3711367ded74a4726dcb8bb8919538",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/aio-libs/aiomysql/pull/1044",
+          "title": "GitHub PR"
+        }
+      ],
+      "cvssDetails": [],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:P",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 8.2,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-10-23T13:56:44.317533Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N/E:P",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-10-23T13:56:44.317533Z"
+        }
+      ],
+      "description": "## Overview\n[aiomysql](https://pypi.org/project/aiomysql) is a MySQL driver for asyncio.\n\nAffected versions of this package are vulnerable to External Control of File Name or Path via the `LOAD_LOCAL` instruction packet. An attacker can obtain arbitrary files from the client system by setting up a malicious MySQL server that sends crafted instructions to the client, even when client-side restrictions are in place.\n## Remediation\nUpgrade `aiomysql` to version 0.3.0 or higher.\n## References\n- [GitHub Commit](https://github.com/aio-libs/aiomysql/commit/32c4520dae3711367ded74a4726dcb8bb8919538)\n- [GitHub PR](https://github.com/aio-libs/aiomysql/pull/1044)\n",
+      "epssDetails": {
+        "percentile": "0.16171",
+        "probability": "0.00052",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2025-62611"
+        ],
+        "CWE": [
+          "CWE-73"
+        ],
+        "GHSA": [
+          "GHSA-r397-ff8c-wv2g"
+        ]
+      },
+      "packageName": "aiomysql",
+      "proprietary": false,
+      "creationTime": "2025-10-23T13:18:38.385549Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2025-10-22T16:47:10Z",
+      "exploitDetails": {
+        "sources": [
+          "Snyk"
+        ],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Proof of Concept",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Proof of Concept",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2025-10-23T13:56:44.298010Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-10-23T13:56:44.317533Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "high",
+      "from": [
+        "backend@0.1.0",
+        "aiomysql@0.2.0"
+      ],
+      "upgradePath": [
+        false,
+        "aiomysql@0.3.0"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "aiomysql",
+      "version": "0.2.0"
+    },
+    {
+      "id": "SNYK-PYTHON-CRYPTOGRAPHY-7886970",
+      "title": "Type Confusion",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "credit": [
+        "David Benjamin"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[37.0.0,43.0.1)"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "43.0.1"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "high",
+      "cvssScore": 8.2,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "cryptography",
+      "references": [
+        {
+          "url": "https://github.com/openssl/openssl/commit/05f360d9e849a1b277db628f1f13083a7f8dd04f",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/06d1dc3fa96a2ba5a3e22735a033012aadc9f0d6",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/621f3729831b05ee828a3203eddb621d014ff2b2",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/7dfcee2cd2a63b2c64b9b4b0850be64cb695b0a0",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/pyca/cryptography/commit/6687bab97aef31d6ee6cc94ecc87a972137b5d4a",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://openssl-library.org/news/secadv/20240903.txt",
+          "title": "openssl News"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "NVD",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 7.5,
+          "modificationTime": "2025-06-03T13:13:13.172850Z"
+        },
+        {
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-09-04T13:45:42.238261Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-09-04T11:04:35.484491Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 8.2,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-06-03T14:14:18.761550Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-03T14:14:18.761550Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "NVD",
+          "severity": "high",
+          "baseScore": 7.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-03T13:13:13.172850Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-09-04T13:45:42.238261Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "SUSE",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-09-04T11:04:35.484491Z"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Type Confusion in the `do_x509_check()` function in `x509/v3_utl.c`, which is responsible for certificate name checks. An application that specifies an expected DNS name, Email address or IP address that performs a name check on an `otherName` subject alternative name of an X.509 certificate can be made to crash when it attempts to read an invalid memory address.\n\n**Note:** Users that are building cryptography source (\"sdist\") are responsible for upgrading their copy of OpenSSL.\n\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its intended and legitimate users.\n\nUnlike other vulnerabilities, DoS attacks usually do not aim at breaching security. Rather, they are focused on making websites and services unavailable to genuine users resulting in downtime.\n\nOne popular Denial of Service vulnerability is DDoS (a Distributed Denial of Service), an attack that attempts to clog network pipes to the system by generating a large volume of traffic from many machines.\n\nWhen it comes to open source libraries, DoS vulnerabilities allow attackers to trigger such a crash or crippling of the service by using a flaw either in the application code or from the use of open source libraries.\n\nTwo common types of DoS vulnerabilities:\n\n* High CPU/Memory Consumption- An attacker sending crafted requests that could cause the system to take a disproportionate amount of time to process. For example, [commons-fileupload:commons-fileupload](https://security.snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-30082).\n\n* Crash - An attacker sending crafted requests that could cause the system to crash. For Example,  [npm `ws` package](https://snyk.io/vuln/npm:ws:20171108)\n\n## Remediation\nUpgrade `cryptography` to version 43.0.1 or higher.\n## References\n- [GitHub Commit](https://github.com/openssl/openssl/commit/05f360d9e849a1b277db628f1f13083a7f8dd04f)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/06d1dc3fa96a2ba5a3e22735a033012aadc9f0d6)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/621f3729831b05ee828a3203eddb621d014ff2b2)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/7dfcee2cd2a63b2c64b9b4b0850be64cb695b0a0)\n- [GitHub Commit](https://github.com/pyca/cryptography/commit/6687bab97aef31d6ee6cc94ecc87a972137b5d4a)\n- [openssl News](https://openssl-library.org/news/secadv/20240903.txt)\n",
+      "epssDetails": {
+        "percentile": "0.94308",
+        "probability": "0.15242",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2024-6119"
+        ],
+        "CWE": [
+          "CWE-843"
+        ],
+        "GHSA": [
+          "GHSA-h4gh-qq45-vh27"
+        ]
+      },
+      "packageName": "cryptography",
+      "proprietary": false,
+      "creationTime": "2024-09-04T10:22:34.913671Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2024-09-03T21:59:48Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2024-09-04T15:02:33.266519Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-06-03T14:14:18.761550Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "high",
+      "from": [
+        "backend@0.1.0",
+        "cryptography@42.0.8"
+      ],
+      "upgradePath": [
+        false,
+        "cryptography@43.0.1"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "cryptography",
+      "version": "42.0.8"
+    },
+    {
+      "id": "SNYK-PYTHON-CRYPTOGRAPHY-8715586",
+      "title": "Missing Report of Error Condition",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+      "credit": [
+        "Apple Inc."
+      ],
+      "semver": {
+        "vulnerable": [
+          "[42.0.0,44.0.1)"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "44.0.1"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "medium",
+      "cvssScore": 6.3,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "cryptography",
+      "references": [
+        {
+          "url": "https://github.com/openssl/openssl/commit/738d4f9fdeaad57660dcba50a619fafced3fd5e9",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/pyca/cryptography/commit/adaaaed77db676bbaa9d171175db81dce056e2a7",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://openssl-library.org/news/secadv/20250211.txt",
+          "title": "OpenSSL Advisory"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "cvssV3BaseScore": 7.4,
+          "modificationTime": "2025-02-12T13:34:54.014035Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "cvssV3BaseScore": 8.8,
+          "modificationTime": "2025-06-21T11:09:38.415793Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 6.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-02-12T07:52:10.093052Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 4.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-02-12T07:52:10.093052Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "assigner": "Red Hat",
+          "severity": "high",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-02-12T13:34:54.014035Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "assigner": "SUSE",
+          "severity": "high",
+          "baseScore": 8.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-21T11:09:38.415793Z"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Missing Report of Error Condition causing server authentication failures to not be detected by clients, due to handshakes not aborting as expected when the `SSL_VERIFY_PEER` verification mode is set. An attacker could impersonate a legitimate server by performing a MitM attack on TLS and DTLS connections using Raw Public Keys (RPKs).\r\n\r\n**Note:**\r\n\r\n1) This is only exploitable if TLS clients explicitly enable RPK use by the server, and the server, likewise, enables sending of an RPK instead of an X.509 certificate chain. The affected clients are those that then rely on the handshake to fail when the server's RPK fails to match one of the expected public keys, by setting the verification mode to `SSL_VERIFY_PEER`;\r\n\r\n2) Clients that enable server-side raw public keys can still find out that raw public key verification failed by calling `SSL_get_verify_result()`. Those that do, and take appropriate action, are not affected.\n## Remediation\nUpgrade `cryptography` to version 44.0.1 or higher.\n## References\n- [GitHub Commit](https://github.com/openssl/openssl/commit/738d4f9fdeaad57660dcba50a619fafced3fd5e9)\n- [GitHub Commit](https://github.com/pyca/cryptography/commit/adaaaed77db676bbaa9d171175db81dce056e2a7)\n- [OpenSSL Advisory](https://openssl-library.org/news/secadv/20250211.txt)\n",
+      "epssDetails": {
+        "percentile": "0.55695",
+        "probability": "0.00334",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2024-12797"
+        ],
+        "CWE": [
+          "CWE-392"
+        ],
+        "GHSA": [
+          "GHSA-79v4-65xg-pq4g"
+        ]
+      },
+      "packageName": "cryptography",
+      "proprietary": false,
+      "creationTime": "2025-02-12T07:40:44.919993Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2025-02-11T18:06:42Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2025-02-12T07:52:10.086447Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-06-21T11:09:38.415793Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "medium",
+      "from": [
+        "backend@0.1.0",
+        "cryptography@42.0.8"
+      ],
+      "upgradePath": [
+        false,
+        "cryptography@44.0.1"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "cryptography",
+      "version": "42.0.8"
+    },
+    {
+      "id": "SNYK-PYTHON-CRYPTOGRAPHY-7886970",
+      "title": "Type Confusion",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "credit": [
+        "David Benjamin"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[37.0.0,43.0.1)"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "43.0.1"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "high",
+      "cvssScore": 8.2,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "cryptography",
+      "references": [
+        {
+          "url": "https://github.com/openssl/openssl/commit/05f360d9e849a1b277db628f1f13083a7f8dd04f",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/06d1dc3fa96a2ba5a3e22735a033012aadc9f0d6",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/621f3729831b05ee828a3203eddb621d014ff2b2",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/7dfcee2cd2a63b2c64b9b4b0850be64cb695b0a0",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/pyca/cryptography/commit/6687bab97aef31d6ee6cc94ecc87a972137b5d4a",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://openssl-library.org/news/secadv/20240903.txt",
+          "title": "openssl News"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "NVD",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 7.5,
+          "modificationTime": "2025-06-03T13:13:13.172850Z"
+        },
+        {
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-09-04T13:45:42.238261Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-09-04T11:04:35.484491Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 8.2,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-06-03T14:14:18.761550Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-03T14:14:18.761550Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "NVD",
+          "severity": "high",
+          "baseScore": 7.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-03T13:13:13.172850Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-09-04T13:45:42.238261Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "SUSE",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-09-04T11:04:35.484491Z"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Type Confusion in the `do_x509_check()` function in `x509/v3_utl.c`, which is responsible for certificate name checks. An application that specifies an expected DNS name, Email address or IP address that performs a name check on an `otherName` subject alternative name of an X.509 certificate can be made to crash when it attempts to read an invalid memory address.\n\n**Note:** Users that are building cryptography source (\"sdist\") are responsible for upgrading their copy of OpenSSL.\n\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its intended and legitimate users.\n\nUnlike other vulnerabilities, DoS attacks usually do not aim at breaching security. Rather, they are focused on making websites and services unavailable to genuine users resulting in downtime.\n\nOne popular Denial of Service vulnerability is DDoS (a Distributed Denial of Service), an attack that attempts to clog network pipes to the system by generating a large volume of traffic from many machines.\n\nWhen it comes to open source libraries, DoS vulnerabilities allow attackers to trigger such a crash or crippling of the service by using a flaw either in the application code or from the use of open source libraries.\n\nTwo common types of DoS vulnerabilities:\n\n* High CPU/Memory Consumption- An attacker sending crafted requests that could cause the system to take a disproportionate amount of time to process. For example, [commons-fileupload:commons-fileupload](https://security.snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-30082).\n\n* Crash - An attacker sending crafted requests that could cause the system to crash. For Example,  [npm `ws` package](https://snyk.io/vuln/npm:ws:20171108)\n\n## Remediation\nUpgrade `cryptography` to version 43.0.1 or higher.\n## References\n- [GitHub Commit](https://github.com/openssl/openssl/commit/05f360d9e849a1b277db628f1f13083a7f8dd04f)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/06d1dc3fa96a2ba5a3e22735a033012aadc9f0d6)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/621f3729831b05ee828a3203eddb621d014ff2b2)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/7dfcee2cd2a63b2c64b9b4b0850be64cb695b0a0)\n- [GitHub Commit](https://github.com/pyca/cryptography/commit/6687bab97aef31d6ee6cc94ecc87a972137b5d4a)\n- [openssl News](https://openssl-library.org/news/secadv/20240903.txt)\n",
+      "epssDetails": {
+        "percentile": "0.94308",
+        "probability": "0.15242",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2024-6119"
+        ],
+        "CWE": [
+          "CWE-843"
+        ],
+        "GHSA": [
+          "GHSA-h4gh-qq45-vh27"
+        ]
+      },
+      "packageName": "cryptography",
+      "proprietary": false,
+      "creationTime": "2024-09-04T10:22:34.913671Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2024-09-03T21:59:48Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2024-09-04T15:02:33.266519Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-06-03T14:14:18.761550Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "high",
+      "from": [
+        "backend@0.1.0",
+        "jwt@1.4.0",
+        "cryptography@42.0.8"
+      ],
+      "upgradePath": [
+        false,
+        "jwt@1.4.0"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "cryptography",
+      "version": "42.0.8"
+    },
+    {
+      "id": "SNYK-PYTHON-CRYPTOGRAPHY-8715586",
+      "title": "Missing Report of Error Condition",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+      "credit": [
+        "Apple Inc."
+      ],
+      "semver": {
+        "vulnerable": [
+          "[42.0.0,44.0.1)"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "44.0.1"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "medium",
+      "cvssScore": 6.3,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "cryptography",
+      "references": [
+        {
+          "url": "https://github.com/openssl/openssl/commit/738d4f9fdeaad57660dcba50a619fafced3fd5e9",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/pyca/cryptography/commit/adaaaed77db676bbaa9d171175db81dce056e2a7",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://openssl-library.org/news/secadv/20250211.txt",
+          "title": "OpenSSL Advisory"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "cvssV3BaseScore": 7.4,
+          "modificationTime": "2025-02-12T13:34:54.014035Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "cvssV3BaseScore": 8.8,
+          "modificationTime": "2025-06-21T11:09:38.415793Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 6.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-02-12T07:52:10.093052Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 4.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-02-12T07:52:10.093052Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "assigner": "Red Hat",
+          "severity": "high",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-02-12T13:34:54.014035Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "assigner": "SUSE",
+          "severity": "high",
+          "baseScore": 8.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-21T11:09:38.415793Z"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Missing Report of Error Condition causing server authentication failures to not be detected by clients, due to handshakes not aborting as expected when the `SSL_VERIFY_PEER` verification mode is set. An attacker could impersonate a legitimate server by performing a MitM attack on TLS and DTLS connections using Raw Public Keys (RPKs).\r\n\r\n**Note:**\r\n\r\n1) This is only exploitable if TLS clients explicitly enable RPK use by the server, and the server, likewise, enables sending of an RPK instead of an X.509 certificate chain. The affected clients are those that then rely on the handshake to fail when the server's RPK fails to match one of the expected public keys, by setting the verification mode to `SSL_VERIFY_PEER`;\r\n\r\n2) Clients that enable server-side raw public keys can still find out that raw public key verification failed by calling `SSL_get_verify_result()`. Those that do, and take appropriate action, are not affected.\n## Remediation\nUpgrade `cryptography` to version 44.0.1 or higher.\n## References\n- [GitHub Commit](https://github.com/openssl/openssl/commit/738d4f9fdeaad57660dcba50a619fafced3fd5e9)\n- [GitHub Commit](https://github.com/pyca/cryptography/commit/adaaaed77db676bbaa9d171175db81dce056e2a7)\n- [OpenSSL Advisory](https://openssl-library.org/news/secadv/20250211.txt)\n",
+      "epssDetails": {
+        "percentile": "0.55695",
+        "probability": "0.00334",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2024-12797"
+        ],
+        "CWE": [
+          "CWE-392"
+        ],
+        "GHSA": [
+          "GHSA-79v4-65xg-pq4g"
+        ]
+      },
+      "packageName": "cryptography",
+      "proprietary": false,
+      "creationTime": "2025-02-12T07:40:44.919993Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2025-02-11T18:06:42Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2025-02-12T07:52:10.086447Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-06-21T11:09:38.415793Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "medium",
+      "from": [
+        "backend@0.1.0",
+        "jwt@1.4.0",
+        "cryptography@42.0.8"
+      ],
+      "upgradePath": [
+        false,
+        "jwt@1.4.0"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "cryptography",
+      "version": "42.0.8"
+    },
+    {
+      "id": "SNYK-PYTHON-CRYPTOGRAPHY-7886970",
+      "title": "Type Confusion",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "credit": [
+        "David Benjamin"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[37.0.0,43.0.1)"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "43.0.1"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "high",
+      "cvssScore": 8.2,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "cryptography",
+      "references": [
+        {
+          "url": "https://github.com/openssl/openssl/commit/05f360d9e849a1b277db628f1f13083a7f8dd04f",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/06d1dc3fa96a2ba5a3e22735a033012aadc9f0d6",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/621f3729831b05ee828a3203eddb621d014ff2b2",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/openssl/openssl/commit/7dfcee2cd2a63b2c64b9b4b0850be64cb695b0a0",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/pyca/cryptography/commit/6687bab97aef31d6ee6cc94ecc87a972137b5d4a",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://openssl-library.org/news/secadv/20240903.txt",
+          "title": "openssl News"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "NVD",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 7.5,
+          "modificationTime": "2025-06-03T13:13:13.172850Z"
+        },
+        {
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-09-04T13:45:42.238261Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-09-04T11:04:35.484491Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 8.2,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-06-03T14:14:18.761550Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-03T14:14:18.761550Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "NVD",
+          "severity": "high",
+          "baseScore": 7.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-03T13:13:13.172850Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-09-04T13:45:42.238261Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "SUSE",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-09-04T11:04:35.484491Z"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Type Confusion in the `do_x509_check()` function in `x509/v3_utl.c`, which is responsible for certificate name checks. An application that specifies an expected DNS name, Email address or IP address that performs a name check on an `otherName` subject alternative name of an X.509 certificate can be made to crash when it attempts to read an invalid memory address.\n\n**Note:** Users that are building cryptography source (\"sdist\") are responsible for upgrading their copy of OpenSSL.\n\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its intended and legitimate users.\n\nUnlike other vulnerabilities, DoS attacks usually do not aim at breaching security. Rather, they are focused on making websites and services unavailable to genuine users resulting in downtime.\n\nOne popular Denial of Service vulnerability is DDoS (a Distributed Denial of Service), an attack that attempts to clog network pipes to the system by generating a large volume of traffic from many machines.\n\nWhen it comes to open source libraries, DoS vulnerabilities allow attackers to trigger such a crash or crippling of the service by using a flaw either in the application code or from the use of open source libraries.\n\nTwo common types of DoS vulnerabilities:\n\n* High CPU/Memory Consumption- An attacker sending crafted requests that could cause the system to take a disproportionate amount of time to process. For example, [commons-fileupload:commons-fileupload](https://security.snyk.io/vuln/SNYK-JAVA-COMMONSFILEUPLOAD-30082).\n\n* Crash - An attacker sending crafted requests that could cause the system to crash. For Example,  [npm `ws` package](https://snyk.io/vuln/npm:ws:20171108)\n\n## Remediation\nUpgrade `cryptography` to version 43.0.1 or higher.\n## References\n- [GitHub Commit](https://github.com/openssl/openssl/commit/05f360d9e849a1b277db628f1f13083a7f8dd04f)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/06d1dc3fa96a2ba5a3e22735a033012aadc9f0d6)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/621f3729831b05ee828a3203eddb621d014ff2b2)\n- [GitHub Commit](https://github.com/openssl/openssl/commit/7dfcee2cd2a63b2c64b9b4b0850be64cb695b0a0)\n- [GitHub Commit](https://github.com/pyca/cryptography/commit/6687bab97aef31d6ee6cc94ecc87a972137b5d4a)\n- [openssl News](https://openssl-library.org/news/secadv/20240903.txt)\n",
+      "epssDetails": {
+        "percentile": "0.94308",
+        "probability": "0.15242",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2024-6119"
+        ],
+        "CWE": [
+          "CWE-843"
+        ],
+        "GHSA": [
+          "GHSA-h4gh-qq45-vh27"
+        ]
+      },
+      "packageName": "cryptography",
+      "proprietary": false,
+      "creationTime": "2024-09-04T10:22:34.913671Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2024-09-03T21:59:48Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2024-09-04T15:02:33.266519Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-06-03T14:14:18.761550Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "high",
+      "from": [
+        "backend@0.1.0",
+        "python-jose@3.5.0",
+        "cryptography@42.0.8"
+      ],
+      "upgradePath": [
+        false,
+        "python-jose@3.5.0"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "cryptography",
+      "version": "42.0.8"
+    },
+    {
+      "id": "SNYK-PYTHON-CRYPTOGRAPHY-8715586",
+      "title": "Missing Report of Error Condition",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+      "credit": [
+        "Apple Inc."
+      ],
+      "semver": {
+        "vulnerable": [
+          "[42.0.0,44.0.1)"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "44.0.1"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "medium",
+      "cvssScore": 6.3,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "cryptography",
+      "references": [
+        {
+          "url": "https://github.com/openssl/openssl/commit/738d4f9fdeaad57660dcba50a619fafced3fd5e9",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/pyca/cryptography/commit/adaaaed77db676bbaa9d171175db81dce056e2a7",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://openssl-library.org/news/secadv/20250211.txt",
+          "title": "OpenSSL Advisory"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "cvssV3BaseScore": 7.4,
+          "modificationTime": "2025-02-12T13:34:54.014035Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "cvssV3BaseScore": 8.8,
+          "modificationTime": "2025-06-21T11:09:38.415793Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 6.3,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-02-12T07:52:10.093052Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 4.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-02-12T07:52:10.093052Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "assigner": "Red Hat",
+          "severity": "high",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-02-12T13:34:54.014035Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "assigner": "SUSE",
+          "severity": "high",
+          "baseScore": 8.8,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-06-21T11:09:38.415793Z"
+        }
+      ],
+      "description": "## Overview\n\nAffected versions of this package are vulnerable to Missing Report of Error Condition causing server authentication failures to not be detected by clients, due to handshakes not aborting as expected when the `SSL_VERIFY_PEER` verification mode is set. An attacker could impersonate a legitimate server by performing a MitM attack on TLS and DTLS connections using Raw Public Keys (RPKs).\r\n\r\n**Note:**\r\n\r\n1) This is only exploitable if TLS clients explicitly enable RPK use by the server, and the server, likewise, enables sending of an RPK instead of an X.509 certificate chain. The affected clients are those that then rely on the handshake to fail when the server's RPK fails to match one of the expected public keys, by setting the verification mode to `SSL_VERIFY_PEER`;\r\n\r\n2) Clients that enable server-side raw public keys can still find out that raw public key verification failed by calling `SSL_get_verify_result()`. Those that do, and take appropriate action, are not affected.\n## Remediation\nUpgrade `cryptography` to version 44.0.1 or higher.\n## References\n- [GitHub Commit](https://github.com/openssl/openssl/commit/738d4f9fdeaad57660dcba50a619fafced3fd5e9)\n- [GitHub Commit](https://github.com/pyca/cryptography/commit/adaaaed77db676bbaa9d171175db81dce056e2a7)\n- [OpenSSL Advisory](https://openssl-library.org/news/secadv/20250211.txt)\n",
+      "epssDetails": {
+        "percentile": "0.55695",
+        "probability": "0.00334",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2024-12797"
+        ],
+        "CWE": [
+          "CWE-392"
+        ],
+        "GHSA": [
+          "GHSA-79v4-65xg-pq4g"
+        ]
+      },
+      "packageName": "cryptography",
+      "proprietary": false,
+      "creationTime": "2025-02-12T07:40:44.919993Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2025-02-11T18:06:42Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2025-02-12T07:52:10.086447Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-06-21T11:09:38.415793Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "medium",
+      "from": [
+        "backend@0.1.0",
+        "python-jose@3.5.0",
+        "cryptography@42.0.8"
+      ],
+      "upgradePath": [
+        false,
+        "python-jose@3.5.0"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "cryptography",
+      "version": "42.0.8"
+    },
+    {
+      "id": "SNYK-PYTHON-ECDSA-6184115",
+      "title": "Timing Attack",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "credit": [
+        "Hubert Kario"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[0,]"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "high",
+      "cvssScore": 7.4,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "ecdsa",
+      "references": [
+        {
+          "url": "https://github.com/tlsfuzzer/python-ecdsa/blob/master/SECURITY.md",
+          "title": "Additional Information"
+        },
+        {
+          "url": "https://minerva.crocs.fi.muni.cz/",
+          "title": "Additional Information"
+        },
+        {
+          "url": "https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/",
+          "title": "Additional Information"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "NVD",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "cvssV3BaseScore": 7.4,
+          "modificationTime": "2024-03-11T09:51:23.821976Z"
+        },
+        {
+          "assigner": "Red Hat",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "cvssV3BaseScore": 7.4,
+          "modificationTime": "2024-03-11T09:49:56.639490Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-03-14T11:07:48.344386Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "assigner": "NVD",
+          "severity": "high",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-03-11T09:51:23.821976Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "assigner": "Red Hat",
+          "severity": "high",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-03-11T09:49:56.639490Z"
+        }
+      ],
+      "description": "## Overview\n[ecdsa](https://pypi.org/project/ecdsa/) is an easy-to-use implementation of ECDSA cryptography (Elliptic Curve Digital Signature Algorithm), implemented purely in Python, released under the MIT license.\n\nAffected versions of this package are vulnerable to Timing Attack via the `sign_digest` API function. An attacker can leak the internal nonce which may allow for private key discovery by timing signatures.\r\n\r\n**Notes:**\r\n\r\n1) This library was not designed with security in mind. If you are processing data that needs to be protected we suggest you use a quality wrapper around OpenSSL. `pyca/cryptography` is one example of such a wrapper\r\n\r\n2) That means both `ECDSA` signatures, key generation and `ECDH` operations are affected. `ECDSA` signature verification is unaffected.\r\n\r\n3) The maintainers don't plan to release a fix to this vulnerability.\n## Remediation\nThere is no fixed version for `ecdsa`.\n\n## References\n- [Additional Information](https://github.com/tlsfuzzer/python-ecdsa/blob/master/SECURITY.md)\n- [Additional Information](https://minerva.crocs.fi.muni.cz/)\n- [Additional Information](https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/)\n",
+      "epssDetails": {
+        "percentile": "0.69238",
+        "probability": "0.00622",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2024-23342"
+        ],
+        "CWE": [
+          "CWE-208"
+        ],
+        "GHSA": [
+          "GHSA-wj6h-64fc-37mp"
+        ]
+      },
+      "packageName": "ecdsa",
+      "proprietary": false,
+      "creationTime": "2024-01-23T07:39:00.520002Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2024-01-22T21:35:27Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2024-01-23T07:44:20.369188Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-03-14T11:07:48.344386Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "high",
+      "from": [
+        "backend@0.1.0",
+        "python-jose@3.5.0",
+        "ecdsa@0.19.1"
+      ],
+      "upgradePath": [],
+      "isUpgradable": false,
+      "isPatchable": false,
+      "name": "ecdsa",
+      "version": "0.19.1"
+    },
+    {
+      "id": "SNYK-PYTHON-ECDSA-6219992",
+      "title": "Missing Encryption of Sensitive Data",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "credit": [
+        "Unknown"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[0,]"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "high",
+      "cvssScore": 7.4,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "ecdsa",
+      "references": [
+        {
+          "url": "https://github.com/tlsfuzzer/python-ecdsa/blob/0d5a38ca8ada5f2fec67904236f563f562b402d4/SECURITY.md?plain=1%23L32",
+          "title": "Vulnerable Code"
+        }
+      ],
+      "cvssDetails": [],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 7.4,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-03-14T11:06:19.435370Z"
+        }
+      ],
+      "description": "## Overview\n[ecdsa](https://pypi.org/project/ecdsa/) is an easy-to-use implementation of ECDSA cryptography (Elliptic Curve Digital Signature Algorithm), implemented purely in Python, released under the MIT license.\n\nAffected versions of this package are vulnerable to Missing Encryption of Sensitive Data due to insufficient protection. For a sophisticated attacker observing just one operation with a private key will be sufficient to completely reconstruct the private key.\r\n\r\n**Note:**\r\nFixes for side-channel vulnerabilities will not be developed.\n## Remediation\nThere is no fixed version for `ecdsa`.\n\n## References\n- [Vulnerable Code](https://github.com/tlsfuzzer/python-ecdsa/blob/0d5a38ca8ada5f2fec67904236f563f562b402d4/SECURITY.md?plain=1#L32)\n",
+      "epssDetails": null,
+      "identifiers": {
+        "CVE": [],
+        "CWE": [
+          "CWE-311"
+        ],
+        "PVE": [
+          "PVE-2024-64396"
+        ]
+      },
+      "packageName": "ecdsa",
+      "proprietary": false,
+      "creationTime": "2024-02-01T09:40:50.072457Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2024-02-01T06:31:41Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2024-02-01T13:34:05.874629Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-03-14T11:06:19.435370Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "high",
+      "from": [
+        "backend@0.1.0",
+        "python-jose@3.5.0",
+        "ecdsa@0.19.1"
+      ],
+      "upgradePath": [],
+      "isUpgradable": false,
+      "isPatchable": false,
+      "name": "ecdsa",
+      "version": "0.19.1"
+    },
+    {
+      "id": "SNYK-PYTHON-RSA-1038401",
+      "title": "Timing Attack",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "credit": [
+        "Unknown"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[2.0,4.7)"
+        ]
+      },
+      "exploit": "Not Defined",
+      "fixedIn": [
+        "4.7"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "medium",
+      "cvssScore": 5.9,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "rsa",
+      "references": [
+        {
+          "url": "https://github.com/sybrenstuvel/python-rsa/issues/165",
+          "title": "GitHub Issue"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1889972",
+          "title": "RedHat Bugzilla Bug"
+        },
+        {
+          "url": "https://people.redhat.com/~hkario/marvin/",
+          "title": "Vulnerability Report"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "NVD",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-03-11T09:48:16.119923Z"
+        },
+        {
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-03-11T09:53:47.525338Z"
+        },
+        {
+          "assigner": "SUSE",
+          "severity": "medium",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "cvssV3BaseScore": 5.9,
+          "modificationTime": "2024-03-11T09:52:26.474164Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-03-06T14:09:26.946061Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "assigner": "NVD",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-03-11T09:48:16.119923Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "assigner": "Red Hat",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-03-11T09:53:47.525338Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "assigner": "SUSE",
+          "severity": "medium",
+          "baseScore": 5.9,
+          "cvssVersion": "3.1",
+          "modificationTime": "2024-03-11T09:52:26.474164Z"
+        }
+      ],
+      "description": "## Overview\n[rsa](https://pypi.org/project/rsa/) is a pure-Python RSA implementation.\n\nAffected versions of this package are vulnerable to Timing Attack via timed processing of valid `PKCS#1` v1.5 ciphertext. An attacker can recover ciphertexts via a side-channel attack by exploiting the Marvin security flaw.\n## Remediation\nUpgrade `rsa` to version 4.7 or higher.\n## References\n- [GitHub Issue](https://github.com/sybrenstuvel/python-rsa/issues/165)\n- [RedHat Bugzilla Bug](https://bugzilla.redhat.com/show_bug.cgi?id=1889972)\n- [Vulnerability Report](https://people.redhat.com/~hkario/marvin/)\n",
+      "epssDetails": {
+        "percentile": "0.46006",
+        "probability": "0.00233",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2020-25658"
+        ],
+        "CWE": [
+          "CWE-208"
+        ]
+      },
+      "packageName": "rsa",
+      "proprietary": false,
+      "creationTime": "2020-11-10T14:17:17.451881Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2020-11-09T00:00:00Z",
+      "exploitDetails": {
+        "sources": [],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Not Defined",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Not Defined",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2020-11-10T15:27:31Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2024-03-11T09:53:47.525338Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "medium",
+      "from": [
+        "backend@0.1.0",
+        "python-jose@3.5.0",
+        "rsa@4.2"
+      ],
+      "upgradePath": [
+        false,
+        "python-jose@3.5.0"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "rsa",
+      "version": "4.2"
+    },
+    {
+      "id": "SNYK-PYTHON-STARLETTE-13733964",
+      "title": "Regular Expression Denial of Service (ReDoS)",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P",
+      "credit": [
+        "Seokchan Yoon"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[,0.49.1)"
+        ]
+      },
+      "exploit": "Proof of Concept",
+      "fixedIn": [
+        "0.49.1"
+      ],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "high",
+      "cvssScore": 8.7,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "starlette",
+      "references": [
+        {
+          "url": "https://github.com/Kludex/starlette/commit/4ea6e22b489ec388d6004cfbca52dd5b147127c5",
+          "title": "GitHub Commit"
+        },
+        {
+          "url": "https://github.com/Kludex/starlette/releases/tag/0.49.1",
+          "title": "GitHub Release"
+        },
+        {
+          "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2406929",
+          "title": "Red Hat Bugzilla Bug"
+        }
+      ],
+      "cvssDetails": [
+        {
+          "assigner": "Red Hat",
+          "severity": "high",
+          "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "cvssV3BaseScore": 7.5,
+          "modificationTime": "2025-10-30T03:01:24.531259Z"
+        }
+      ],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:P",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 8.7,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-10-29T10:33:29.266574Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P",
+          "assigner": "Snyk",
+          "severity": "high",
+          "baseScore": 7.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-10-29T10:33:29.266574Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "assigner": "Red Hat",
+          "severity": "high",
+          "baseScore": 7.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-10-30T03:01:24.531259Z"
+        }
+      ],
+      "description": "## Overview\n[starlette](https://www.pypi.org/project/starlette) is a The little ASGI library that shines.\n\nAffected versions of this package are vulnerable to Regular Expression Denial of Service (ReDoS) via the `FileResponse._parse_range_header` method. An attacker can exhaust server CPU resources by sending a specially crafted HTTP Range header containing numerous small, non-overlapping ranges, which triggers quadratic-time processing during range parsing and merging.\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its original and legitimate users. There are many types of DoS attacks, ranging from trying to clog the network pipes to the system by generating a large volume of traffic from many machines (a Distributed Denial of Service - DDoS - attack) to sending crafted requests that cause a system to crash or take a disproportional amount of time to process.\n\nThe Regular expression Denial of Service (ReDoS) is a type of Denial of Service attack. Regular expressions are incredibly powerful, but they aren't very intuitive and can ultimately end up making it easy for attackers to take your site down.\n\nLet’s take the following regular expression as an example:\n```js\nregex = /A(B|C+)+D/\n```\n\nThis regular expression accomplishes the following:\n- `A` The string must start with the letter 'A'\n- `(B|C+)+` The string must then follow the letter A with either the letter 'B' or some number of occurrences of the letter 'C' (the `+` matches one or more times). The `+` at the end of this section states that we can look for one or more matches of this section.\n- `D` Finally, we ensure this section of the string ends with a 'D'\n\nThe expression would match inputs such as `ABBD`, `ABCCCCD`, `ABCBCCCD` and `ACCCCCD`\n\nIt most cases, it doesn't take very long for a regex engine to find a match:\n\n```bash\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCD\")'\n0.04s user 0.01s system 95% cpu 0.052 total\n\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCX\")'\n1.79s user 0.02s system 99% cpu 1.812 total\n```\n\nThe entire process of testing it against a 30 characters long string takes around ~52ms. But when given an invalid string, it takes nearly two seconds to complete the test, over ten times as long as it took to test a valid string. The dramatic difference is due to the way regular expressions get evaluated.\n\nMost Regex engines will work very similarly (with minor differences). The engine will match the first possible way to accept the current character and proceed to the next one. If it then fails to match the next one, it will backtrack and see if there was another way to digest the previous character. If it goes too far down the rabbit hole only to find out the string doesn’t match in the end, and if many characters have multiple valid regex paths, the number of backtracking steps can become very large, resulting in what is known as _catastrophic backtracking_.\n\nLet's look at how our expression runs into this problem, using a shorter string: \"ACCCX\". While it seems fairly straightforward, there are still four different ways that the engine could match those three C's:\n1. CCC\n2. CC+C\n3. C+CC\n4. C+C+C.\n\nThe engine has to try each of those combinations to see if any of them potentially match against the expression. When you combine that with the other steps the engine must take, we can use [RegEx 101 debugger](https://regex101.com/debugger) to see the engine has to take a total of 38 steps before it can determine the string doesn't match.\n\nFrom there, the number of steps the engine must use to validate a string just continues to grow.\n\n| String | Number of C's | Number of steps |\n| -------|-------------:| -----:|\n| ACCCX | 3 | 38\n| ACCCCX | 4 | 71\n| ACCCCCX | 5 | 136\n| ACCCCCCCCCCCCCCX | 14 | 65,553\n\n\nBy the time the string includes 14 C's, the engine has to take over 65,000 steps just to see if the string is valid. These extreme situations can cause them to work very slowly (exponentially related to input size, as shown above), allowing an attacker to exploit this and can cause the service to excessively consume CPU, resulting in a Denial of Service.\n\n## Remediation\nUpgrade `starlette` to version 0.49.1 or higher.\n## References\n- [GitHub Commit](https://github.com/Kludex/starlette/commit/4ea6e22b489ec388d6004cfbca52dd5b147127c5)\n- [GitHub Release](https://github.com/Kludex/starlette/releases/tag/0.49.1)\n- [Red Hat Bugzilla Bug](https://bugzilla.redhat.com/show_bug.cgi?id=2406929)\n",
+      "epssDetails": {
+        "percentile": "0.62356",
+        "probability": "0.00440",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2025-62727"
+        ],
+        "CWE": [
+          "CWE-1333"
+        ],
+        "GHSA": [
+          "GHSA-7f5h-v6xp-fcq8"
+        ]
+      },
+      "packageName": "starlette",
+      "proprietary": false,
+      "creationTime": "2025-10-29T09:39:43.799559Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2025-10-28T20:38:01Z",
+      "exploitDetails": {
+        "sources": [
+          "Snyk"
+        ],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Proof of Concept",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Proof of Concept",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2025-10-29T10:33:29.255480Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-10-30T03:01:24.531259Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "high",
+      "from": [
+        "backend@0.1.0",
+        "fastapi@0.116.2",
+        "starlette@0.48.0"
+      ],
+      "upgradePath": [
+        false,
+        "fastapi@0.116.2"
+      ],
+      "isUpgradable": true,
+      "isPatchable": false,
+      "name": "starlette",
+      "version": "0.48.0"
+    },
+    {
+      "id": "SNYK-PYTHON-TWISTED-12671201",
+      "title": "Arbitrary Command Injection",
+      "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P",
+      "credit": [
+        "Just Insecure"
+      ],
+      "semver": {
+        "vulnerable": [
+          "[0,]"
+        ]
+      },
+      "exploit": "Proof of Concept",
+      "fixedIn": [],
+      "patches": [],
+      "insights": {
+        "triageAdvice": null
+      },
+      "language": "python",
+      "severity": "medium",
+      "cvssScore": 6.9,
+      "functions": [],
+      "malicious": false,
+      "isDisputed": false,
+      "moduleName": "twisted",
+      "references": [
+        {
+          "url": "https://medium.com/@Justinsecure/chained-rce-on-twistedweb-14-0-0-via-command-injection-and-unauthenticated-put-1aa657995b4e",
+          "title": "Medium Blog"
+        }
+      ],
+      "cvssDetails": [],
+      "cvssSources": [
+        {
+          "type": "primary",
+          "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:P",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 6.9,
+          "cvssVersion": "4.0",
+          "modificationTime": "2025-09-15T15:01:16.337398Z"
+        },
+        {
+          "type": "secondary",
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P",
+          "assigner": "Snyk",
+          "severity": "medium",
+          "baseScore": 6.5,
+          "cvssVersion": "3.1",
+          "modificationTime": "2025-09-15T15:01:16.337398Z"
+        }
+      ],
+      "description": "## Overview\n[Twisted](https://pypi.org/project/Twisted/) is an event-based network programming and multi-protocol integration framework.\n\nAffected versions of this package are vulnerable to Arbitrary Command Injection via improper input sanitization in the file upload process. An attacker can execute arbitrary commands on the target system by sending a specially crafted HTTP PUT request to upload a malicious file and subsequently triggering its execution. This can result in remote code execution and potential privilege escalation depending on the web server's permissions.\n## Remediation\nThere is no fixed version for `Twisted`.\n## References\n- [Medium Blog](https://medium.com/@Justinsecure/chained-rce-on-twistedweb-14-0-0-via-command-injection-and-unauthenticated-put-1aa657995b4e)\n",
+      "epssDetails": {
+        "percentile": "0.74097",
+        "probability": "0.00847",
+        "modelVersion": "v2025.03.14"
+      },
+      "identifiers": {
+        "CVE": [
+          "CVE-2025-50688"
+        ],
+        "CWE": [
+          "CWE-77"
+        ]
+      },
+      "packageName": "twisted",
+      "proprietary": false,
+      "creationTime": "2025-09-15T10:41:09.206177Z",
+      "functions_new": [],
+      "alternativeIds": [],
+      "disclosureTime": "2025-08-05T17:42:58Z",
+      "exploitDetails": {
+        "sources": [
+          "Snyk"
+        ],
+        "maturityLevels": [
+          {
+            "type": "secondary",
+            "level": "Proof of Concept",
+            "format": "CVSSv3"
+          },
+          {
+            "type": "primary",
+            "level": "Proof of Concept",
+            "format": "CVSSv4"
+          }
+        ]
+      },
+      "packageManager": "pip",
+      "publicationTime": "2025-09-15T15:01:16.322102Z",
+      "severityBasedOn": "CVSS",
+      "modificationTime": "2025-09-15T15:01:16.337398Z",
+      "socialTrendAlert": false,
+      "severityWithCritical": "medium",
+      "from": [
+        "backend@0.1.0",
+        "twisted@24.11.0"
+      ],
+      "upgradePath": [],
+      "isUpgradable": false,
+      "isPatchable": false,
+      "name": "twisted",
+      "version": "24.11.0"
+    }
+  ],
+  "ok": false,
+  "dependencyCount": 48,
+  "org": "freelancer-marketplace",
+  "policy": "# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.\nversion: v1.25.1\nignore: {}\npatch: {}\n",
+  "isPrivate": true,
+  "licensesPolicy": {
+    "severities": {},
+    "orgLicenseRules": {
+      "AGPL-1.0": {
+        "licenseType": "AGPL-1.0",
+        "severity": "high",
+        "instructions": ""
+      },
+      "AGPL-3.0": {
+        "licenseType": "AGPL-3.0",
+        "severity": "high",
+        "instructions": ""
+      },
+      "Artistic-1.0": {
+        "licenseType": "Artistic-1.0",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "Artistic-2.0": {
+        "licenseType": "Artistic-2.0",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "CDDL-1.0": {
+        "licenseType": "CDDL-1.0",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "CPOL-1.02": {
+        "licenseType": "CPOL-1.02",
+        "severity": "high",
+        "instructions": ""
+      },
+      "EPL-1.0": {
+        "licenseType": "EPL-1.0",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "GPL-2.0": {
+        "licenseType": "GPL-2.0",
+        "severity": "high",
+        "instructions": ""
+      },
+      "GPL-3.0": {
+        "licenseType": "GPL-3.0",
+        "severity": "high",
+        "instructions": ""
+      },
+      "LGPL-2.0": {
+        "licenseType": "LGPL-2.0",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "LGPL-2.1": {
+        "licenseType": "LGPL-2.1",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "LGPL-3.0": {
+        "licenseType": "LGPL-3.0",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "MPL-1.1": {
+        "licenseType": "MPL-1.1",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "MPL-2.0": {
+        "licenseType": "MPL-2.0",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "MS-RL": {
+        "licenseType": "MS-RL",
+        "severity": "medium",
+        "instructions": ""
+      },
+      "SimPL-2.0": {
+        "licenseType": "SimPL-2.0",
+        "severity": "high",
+        "instructions": ""
+      }
+    }
+  },
+  "packageManager": "poetry",
+  "projectId": "ef3c8b5d-2e2a-43d1-9640-f7dbba1694bc",
+  "ignoreSettings": {
+    "adminOnly": false,
+    "reasonRequired": false,
+    "disregardFilesystemIgnores": false
+  },
+  "summary": "12 vulnerable dependency paths",
+  "remediation": {
+    "unresolved": [
+      {
+        "id": "SNYK-PYTHON-ECDSA-6184115",
+        "title": "Timing Attack",
+        "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "credit": [
+          "Hubert Kario"
+        ],
+        "semver": {
+          "vulnerable": [
+            "[0,]"
+          ]
+        },
+        "exploit": "Not Defined",
+        "fixedIn": [],
+        "patches": [],
+        "insights": {
+          "triageAdvice": null
+        },
+        "language": "python",
+        "severity": "high",
+        "cvssScore": 7.4,
+        "functions": [],
+        "malicious": false,
+        "isDisputed": false,
+        "moduleName": "ecdsa",
+        "references": [
+          {
+            "url": "https://github.com/tlsfuzzer/python-ecdsa/blob/master/SECURITY.md",
+            "title": "Additional Information"
+          },
+          {
+            "url": "https://minerva.crocs.fi.muni.cz/",
+            "title": "Additional Information"
+          },
+          {
+            "url": "https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/",
+            "title": "Additional Information"
+          }
+        ],
+        "cvssDetails": [
+          {
+            "assigner": "NVD",
+            "severity": "high",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvssV3BaseScore": 7.4,
+            "modificationTime": "2024-03-11T09:51:23.821976Z"
+          },
+          {
+            "assigner": "Red Hat",
+            "severity": "high",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "cvssV3BaseScore": 7.4,
+            "modificationTime": "2024-03-11T09:49:56.639490Z"
+          }
+        ],
+        "cvssSources": [
+          {
+            "type": "primary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "assigner": "Snyk",
+            "severity": "high",
+            "baseScore": 7.4,
+            "cvssVersion": "3.1",
+            "modificationTime": "2025-03-14T11:07:48.344386Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "assigner": "NVD",
+            "severity": "high",
+            "baseScore": 7.4,
+            "cvssVersion": "3.1",
+            "modificationTime": "2024-03-11T09:51:23.821976Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "assigner": "Red Hat",
+            "severity": "high",
+            "baseScore": 7.4,
+            "cvssVersion": "3.1",
+            "modificationTime": "2024-03-11T09:49:56.639490Z"
+          }
+        ],
+        "description": "## Overview\n[ecdsa](https://pypi.org/project/ecdsa/) is an easy-to-use implementation of ECDSA cryptography (Elliptic Curve Digital Signature Algorithm), implemented purely in Python, released under the MIT license.\n\nAffected versions of this package are vulnerable to Timing Attack via the `sign_digest` API function. An attacker can leak the internal nonce which may allow for private key discovery by timing signatures.\r\n\r\n**Notes:**\r\n\r\n1) This library was not designed with security in mind. If you are processing data that needs to be protected we suggest you use a quality wrapper around OpenSSL. `pyca/cryptography` is one example of such a wrapper\r\n\r\n2) That means both `ECDSA` signatures, key generation and `ECDH` operations are affected. `ECDSA` signature verification is unaffected.\r\n\r\n3) The maintainers don't plan to release a fix to this vulnerability.\n## Remediation\nThere is no fixed version for `ecdsa`.\n\n## References\n- [Additional Information](https://github.com/tlsfuzzer/python-ecdsa/blob/master/SECURITY.md)\n- [Additional Information](https://minerva.crocs.fi.muni.cz/)\n- [Additional Information](https://securitypitfalls.wordpress.com/2018/08/03/constant-time-compare-in-python/)\n",
+        "epssDetails": {
+          "percentile": "0.69238",
+          "probability": "0.00622",
+          "modelVersion": "v2025.03.14"
+        },
+        "identifiers": {
+          "CVE": [
+            "CVE-2024-23342"
+          ],
+          "CWE": [
+            "CWE-208"
+          ],
+          "GHSA": [
+            "GHSA-wj6h-64fc-37mp"
+          ]
+        },
+        "packageName": "ecdsa",
+        "proprietary": false,
+        "creationTime": "2024-01-23T07:39:00.520002Z",
+        "functions_new": [],
+        "alternativeIds": [],
+        "disclosureTime": "2024-01-22T21:35:27Z",
+        "exploitDetails": {
+          "sources": [],
+          "maturityLevels": [
+            {
+              "type": "secondary",
+              "level": "Not Defined",
+              "format": "CVSSv3"
+            },
+            {
+              "type": "primary",
+              "level": "Not Defined",
+              "format": "CVSSv4"
+            }
+          ]
+        },
+        "packageManager": "pip",
+        "publicationTime": "2024-01-23T07:44:20.369188Z",
+        "severityBasedOn": "CVSS",
+        "modificationTime": "2025-03-14T11:07:48.344386Z",
+        "socialTrendAlert": false,
+        "packagePopularityRank": 99,
+        "from": [
+          "backend@0.1.0",
+          "python-jose@3.5.0",
+          "ecdsa@0.19.1"
+        ],
+        "upgradePath": [],
+        "isUpgradable": false,
+        "isPatchable": false,
+        "isPinnable": false,
+        "isRuntime": false,
+        "name": "ecdsa",
+        "version": "0.19.1",
+        "severityWithCritical": "high"
+      },
+      {
+        "id": "SNYK-PYTHON-ECDSA-6219992",
+        "title": "Missing Encryption of Sensitive Data",
+        "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+        "credit": [
+          "Unknown"
+        ],
+        "semver": {
+          "vulnerable": [
+            "[0,]"
+          ]
+        },
+        "exploit": "Not Defined",
+        "fixedIn": [],
+        "patches": [],
+        "insights": {
+          "triageAdvice": null
+        },
+        "language": "python",
+        "severity": "high",
+        "cvssScore": 7.4,
+        "functions": [],
+        "malicious": false,
+        "isDisputed": false,
+        "moduleName": "ecdsa",
+        "references": [
+          {
+            "url": "https://github.com/tlsfuzzer/python-ecdsa/blob/0d5a38ca8ada5f2fec67904236f563f562b402d4/SECURITY.md?plain=1%23L32",
+            "title": "Vulnerable Code"
+          }
+        ],
+        "cvssDetails": [],
+        "cvssSources": [
+          {
+            "type": "primary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "assigner": "Snyk",
+            "severity": "high",
+            "baseScore": 7.4,
+            "cvssVersion": "3.1",
+            "modificationTime": "2025-03-14T11:06:19.435370Z"
+          }
+        ],
+        "description": "## Overview\n[ecdsa](https://pypi.org/project/ecdsa/) is an easy-to-use implementation of ECDSA cryptography (Elliptic Curve Digital Signature Algorithm), implemented purely in Python, released under the MIT license.\n\nAffected versions of this package are vulnerable to Missing Encryption of Sensitive Data due to insufficient protection. For a sophisticated attacker observing just one operation with a private key will be sufficient to completely reconstruct the private key.\r\n\r\n**Note:**\r\nFixes for side-channel vulnerabilities will not be developed.\n## Remediation\nThere is no fixed version for `ecdsa`.\n\n## References\n- [Vulnerable Code](https://github.com/tlsfuzzer/python-ecdsa/blob/0d5a38ca8ada5f2fec67904236f563f562b402d4/SECURITY.md?plain=1#L32)\n",
+        "epssDetails": null,
+        "identifiers": {
+          "CVE": [],
+          "CWE": [
+            "CWE-311"
+          ],
+          "PVE": [
+            "PVE-2024-64396"
+          ]
+        },
+        "packageName": "ecdsa",
+        "proprietary": false,
+        "creationTime": "2024-02-01T09:40:50.072457Z",
+        "functions_new": [],
+        "alternativeIds": [],
+        "disclosureTime": "2024-02-01T06:31:41Z",
+        "exploitDetails": {
+          "sources": [],
+          "maturityLevels": [
+            {
+              "type": "secondary",
+              "level": "Not Defined",
+              "format": "CVSSv3"
+            },
+            {
+              "type": "primary",
+              "level": "Not Defined",
+              "format": "CVSSv4"
+            }
+          ]
+        },
+        "packageManager": "pip",
+        "publicationTime": "2024-02-01T13:34:05.874629Z",
+        "severityBasedOn": "CVSS",
+        "modificationTime": "2025-03-14T11:06:19.435370Z",
+        "socialTrendAlert": false,
+        "packagePopularityRank": 99,
+        "from": [
+          "backend@0.1.0",
+          "python-jose@3.5.0",
+          "ecdsa@0.19.1"
+        ],
+        "upgradePath": [],
+        "isUpgradable": false,
+        "isPatchable": false,
+        "isPinnable": false,
+        "isRuntime": false,
+        "name": "ecdsa",
+        "version": "0.19.1",
+        "severityWithCritical": "high"
+      },
+      {
+        "id": "SNYK-PYTHON-RSA-1038401",
+        "title": "Timing Attack",
+        "CVSSv3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "credit": [
+          "Unknown"
+        ],
+        "semver": {
+          "vulnerable": [
+            "[2.0,4.7)"
+          ]
+        },
+        "exploit": "Not Defined",
+        "fixedIn": [
+          "4.7"
+        ],
+        "patches": [],
+        "insights": {
+          "triageAdvice": null
+        },
+        "language": "python",
+        "severity": "medium",
+        "cvssScore": 5.9,
+        "functions": [],
+        "malicious": false,
+        "isDisputed": false,
+        "moduleName": "rsa",
+        "references": [
+          {
+            "url": "https://github.com/sybrenstuvel/python-rsa/issues/165",
+            "title": "GitHub Issue"
+          },
+          {
+            "url": "https://bugzilla.redhat.com/show_bug.cgi?id=1889972",
+            "title": "RedHat Bugzilla Bug"
+          },
+          {
+            "url": "https://people.redhat.com/~hkario/marvin/",
+            "title": "Vulnerability Report"
+          }
+        ],
+        "cvssDetails": [
+          {
+            "assigner": "NVD",
+            "severity": "medium",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "cvssV3BaseScore": 5.9,
+            "modificationTime": "2024-03-11T09:48:16.119923Z"
+          },
+          {
+            "assigner": "Red Hat",
+            "severity": "medium",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "cvssV3BaseScore": 5.9,
+            "modificationTime": "2024-03-11T09:53:47.525338Z"
+          },
+          {
+            "assigner": "SUSE",
+            "severity": "medium",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "cvssV3BaseScore": 5.9,
+            "modificationTime": "2024-03-11T09:52:26.474164Z"
+          }
+        ],
+        "cvssSources": [
+          {
+            "type": "primary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "assigner": "Snyk",
+            "severity": "medium",
+            "baseScore": 5.9,
+            "cvssVersion": "3.1",
+            "modificationTime": "2024-03-06T14:09:26.946061Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "assigner": "NVD",
+            "severity": "medium",
+            "baseScore": 5.9,
+            "cvssVersion": "3.1",
+            "modificationTime": "2024-03-11T09:48:16.119923Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "assigner": "Red Hat",
+            "severity": "medium",
+            "baseScore": 5.9,
+            "cvssVersion": "3.1",
+            "modificationTime": "2024-03-11T09:53:47.525338Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "assigner": "SUSE",
+            "severity": "medium",
+            "baseScore": 5.9,
+            "cvssVersion": "3.1",
+            "modificationTime": "2024-03-11T09:52:26.474164Z"
+          }
+        ],
+        "description": "## Overview\n[rsa](https://pypi.org/project/rsa/) is a pure-Python RSA implementation.\n\nAffected versions of this package are vulnerable to Timing Attack via timed processing of valid `PKCS#1` v1.5 ciphertext. An attacker can recover ciphertexts via a side-channel attack by exploiting the Marvin security flaw.\n## Remediation\nUpgrade `rsa` to version 4.7 or higher.\n## References\n- [GitHub Issue](https://github.com/sybrenstuvel/python-rsa/issues/165)\n- [RedHat Bugzilla Bug](https://bugzilla.redhat.com/show_bug.cgi?id=1889972)\n- [Vulnerability Report](https://people.redhat.com/~hkario/marvin/)\n",
+        "epssDetails": {
+          "percentile": "0.46006",
+          "probability": "0.00233",
+          "modelVersion": "v2025.03.14"
+        },
+        "identifiers": {
+          "CVE": [
+            "CVE-2020-25658"
+          ],
+          "CWE": [
+            "CWE-208"
+          ]
+        },
+        "packageName": "rsa",
+        "proprietary": false,
+        "creationTime": "2020-11-10T14:17:17.451881Z",
+        "functions_new": [],
+        "alternativeIds": [],
+        "disclosureTime": "2020-11-09T00:00:00Z",
+        "exploitDetails": {
+          "sources": [],
+          "maturityLevels": [
+            {
+              "type": "secondary",
+              "level": "Not Defined",
+              "format": "CVSSv3"
+            },
+            {
+              "type": "primary",
+              "level": "Not Defined",
+              "format": "CVSSv4"
+            }
+          ]
+        },
+        "packageManager": "pip",
+        "publicationTime": "2020-11-10T15:27:31Z",
+        "severityBasedOn": "CVSS",
+        "modificationTime": "2024-03-11T09:53:47.525338Z",
+        "socialTrendAlert": false,
+        "packagePopularityRank": 99,
+        "from": [
+          "backend@0.1.0",
+          "python-jose@3.5.0",
+          "rsa@4.2"
+        ],
+        "upgradePath": [
+          false,
+          "python-jose@3.5.0"
+        ],
+        "isUpgradable": true,
+        "isPatchable": false,
+        "isPinnable": true,
+        "isRuntime": false,
+        "name": "rsa",
+        "version": "4.2",
+        "severityWithCritical": "medium"
+      },
+      {
+        "id": "SNYK-PYTHON-STARLETTE-13733964",
+        "title": "Regular Expression Denial of Service (ReDoS)",
+        "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P",
+        "credit": [
+          "Seokchan Yoon"
+        ],
+        "semver": {
+          "vulnerable": [
+            "[,0.49.1)"
+          ]
+        },
+        "exploit": "Proof of Concept",
+        "fixedIn": [
+          "0.49.1"
+        ],
+        "patches": [],
+        "insights": {
+          "triageAdvice": null
+        },
+        "language": "python",
+        "severity": "high",
+        "cvssScore": 8.7,
+        "functions": [],
+        "malicious": false,
+        "isDisputed": false,
+        "moduleName": "starlette",
+        "references": [
+          {
+            "url": "https://github.com/Kludex/starlette/commit/4ea6e22b489ec388d6004cfbca52dd5b147127c5",
+            "title": "GitHub Commit"
+          },
+          {
+            "url": "https://github.com/Kludex/starlette/releases/tag/0.49.1",
+            "title": "GitHub Release"
+          },
+          {
+            "url": "https://bugzilla.redhat.com/show_bug.cgi?id=2406929",
+            "title": "Red Hat Bugzilla Bug"
+          }
+        ],
+        "cvssDetails": [
+          {
+            "assigner": "Red Hat",
+            "severity": "high",
+            "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "cvssV3BaseScore": 7.5,
+            "modificationTime": "2025-10-30T03:01:24.531259Z"
+          }
+        ],
+        "cvssSources": [
+          {
+            "type": "primary",
+            "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:P",
+            "assigner": "Snyk",
+            "severity": "high",
+            "baseScore": 8.7,
+            "cvssVersion": "4.0",
+            "modificationTime": "2025-10-29T10:33:29.266574Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/E:P",
+            "assigner": "Snyk",
+            "severity": "high",
+            "baseScore": 7.5,
+            "cvssVersion": "3.1",
+            "modificationTime": "2025-10-29T10:33:29.266574Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "assigner": "Red Hat",
+            "severity": "high",
+            "baseScore": 7.5,
+            "cvssVersion": "3.1",
+            "modificationTime": "2025-10-30T03:01:24.531259Z"
+          }
+        ],
+        "description": "## Overview\n[starlette](https://www.pypi.org/project/starlette) is a The little ASGI library that shines.\n\nAffected versions of this package are vulnerable to Regular Expression Denial of Service (ReDoS) via the `FileResponse._parse_range_header` method. An attacker can exhaust server CPU resources by sending a specially crafted HTTP Range header containing numerous small, non-overlapping ranges, which triggers quadratic-time processing during range parsing and merging.\n\n## Details\n\nDenial of Service (DoS) describes a family of attacks, all aimed at making a system inaccessible to its original and legitimate users. There are many types of DoS attacks, ranging from trying to clog the network pipes to the system by generating a large volume of traffic from many machines (a Distributed Denial of Service - DDoS - attack) to sending crafted requests that cause a system to crash or take a disproportional amount of time to process.\n\nThe Regular expression Denial of Service (ReDoS) is a type of Denial of Service attack. Regular expressions are incredibly powerful, but they aren't very intuitive and can ultimately end up making it easy for attackers to take your site down.\n\nLet’s take the following regular expression as an example:\n```js\nregex = /A(B|C+)+D/\n```\n\nThis regular expression accomplishes the following:\n- `A` The string must start with the letter 'A'\n- `(B|C+)+` The string must then follow the letter A with either the letter 'B' or some number of occurrences of the letter 'C' (the `+` matches one or more times). The `+` at the end of this section states that we can look for one or more matches of this section.\n- `D` Finally, we ensure this section of the string ends with a 'D'\n\nThe expression would match inputs such as `ABBD`, `ABCCCCD`, `ABCBCCCD` and `ACCCCCD`\n\nIt most cases, it doesn't take very long for a regex engine to find a match:\n\n```bash\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCD\")'\n0.04s user 0.01s system 95% cpu 0.052 total\n\n$ time node -e '/A(B|C+)+D/.test(\"ACCCCCCCCCCCCCCCCCCCCCCCCCCCCX\")'\n1.79s user 0.02s system 99% cpu 1.812 total\n```\n\nThe entire process of testing it against a 30 characters long string takes around ~52ms. But when given an invalid string, it takes nearly two seconds to complete the test, over ten times as long as it took to test a valid string. The dramatic difference is due to the way regular expressions get evaluated.\n\nMost Regex engines will work very similarly (with minor differences). The engine will match the first possible way to accept the current character and proceed to the next one. If it then fails to match the next one, it will backtrack and see if there was another way to digest the previous character. If it goes too far down the rabbit hole only to find out the string doesn’t match in the end, and if many characters have multiple valid regex paths, the number of backtracking steps can become very large, resulting in what is known as _catastrophic backtracking_.\n\nLet's look at how our expression runs into this problem, using a shorter string: \"ACCCX\". While it seems fairly straightforward, there are still four different ways that the engine could match those three C's:\n1. CCC\n2. CC+C\n3. C+CC\n4. C+C+C.\n\nThe engine has to try each of those combinations to see if any of them potentially match against the expression. When you combine that with the other steps the engine must take, we can use [RegEx 101 debugger](https://regex101.com/debugger) to see the engine has to take a total of 38 steps before it can determine the string doesn't match.\n\nFrom there, the number of steps the engine must use to validate a string just continues to grow.\n\n| String | Number of C's | Number of steps |\n| -------|-------------:| -----:|\n| ACCCX | 3 | 38\n| ACCCCX | 4 | 71\n| ACCCCCX | 5 | 136\n| ACCCCCCCCCCCCCCX | 14 | 65,553\n\n\nBy the time the string includes 14 C's, the engine has to take over 65,000 steps just to see if the string is valid. These extreme situations can cause them to work very slowly (exponentially related to input size, as shown above), allowing an attacker to exploit this and can cause the service to excessively consume CPU, resulting in a Denial of Service.\n\n## Remediation\nUpgrade `starlette` to version 0.49.1 or higher.\n## References\n- [GitHub Commit](https://github.com/Kludex/starlette/commit/4ea6e22b489ec388d6004cfbca52dd5b147127c5)\n- [GitHub Release](https://github.com/Kludex/starlette/releases/tag/0.49.1)\n- [Red Hat Bugzilla Bug](https://bugzilla.redhat.com/show_bug.cgi?id=2406929)\n",
+        "epssDetails": {
+          "percentile": "0.62356",
+          "probability": "0.00440",
+          "modelVersion": "v2025.03.14"
+        },
+        "identifiers": {
+          "CVE": [
+            "CVE-2025-62727"
+          ],
+          "CWE": [
+            "CWE-1333"
+          ],
+          "GHSA": [
+            "GHSA-7f5h-v6xp-fcq8"
+          ]
+        },
+        "packageName": "starlette",
+        "proprietary": false,
+        "creationTime": "2025-10-29T09:39:43.799559Z",
+        "functions_new": [],
+        "alternativeIds": [],
+        "disclosureTime": "2025-10-28T20:38:01Z",
+        "exploitDetails": {
+          "sources": [
+            "Snyk"
+          ],
+          "maturityLevels": [
+            {
+              "type": "secondary",
+              "level": "Proof of Concept",
+              "format": "CVSSv3"
+            },
+            {
+              "type": "primary",
+              "level": "Proof of Concept",
+              "format": "CVSSv4"
+            }
+          ]
+        },
+        "packageManager": "pip",
+        "publicationTime": "2025-10-29T10:33:29.255480Z",
+        "severityBasedOn": "CVSS",
+        "modificationTime": "2025-10-30T03:01:24.531259Z",
+        "socialTrendAlert": false,
+        "packagePopularityRank": 99,
+        "from": [
+          "backend@0.1.0",
+          "fastapi@0.116.2",
+          "starlette@0.48.0"
+        ],
+        "upgradePath": [
+          false,
+          "fastapi@0.116.2"
+        ],
+        "isUpgradable": true,
+        "isPatchable": false,
+        "isPinnable": true,
+        "isRuntime": false,
+        "name": "starlette",
+        "version": "0.48.0",
+        "severityWithCritical": "high"
+      },
+      {
+        "id": "SNYK-PYTHON-TWISTED-12671201",
+        "title": "Arbitrary Command Injection",
+        "CVSSv3": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P",
+        "credit": [
+          "Just Insecure"
+        ],
+        "semver": {
+          "vulnerable": [
+            "[0,]"
+          ]
+        },
+        "exploit": "Proof of Concept",
+        "fixedIn": [],
+        "patches": [],
+        "insights": {
+          "triageAdvice": null
+        },
+        "language": "python",
+        "severity": "medium",
+        "cvssScore": 6.9,
+        "functions": [],
+        "malicious": false,
+        "isDisputed": false,
+        "moduleName": "twisted",
+        "references": [
+          {
+            "url": "https://medium.com/@Justinsecure/chained-rce-on-twistedweb-14-0-0-via-command-injection-and-unauthenticated-put-1aa657995b4e",
+            "title": "Medium Blog"
+          }
+        ],
+        "cvssDetails": [],
+        "cvssSources": [
+          {
+            "type": "primary",
+            "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:P",
+            "assigner": "Snyk",
+            "severity": "medium",
+            "baseScore": 6.9,
+            "cvssVersion": "4.0",
+            "modificationTime": "2025-09-15T15:01:16.337398Z"
+          },
+          {
+            "type": "secondary",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N/E:P",
+            "assigner": "Snyk",
+            "severity": "medium",
+            "baseScore": 6.5,
+            "cvssVersion": "3.1",
+            "modificationTime": "2025-09-15T15:01:16.337398Z"
+          }
+        ],
+        "description": "## Overview\n[Twisted](https://pypi.org/project/Twisted/) is an event-based network programming and multi-protocol integration framework.\n\nAffected versions of this package are vulnerable to Arbitrary Command Injection via improper input sanitization in the file upload process. An attacker can execute arbitrary commands on the target system by sending a specially crafted HTTP PUT request to upload a malicious file and subsequently triggering its execution. This can result in remote code execution and potential privilege escalation depending on the web server's permissions.\n## Remediation\nThere is no fixed version for `Twisted`.\n## References\n- [Medium Blog](https://medium.com/@Justinsecure/chained-rce-on-twistedweb-14-0-0-via-command-injection-and-unauthenticated-put-1aa657995b4e)\n",
+        "epssDetails": {
+          "percentile": "0.74097",
+          "probability": "0.00847",
+          "modelVersion": "v2025.03.14"
+        },
+        "identifiers": {
+          "CVE": [
+            "CVE-2025-50688"
+          ],
+          "CWE": [
+            "CWE-77"
+          ]
+        },
+        "packageName": "twisted",
+        "proprietary": false,
+        "creationTime": "2025-09-15T10:41:09.206177Z",
+        "functions_new": [],
+        "alternativeIds": [],
+        "disclosureTime": "2025-08-05T17:42:58Z",
+        "exploitDetails": {
+          "sources": [
+            "Snyk"
+          ],
+          "maturityLevels": [
+            {
+              "type": "secondary",
+              "level": "Proof of Concept",
+              "format": "CVSSv3"
+            },
+            {
+              "type": "primary",
+              "level": "Proof of Concept",
+              "format": "CVSSv4"
+            }
+          ]
+        },
+        "packageManager": "pip",
+        "publicationTime": "2025-09-15T15:01:16.322102Z",
+        "severityBasedOn": "CVSS",
+        "modificationTime": "2025-09-15T15:01:16.337398Z",
+        "socialTrendAlert": false,
+        "packagePopularityRank": 92,
+        "from": [
+          "backend@0.1.0",
+          "twisted@24.11.0"
+        ],
+        "upgradePath": [],
+        "isUpgradable": false,
+        "isPatchable": false,
+        "isPinnable": false,
+        "isRuntime": false,
+        "name": "twisted",
+        "version": "24.11.0",
+        "severityWithCritical": "medium"
+      }
+    ],
+    "upgrade": {
+      "aiomysql@0.2.0": {
+        "upgradeTo": "aiomysql@0.3.0",
+        "upgrades": [
+          "aiomysql@0.2.0"
+        ],
+        "vulns": [
+          "SNYK-PYTHON-AIOMYSQL-13671310"
+        ]
+      },
+      "cryptography@42.0.8": {
+        "upgradeTo": "cryptography@44.0.1",
+        "upgrades": [
+          "cryptography@42.0.8",
+          "cryptography@42.0.8"
+        ],
+        "vulns": [
+          "SNYK-PYTHON-CRYPTOGRAPHY-8715586",
+          "SNYK-PYTHON-CRYPTOGRAPHY-7886970"
+        ]
+      }
+    },
+    "patch": {},
+    "ignore": {},
+    "pin": {
+      "aiomysql@0.2.0": {
+        "upgradeTo": "aiomysql@0.3.0",
+        "vulns": [
+          "SNYK-PYTHON-AIOMYSQL-13671310"
+        ],
+        "isTransitive": false
+      },
+      "cryptography@42.0.8": {
+        "upgradeTo": "cryptography@44.0.1",
+        "vulns": [
+          "SNYK-PYTHON-CRYPTOGRAPHY-7886970",
+          "SNYK-PYTHON-CRYPTOGRAPHY-8715586"
+        ],
+        "isTransitive": false
+      },
+      "rsa@4.2": {
+        "upgradeTo": "rsa@4.7",
+        "vulns": [
+          "SNYK-PYTHON-RSA-1038401"
+        ],
+        "isTransitive": true
+      },
+      "starlette@0.48.0": {
+        "upgradeTo": "starlette@0.49.1",
+        "vulns": [
+          "SNYK-PYTHON-STARLETTE-13733964"
+        ],
+        "isTransitive": true
+      }
+    }
+  },
+  "filesystemPolicy": false,
+  "filtered": {
+    "ignore": [],
+    "patch": []
+  },
+  "uniqueCount": 8,
+  "targetFile": "pyproject.toml",
+  "projectName": "backend",
+  "foundProjectCount": 1,
+  "displayTargetFile": "pyproject.toml",
+  "hasUnknownVersions": false,
+  "path": "/mnt/e/SWE5006/freelancer-marketplace/backend"
+}

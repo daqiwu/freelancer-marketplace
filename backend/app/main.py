@@ -32,6 +32,51 @@ app.add_middleware(
     allow_headers=["*"],  # 允许所有请求头
 )
 
+
+# 🔒 Security Headers Middleware - DAST Protection
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    """
+    Add security headers to all responses to protect against common attacks.
+    This fixes critical DAST findings:
+    - HSTS: Prevents man-in-the-middle attacks
+    - CSP: Prevents XSS and injection attacks
+    - X-Frame-Options: Prevents clickjacking
+    - X-Content-Type-Options: Prevents MIME sniffing
+    """
+    response = await call_next(request)
+    
+    # CRITICAL: Force HTTPS (prevents man-in-the-middle attacks)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    
+    # HIGH: Prevent MIME type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    
+    # HIGH: Prevent clickjacking attacks
+    response.headers["X-Frame-Options"] = "DENY"
+    
+    # HIGH: Content Security Policy (prevents XSS)
+    # Allow unsafe-inline for Swagger UI to work properly
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data:; "
+    )
+    
+    # MEDIUM: XSS Protection for legacy browsers
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    
+    # MEDIUM: Control referrer information leakage
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    
+    # LOW: Control browser features
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    
+    return response
+
+
 app.include_router(marketplace_router)
 app.include_router(auth_router)
 app.include_router(orders_router)
@@ -46,22 +91,64 @@ app.include_router(review_router)
 app.include_router(security_router)
 
 
+# 🏥 Root endpoint - AWS App Runner default health check
+@app.get("/")
+async def root():
+    """
+    Root endpoint for AWS App Runner default health check.
+    Redirects to API documentation.
+    """
+    return {
+        "message": "Freelancer Marketplace API",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
+
+# 🏥 Health check endpoint for AWS App Runner / Load Balancers
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for AWS App Runner, ALB, and monitoring.
+    Returns 200 OK if the application is running.
+    """
+    return {
+        "status": "healthy",
+        "service": "freelancer-marketplace-api",
+        "timestamp": "2025-11-07"
+    }
+
+
 # 启动时创建数据库表
 @app.on_event("startup")
 async def startup_event():
+    """
+    Initialize database on startup.
+    Handles errors gracefully to prevent 502 errors in AWS App Runner.
+    """
     try:
+        # Create database tables
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        print("数据库表创建完成！")
+        print("✅ 数据库表创建完成！")
 
-        # 初始化数据库（包括创建管理员账户）
-        from init_db import init_db
-
-        await init_db()
+        # Initialize database (create admin account, etc.)
+        # Import here to avoid circular dependencies
+        try:
+            from init_db import init_db
+            await init_db()
+            print("✅ 数据库初始化完成")
+        except ImportError:
+            print("⚠️  init_db module not found, skipping initialization")
+        except Exception as init_error:
+            print(f"⚠️  数据库初始化警告: {init_error}")
+            # Continue anyway - admin account may already exist
 
     except Exception as e:
-        print(f"数据库初始化失败: {e}")
-        # 继续运行，不因为数据库问题停止服务
+        print(f"❌ 数据库启动错误: {e}")
+        # Don't raise - allow app to start even if DB connection fails temporarily
+        # AWS App Runner needs the app to respond to health checks
 
 
 if __name__ == "__main__":

@@ -1,21 +1,46 @@
-# 使用 Node 官方轻量镜像
-FROM node:20-alpine
+# ============================================
+# Stage 1: Build Stage - Build the Vue.js App
+# ============================================
+FROM node:18-alpine AS builder
 
-# 设置工作目录
+# Set working directory
 WORKDIR /app
 
-# 先复制 package.json 和 package-lock.json（或 pnpm-lock.yaml / yarn.lock）
-# 这样可以利用 Docker 缓存，加快重建速度
+# Copy package files for better layer caching
 COPY package*.json ./
 
-# 安装依赖
-RUN npm install
+# Install dependencies using npm ci (faster & more reliable for CI/CD)
+RUN npm ci --only=production=false
 
-# 复制项目其他文件
+# Copy source code
 COPY . .
 
-# 暴露 Vue 默认端口
-EXPOSE 8080
+# Build the production-ready static files
+RUN npm run build
 
-# 设置容器启动命令
-CMD ["npm", "run", "serve", "--", "--host", "0.0.0.0", "--port", "8080"]
+# ============================================
+# Stage 2: Production Stage - Serve with Nginx
+# ============================================
+FROM nginx:1.25-alpine AS production
+
+# Install curl for healthchecks
+RUN apk add --no-cache curl
+
+# Remove default nginx config
+RUN rm -rf /etc/nginx/conf.d/default.conf
+
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built files from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost/ || exit 1
+
+# Run nginx in foreground
+CMD ["nginx", "-g", "daemon off;"]
