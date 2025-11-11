@@ -59,16 +59,34 @@ jobs:
         working-directory: backend
         run: |
           echo "🎨 Formatting code with Black..."
-          black --line-length 200 app/ tests/
+          # Only run Black on paths that exist to avoid failing when tests/ is absent
+          TARGETS=""
+          [ -d app ] && TARGETS="$TARGETS app"
+          [ -d tests ] && TARGETS="$TARGETS tests"
+          if [ -z "$TARGETS" ]; then
+            echo "⚠️ No target directories (app/ or tests/) found for Black. Skipping formatting."
+          else
+            echo "Running: black --line-length 200 $TARGETS"
+            black --line-length 200 $TARGETS
+          fi
           echo "✅ Black formatting completed!"
 
       - name: Run isort (Import Sorting)
         working-directory: backend
         run: |
           echo "� Sorting imports with isort..."
-          isort --profile black --line-length 200 app/ tests/
+          # Only run isort on paths that exist to avoid failing when tests/ is absent
+          TARGETS=""
+          [ -d app ] && TARGETS="$TARGETS app"
+          [ -d tests ] && TARGETS="$TARGETS tests"
+          if [ -z "$TARGETS" ]; then
+            echo "⚠️ No target directories (app/ or tests/) found for isort. Skipping import sorting."
+          else
+            echo "Running: isort --profile black --line-length 200 $TARGETS"
+            isort --profile black --line-length 200 $TARGETS
+          fi
           echo "✅ Import sorting completed!"
-          
+
 
       - name: Check for formatting changes
         working-directory: backend
