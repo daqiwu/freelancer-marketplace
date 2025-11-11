@@ -1,9 +1,11 @@
 import time
+from datetime import datetime, timedelta
 
 import pytest
 from httpx import AsyncClient
 
 DEPLOY_URL = "https://freelancer-marketplace-api.onrender.com"
+
 
 @pytest.mark.asyncio
 async def test_publish_order_api():
@@ -340,3 +342,117 @@ async def test_list_order_history_api():
         statuses = [o["status"] for o in orders]
         assert "pending_review" in statuses or "pending" in statuses
         assert "cancelled" in statuses
+
+
+class TestCustomerOrders:
+    """客户订单功能测试"""
+
+    def test_publish_order_success(self, client, customer_token):
+        """测试发布订单成功"""
+        future_time = datetime.now() + timedelta(days=1)
+        response = client.post(
+            "/customer/orders/publish",
+            headers={"Authorization": f"Bearer {customer_token}"},
+            json={
+                "title": "House Cleaning",
+                "description": "Need professional cleaning",
+                "service_type": "cleaning",
+                "price": 100.0,
+                "location": "NORTH",
+                "address": "123 Main St",
+                "service_start_time": future_time.isoformat(),
+                "service_end_time": (future_time + timedelta(hours=2)).isoformat()
+            }
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["title"] == "House Cleaning"
+        assert data["status"] == "pending_review"
+
+    def test_publish_order_with_sensitive_info(self, client, customer_token):
+        """测试包含敏感信息的订单被拒绝"""
+        future_time = datetime.now() + timedelta(days=1)
+        response = client.post(
+            "/customer/orders/publish",
+            headers={"Authorization": f"Bearer {customer_token}"},
+            json={
+                "title": "Test Order",
+                "description": "Call me at 13812345678",
+                "service_type": "cleaning",
+                "price": 100.0,
+                "location": "NORTH",
+                "address": "123 Main St",
+                "service_start_time": future_time.isoformat(),
+                "service_end_time": (future_time + timedelta(hours=2)).isoformat()
+            }
+        )
+        assert response.status_code == 400
+
+    def test_publish_order_negative_price(self, client, customer_token):
+        """测试负价格订单被拒绝"""
+        future_time = datetime.now() + timedelta(days=1)
+        response = client.post(
+            "/customer/orders/publish",
+            headers={"Authorization": f"Bearer {customer_token}"},
+            json={
+                "title": "Test Order",
+                "description": "Test",
+                "service_type": "cleaning",
+                "price": -10.0,
+                "location": "NORTH",
+                "address": "123 Main St",
+                "service_start_time": future_time.isoformat(),
+                "service_end_time": (future_time + timedelta(hours=2)).isoformat()
+            }
+        )
+        assert response.status_code == 400
+
+    def test_get_my_orders(self, client, customer_token, sample_order):
+        """测试获取我的订单列表"""
+        response = client.get(
+            "/customer/orders/my",
+            headers={"Authorization": f"Bearer {customer_token}"}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) > 0
+
+    def test_get_order_detail(self, client, customer_token, sample_order):
+        """测试获取订单详情"""
+        response = client.get(
+            f"/customer/orders/my/{sample_order.id}",
+            headers={"Authorization": f"Bearer {customer_token}"}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == sample_order.id
+
+    def test_cancel_order_success(self, client, customer_token, sample_order):
+        """测试取消订单成功"""
+        response = client.post(
+            f"/customer/orders/cancel/{sample_order.id}",
+            headers={"Authorization": f"Bearer {customer_token}"}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "cancelled"
+
+    def test_submit_review_success(self, client, customer_token, completed_order):
+        """测试提交评价成功"""
+        # 先支付订单
+        client.post(
+            f"/customer/orders/pay/{completed_order.id}",
+            headers={"Authorization": f"Bearer {customer_token}"}
+        )
+        
+        # 提交评价
+        response = client.post(
+            "/customer/orders/review",
+            headers={"Authorization": f"Bearer {customer_token}"},
+            json={
+                "order_id": completed_order.id,
+                "stars": 5,
+                "content": "Excellent service!"
+            }
+        )
+        assert response.status_code == 200

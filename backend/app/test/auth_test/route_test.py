@@ -141,3 +141,106 @@ class TestAuthRoutes:
         """测试登录端点存在"""
         response = client.post("/auth/login", json={})
         assert response.status_code != 404
+
+    def test_register_endpoint(self, client):
+        """测试注册端点"""
+        response = client.post(
+            "/auth/register",
+            json={
+                "username": "newuser",
+                "email": "newuser@test.com",
+                "password": "password123",
+                "role_id": 1,
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["username"] == "newuser"
+        assert data["email"] == "newuser@test.com"
+        assert "password_hash" not in data
+
+    def test_register_invalid_email(self, client):
+        """测试无效邮箱注册"""
+        response = client.post(
+            "/auth/register",
+            json={
+                "username": "testuser",
+                "email": "invalid-email",
+                "password": "password123",
+                "role_id": 1,
+            },
+        )
+        assert response.status_code == 422
+
+    def test_register_missing_fields(self, client):
+        """测试缺少字段"""
+        response = client.post(
+            "/auth/register",
+            json={
+                "username": "testuser",
+                "email": "test@test.com"
+            },
+        )
+        assert response.status_code == 422
+
+    def test_login_endpoint(self, client, customer_user):
+        """测试登录端点"""
+        response = client.post(
+            "/auth/login",
+            json={
+                "email": "customer@test.com",
+                "password": "password123"
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data
+        assert data["token_type"] == "bearer"
+
+    def test_login_invalid_credentials(self, client):
+        """测试无效凭证登录"""
+        response = client.post(
+            "/auth/login",
+            json={
+                "email": "wrong@test.com",
+                "password": "wrongpass"
+            },
+        )
+        assert response.status_code == 401
+
+    def test_get_current_user(self, client, customer_token):
+        """测试获取当前用户"""
+        response = client.get(
+            "/auth/me",
+            headers={"Authorization": f"Bearer {customer_token}"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["email"] == "customer@test.com"
+        assert data["role_id"] == 1
+
+    def test_get_current_user_without_token(self, client):
+        """测试无Token获取用户"""
+        response = client.get("/auth/me")
+        assert response.status_code == 401
+
+    def test_get_current_user_invalid_token(self, client):
+        """测试无效Token"""
+        response = client.get(
+            "/auth/me",
+            headers={"Authorization": "Bearer invalid_token"},
+        )
+        assert response.status_code == 401
+
+    def test_register_duplicate_prevention(self, client, customer_user):
+        """测试防止重复注册"""
+        response = client.post(
+            "/auth/register",
+            json={
+                "username": "test_customer",
+                "email": "customer@test.com",
+                "password": "password123",
+                "role_id": 1,
+            },
+        )
+        assert response.status_code == 400
