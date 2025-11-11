@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - bala
     paths:
       - frontend/**
       - ".github/workflows/frontend-ci-cd.yml"
