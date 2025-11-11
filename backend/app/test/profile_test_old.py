@@ -5,8 +5,8 @@ import pytest
 
 
 # Skipping external API tests that timeout
-# @pytest.mark.asyncio
-# async def test_get_my_profile_customer():
+@pytest.mark.asyncio
+async def test_get_my_profile_customer():
     async with AsyncClient(base_url=DEPLOY_URL, timeout=30.0) as ac:
         # 清理测试用户  # Clean up test user
         timestamp = str(int(time.time()))
