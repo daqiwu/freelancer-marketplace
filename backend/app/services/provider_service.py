@@ -67,14 +67,14 @@ async def accept_order(
 
     await db.commit()
     await db.refresh(order)
-    # 通知客户
+    # Notify customer
     await send_customer_notification(
         db,
         order.customer_id,
         order.id,
         f"Your order: {order.id} has been accepted by the provider: {provider_id}.",
     )
-    # 通知服务商
+    # Notify provider
     await send_provider_notification(
         db,
         provider_id,
@@ -121,7 +121,7 @@ async def update_order_status(
     order.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(order)
-    # 通知逻辑
+    # Notification logic
     if new_status == OrderStatus.in_progress:
         await send_customer_notification(
             db,
@@ -203,7 +203,7 @@ async def get_order_detail_for_provider(
         return None
 
     review_data = None
-    # 查询评价（如果存在）
+    # Query review (if exists)
     review_result = await db.execute(select(Review).where(Review.order_id == order_id))
     review = review_result.scalars().first()
     if review:

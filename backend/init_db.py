@@ -11,19 +11,19 @@ from app.models.models import Base, Role, User
 
 DATABASE_URL = settings.DATABASE_URL
 
-# 创建异步引擎
+# Create async engine
 engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def init_db():
-    """异步初始化数据库"""
+    """Async database initialization"""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
     async with AsyncSessionLocal() as session:
         try:
-            # 创建角色
+            # Create roles
             for role_name in ["customer", "provider", "admin"]:
                 from sqlalchemy.future import select
 
@@ -38,22 +38,22 @@ async def init_db():
 
             await session.commit()
 
-            # 创建预设管理员账户
+            # Create preset admin account
             result = await session.execute(
                 select(Role).where(Role.role_name == "admin")
             )
             admin_role = result.scalar_one_or_none()
 
             if admin_role:
-                # 检查是否已存在管理员账户
+                # Check if admin account already exists
                 result = await session.execute(
                     select(User).where(User.email == "admin@freelancer-platform.com")
                 )
                 existing_admin = result.scalar_one_or_none()
 
                 if not existing_admin:
-                    # 创建管理员账户
-                    admin_password = "AdminSecure2024!"  # 强密码
+                    # Create admin account
+                    admin_password = "AdminSecure2024!"  # Strong password
                     hashed_password = bcrypt.hashpw(
                         admin_password.encode("utf-8"), bcrypt.gensalt()
                     ).decode("utf-8")
@@ -69,28 +69,28 @@ async def init_db():
                     session.add(admin_user)
                     await session.commit()
 
-                    print("✅ 预设管理员账户创建成功！")
-                    print(f"   用户名: system_admin")
-                    print(f"   邮箱: admin@freelancer-platform.com")
-                    print(f"   密码: AdminSecure2024!")
-                    print(f"   角色: 管理员")
+                    print("✅ Preset admin account created successfully!")
+                    print(f"   Username: system_admin")
+                    print(f"   Email: admin@freelancer-platform.com")
+                    print(f"   Password: AdminSecure2024!")
+                    print(f"   Role: Admin")
                 else:
-                    print("ℹ️  管理员账户已存在，跳过创建")
+                    print("ℹ️  Admin account already exists, skipping creation")
             else:
-                print("❌ 管理员角色不存在，无法创建管理员账户")
+                print("❌ Admin role does not exist, cannot create admin account")
 
         except Exception as e:
-            print(f"❌ 数据库初始化失败: {e}")
+            print(f"❌ Database initialization failed: {e}")
             await session.rollback()
             import traceback
 
             traceback.print_exc()
 
-    print("数据库初始化完成")
+    print("Database initialization completed")
 
 
 def run_init_db():
-    """同步包装器"""
+    """Sync wrapper"""
     asyncio.run(init_db())
 
 
