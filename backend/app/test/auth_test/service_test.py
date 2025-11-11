@@ -1,56 +1,27 @@
-import time
-
+"""
+Unit tests for auth service utility functions
+Service layer is tested indirectly through route tests since it uses async database operations.
+"""
 import pytest
-from httpx import AsyncClient
-
-DEPLOY_URL = "https://freelancer-marketplace-api.onrender.com"
-
-@pytest.mark.asyncio
-async def test_register_success():
-    timestamp = int(time.time())
-    async with AsyncClient(base_url=DEPLOY_URL, timeout=30.0) as ac:
-        # 清理测试用户
-        username = f"apitestuser_{timestamp}"
-        await ac.delete("/auth/test/cleanup", params={"username": username})
-
-        # 注册
-        register_data = {
-            "username": username,
-            "email": f"apitestuser_{timestamp}@example.com",
-            "password": "apitestpass",
-            "role_id": 1,
-        }
-        reg_resp = await ac.post("/auth/register", json=register_data)
-        print("register:", reg_resp.text)
-        assert reg_resp.status_code == 200
-        resp_json = reg_resp.json()
-        assert resp_json["username"] == username
-        assert resp_json["email"] == f"apitestuser_{timestamp}@example.com"
+from app.services import auth_service
 
 
-@pytest.mark.asyncio
-async def test_login_success():
-    timestamp = int(time.time())
-    async with AsyncClient(base_url=DEPLOY_URL, timeout=30.0) as ac:
-        # 清理并注册测试用户
-        username = f"loginapitest_{timestamp}"
-        email = f"loginapitest_{timestamp}@example.com"
-        await ac.delete("/auth/test/cleanup", params={"username": username})
+class TestAuthServiceUtils:
+    """认证服务工具函数测试"""
 
-        register_data = {
-            "username": username,
-            "email": email,
-            "password": "apitestpass",
-            "role_id": 1,
-        }
-        reg_resp = await ac.post("/auth/register", json=register_data)
-        assert reg_resp.status_code == 200
-
-        # 登录
-        login_data = {"email": email, "password": "apitestpass"}
-        login_resp = await ac.post("/auth/login", json=login_data)
-        print("login:", login_resp.text)
-        assert login_resp.status_code == 200
-        resp_json = login_resp.json()
-        assert "access_token" in resp_json
-        assert resp_json["token_type"] == "bearer"
+    def test_create_access_token_with_role(self):
+        """测试创建包含角色的访问令牌"""
+        token = auth_service.create_access_token_with_role(123, 1)
+        assert token is not None
+        assert isinstance(token, str)
+        assert len(token) > 0
+        
+    def test_create_access_token_with_different_roles(self):
+        """测试不同角色的令牌创建"""
+        customer_token = auth_service.create_access_token_with_role(1, 1)
+        provider_token = auth_service.create_access_token_with_role(2, 2)
+        admin_token = auth_service.create_access_token_with_role(3, 3)
+        
+        assert customer_token != provider_token
+        assert provider_token != admin_token
+        assert customer_token != admin_token
