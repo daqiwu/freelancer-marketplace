@@ -19,14 +19,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # 添加 in_progress 和 reviewed 到 ENUM 列
+    # Add in_progress and reviewed to ENUM column
     op.execute(
         "ALTER TABLE orders MODIFY status ENUM('pending','accepted','in_progress','completed','reviewed','cancelled')"
     )
 
 
 def downgrade() -> None:
-    # 回滚时移除 in_progress 和 reviewed
+    # Remove in_progress and reviewed on rollback
     op.execute(
         "ALTER TABLE orders MODIFY status ENUM('pending','accepted','completed','cancelled')"
     )

@@ -7,14 +7,14 @@
       
       <div class="tasks-section">
         <div class="section-header">
-          <h2>{{ isCustomer ? '我的发布' : '热门任务' }}</h2>
+          <h2>{{ isCustomer ? 'My Posts' : 'Popular Tasks' }}</h2>
           <div class="header-actions">
             <div v-if="!isCustomer" class="sort-options">
               <select v-model="sortBy" @change="handleSort" class="sort-select">
-                <option value="latest">最新发布</option>
-                <option value="price-high">价格从高到低</option>
-                <option value="price-low">价格从低到高</option>
-                <option value="deadline">截止时间</option>
+                <option value="latest">Latest</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="deadline">Deadline</option>
               </select>
             </div>
             <button v-if="isCustomer" class="publish-btn" @click="publishTask">
@@ -22,14 +22,14 @@
                 <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              发布任务
+              Publish Task
             </button>
           </div>
         </div>
         
         <div v-if="loading" class="loading-container">
           <div class="loading-spinner"></div>
-          <p>正在加载任务...</p>
+          <p>Loading tasks...</p>
         </div>
         
         <div v-else-if="filteredTasks.length === 0" class="empty-state">
@@ -38,8 +38,8 @@
               <path d="M9 11H15M9 15H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V19C19 20.1046 18.1046 21 17 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <h3>暂无任务</h3>
-          <p>没有找到符合条件的任务，请尝试调整搜索条件</p>
+          <h3>No Tasks</h3>
+          <p>No tasks found matching your criteria. Try adjusting your search.</p>
         </div>
         
         <div v-else class="tasks-grid">
@@ -50,13 +50,13 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                修改
+                Edit
               </button>
               <button class="action-btn delete-btn" @click="deleteTask(task)">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M3 6H5H21M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                删除
+                Delete
               </button>
             </div>
           </div>
@@ -92,18 +92,18 @@ export default {
     return {
       loading: false,
       searchQuery: '',
-      selectedCategory: '全部',
+      selectedCategory: 'All',
       sortBy: 'latest',
       currentPage: 1,
       itemsPerPage: 8,
       tasks: [
         {
           id: 1,
-          title: '网站前端开发项目',
-          category: '技术开发',
-          location: '北京市朝阳区',
-          type: 'Web开发',
-          description: '需要开发一个响应式的企业官网，包含首页、产品展示、关于我们等页面，要求使用Vue.js框架。',
+          title: 'Website Frontend Development',
+          category: 'Tech Development',
+          location: 'Beijing Chaoyang District',
+          type: 'Web Development',
+          description: 'Need to develop a responsive corporate website including homepage, product showcase, about us pages using Vue.js framework.',
           budget: 15000,
           startTime: '2024-01-20',
           endTime: '2024-02-15',
@@ -111,11 +111,11 @@ export default {
         },
         {
           id: 2,
-          title: '品牌Logo设计',
-          category: '设计创意',
-          location: '上海市浦东新区',
-          type: '平面设计',
-          description: '为新兴科技公司设计现代化Logo，要求简洁大气，符合科技感定位。',
+          title: 'Brand Logo Design',
+          category: 'Design',
+          location: 'Shanghai Pudong District',
+          type: 'Graphic Design',
+          description: 'Design a modern logo for a tech startup, simple and elegant with a technology-oriented positioning.',
           budget: 3000,
           startTime: '2024-01-15',
           endTime: '2024-01-30',
@@ -123,11 +123,11 @@ export default {
         },
         {
           id: 3,
-          title: '社交媒体营销推广',
-          category: '营销推广',
-          location: '广州市天河区',
-          type: '数字营销',
-          description: '负责公司在微信、微博、抖音等平台的日常运营和内容创作，提升品牌知名度。',
+          title: 'Social Media Marketing',
+          category: 'Marketing',
+          location: 'Guangzhou Tianhe District',
+          type: 'Digital Marketing',
+          description: 'Manage daily operations and content creation on WeChat, Weibo, Douyin platforms to enhance brand awareness.',
           budget: 8000,
           startTime: '2024-02-01',
           endTime: '2024-03-01',
@@ -135,11 +135,11 @@ export default {
         },
         {
           id: 4,
-          title: '英语口语培训',
-          category: '教育培训',
-          location: '深圳市南山区',
-          type: '在线教育',
-          description: '为职场人士提供一对一英语口语培训，帮助提升商务英语沟通能力。',
+          title: 'English Speaking Training',
+          category: 'Education',
+          location: 'Shenzhen Nanshan District',
+          type: 'Online Education',
+          description: 'Provide one-on-one English speaking training for professionals to improve business English communication.',
           budget: 200,
           startTime: '2024-02-01',
           endTime: '2024-02-28',

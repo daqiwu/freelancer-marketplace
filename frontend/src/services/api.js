@@ -1,4 +1,4 @@
-// API服务文件 - 统一管理所有后端API调用
+// API service file - Unified management of all backend API calls
 const API_BASE_URL = 'http://localhost:8000'
 
 class ApiService {
@@ -6,23 +6,23 @@ class ApiService {
     this.baseURL = API_BASE_URL
   }
 
-  // 获取认证token
+  // Get authentication token
   getAuthToken() {
     return localStorage.getItem('access_token') || sessionStorage.getItem('access_token')
   }
 
-  // 设置认证token
+  // Set authentication token
   setAuthToken(token) {
     localStorage.setItem('access_token', token)
   }
 
-  // 清除认证token
+  // Clear authentication token
   clearAuthToken() {
     localStorage.removeItem('access_token')
     sessionStorage.removeItem('access_token')
   }
 
-  // 通用请求方法
+  // Common request method
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
     const token = this.getAuthToken()
@@ -47,20 +47,20 @@ class ApiService {
       const response = await fetch(url, config)
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: '请求失败' }))
+        const errorData = await response.json().catch(() => ({ detail: 'Request failed' }))
         throw new Error(errorData.detail || `HTTP ${response.status}`)
       }
 
       return await response.json()
     } catch (error) {
-      console.error('API请求失败:', error)
+      console.error('API request failed:', error)
       throw error
     }
   }
 
-  // ========== 认证相关 API ==========
+  // ========== Authentication APIs ==========
 
-  // 用户注册
+  // User registration
   async register(userData) {
     return this.request('/auth/register', {
       method: 'POST',
@@ -68,7 +68,7 @@ class ApiService {
     })
   }
 
-  // 用户登录
+  // User login
   async login(credentials) {
     const response = await this.request('/auth/login', {
       method: 'POST',
@@ -82,7 +82,7 @@ class ApiService {
     return response
   }
 
-  // 用户登出
+  // User logout
   async logout() {
     try {
       await this.request('/auth/logout', {
@@ -93,9 +93,9 @@ class ApiService {
     }
   }
 
-  // ========== 客户订单相关 API ==========
+  // ========== Customer Order APIs ==========
 
-  // 发布订单
+  // Publish order
   async publishOrder(orderData) {
     return this.request('/customer/orders/publish', {
       method: 'POST',
@@ -103,29 +103,29 @@ class ApiService {
     })
   }
 
-  // 取消订单
+  // Cancel order
   async cancelOrder(orderId) {
     return this.request(`/customer/orders/cancel/${orderId}`, {
       method: 'POST'
     })
   }
 
-  // 获取我的订单（未完成）
+  // Get my orders (incomplete)
   async getMyOrders() {
     return this.request('/customer/orders/my')
   }
 
-  // 获取订单详情
+  // Get order details
   async getOrderDetail(orderId) {
     return this.request(`/customer/orders/my/${orderId}`)
   }
 
-  // 获取历史订单
+  // Get order history
   async getOrderHistory() {
     return this.request('/customer/orders/history')
   }
 
-  // 评价订单
+  // Review order
   async reviewOrder(reviewData) {
     return this.request('/customer/orders/review', {
       method: 'POST',
@@ -133,9 +133,9 @@ class ApiService {
     })
   }
 
-  // ========== 支付相关 API ==========
+  // ========== Payment APIs ==========
 
-  // 充值余额
+  // Recharge balance
   async rechargeBalance(amount) {
     return this.request('/customer/payments/recharge', {
       method: 'POST',
@@ -143,7 +143,7 @@ class ApiService {
     })
   }
 
-  // 支付订单
+  // Pay order
   async payOrder(orderId) {
     return this.request('/customer/payments/pay', {
       method: 'POST',
@@ -151,14 +151,14 @@ class ApiService {
     })
   }
 
-  // ========== 用户信息相关 API ==========
+  // ========== User Profile APIs ==========
 
-  // 获取用户信息
+  // Get user profile
   async getUserProfile() {
     return this.request('/profile/me')
   }
 
-  // 更新客户资料
+  // Update customer profile
   async updateCustomerProfile(profileData) {
     return this.request('/profile/update_customer_profile', {
       method: 'PUT',
@@ -166,7 +166,7 @@ class ApiService {
     })
   }
 
-  // 更新服务提供者资料
+  // Update provider profile
   async updateProviderProfile(profileData) {
     return this.request('/profile/update_provider_profile', {
       method: 'PUT',
@@ -174,7 +174,7 @@ class ApiService {
     })
   }
 
-  // 更新用户基本信息
+  // Update user basic info
   async updateUserInfo(userData) {
     return this.request('/profile/update_user_info', {
       method: 'PUT',
@@ -182,20 +182,20 @@ class ApiService {
     })
   }
 
-  // ========== 通知相关 API ==========
+  // ========== Notification APIs ==========
 
-  // 获取客户收件箱
+  // Get customer inbox
   async getCustomerInbox() {
     return this.request('/notification/customer_inbox')
   }
 
-  // 获取服务提供者收件箱
+  // Get provider inbox
   async getProviderInbox() {
     return this.request('/notification/provider_inbox')
   }
 }
 
-// 创建API服务实例
+// Create API service instance
 const apiService = new ApiService()
 
 export default apiService
