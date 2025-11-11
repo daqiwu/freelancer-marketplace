@@ -113,7 +113,7 @@ async def delete_user_by_id(db: AsyncSession, id: int):
 
 
 async def get_pending_review_orders(db: AsyncSession):
-    """获取所有待审核订单"""
+    """Get all pending review orders"""
     result = await db.execute(
         select(Order)
         .where(Order.status == OrderStatus.pending_review)
@@ -125,8 +125,8 @@ async def get_pending_review_orders(db: AsyncSession):
 async def approve_order(
     db: AsyncSession, order_id: int, approved: bool, reject_reason: str = None
 ):
-    """管理员审批订单"""
-    # 查找订单
+    """Admin approve order"""
+    # Find order
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalars().first()
 
@@ -137,13 +137,13 @@ async def approve_order(
         raise ValueError("Only pending_review orders can be approved")
 
     if approved:
-        # 批准订单
+        # Approve order
         order.status = OrderStatus.pending
         order.updated_at = datetime.now(UTC)
         await db.commit()
         await db.refresh(order)
 
-        # 通知客户
+        # Notify customer
         await send_customer_notification(
             db,
             order.customer_id,
@@ -152,7 +152,7 @@ async def approve_order(
         )
         return order
     else:
-        # 拒绝订单
+        # Reject order
         if not reject_reason:
             raise ValueError("Reject reason is required when rejecting an order")
 
@@ -161,7 +161,7 @@ async def approve_order(
         await db.commit()
         await db.refresh(order)
 
-        # 通知客户
+        # Notify customer
         await send_customer_notification(
             db,
             order.customer_id,
@@ -172,14 +172,14 @@ async def approve_order(
 
 
 async def update_order(db: AsyncSession, order_id: int, update_data: dict):
-    """管理员更新订单"""
+    """Admin update order"""
     result = await db.execute(select(Order).where(Order.id == order_id))
     order = result.scalars().first()
 
     if not order:
         raise ValueError("Order not found")
 
-    # 更新订单字段
+    # Update order fields
     for key, value in update_data.items():
         if hasattr(order, key) and value is not None:
             setattr(order, key, value)
@@ -191,12 +191,12 @@ async def update_order(db: AsyncSession, order_id: int, update_data: dict):
 
 
 async def delete_order(db: AsyncSession, order_id: int):
-    """管理员删除订单"""
-    # 先删除相关的通知和评价
+    """Admin delete order"""
+    # Delete related notifications and reviews first
     await db.execute(delete(CustomerInbox).where(CustomerInbox.order_id == order_id))
     await db.execute(delete(ProviderInbox).where(ProviderInbox.order_id == order_id))
     await db.execute(delete(Review).where(Review.order_id == order_id))
 
-    # 删除订单
+    # Delete order
     await db.execute(delete(Order).where(Order.id == order_id))
     await db.commit()

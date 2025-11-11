@@ -8,7 +8,6 @@ from app.models.models import CustomerProfile, ProviderProfile, Role, User
 
 async def get_customer_profile(db: AsyncSession, user_id: int):
     """
-    获取客户个人信息
     Get customer profile info
     """
     result = await db.execute(
@@ -19,7 +18,7 @@ async def get_customer_profile(db: AsyncSession, user_id: int):
     user = result.scalars().first()
     if not user or not user.customer_profile:
         return None
-    # 返回扁平化结构，方便前端直接使用
+    # Return flattened structure for easy frontend use
     return {
         "id": user.id,
         "user_id": user.id,
@@ -39,7 +38,6 @@ async def get_customer_profile(db: AsyncSession, user_id: int):
 
 async def get_provider_profile(db: AsyncSession, user_id: int):
     """
-    获取服务商个人信息
     Get provider profile info
     """
     result = await db.execute(
@@ -50,7 +48,7 @@ async def get_provider_profile(db: AsyncSession, user_id: int):
     user = result.scalars().first()
     if not user or not user.provider_profile:
         return None
-    # 返回扁平化结构，方便前端直接使用
+    # Return flattened structure for easy frontend use
     return {
         "id": user.id,
         "user_id": user.id,
@@ -68,7 +66,6 @@ async def get_provider_profile(db: AsyncSession, user_id: int):
 
 async def get_admin_profile(db: AsyncSession, user_id: int):
     """
-    获取管理员个人信息
     Get admin profile info
     """
     result = await db.execute(
@@ -96,7 +93,6 @@ async def update_customer_profile(
     balance: float,
 ):
     """
-    更新客户资料（首次更新即为创建，后续为更新）
     Update customer profile (create if not exists, else update)
     """
     result = await db.execute(
@@ -104,7 +100,7 @@ async def update_customer_profile(
     )
     profile = result.scalars().first()
     if not profile:
-        # 首次创建
+        # First time create
         profile = CustomerProfile(
             id=user_id,
             location=location,
@@ -114,7 +110,7 @@ async def update_customer_profile(
         )
         db.add(profile)
     else:
-        # 更新
+        # Update existing
         profile.location = location
         profile.address = address
         profile.budget_preference = budget_preference
@@ -133,7 +129,6 @@ async def update_provider_profile(
     availability: str,
 ):
     """
-    更新服务商资料（首次更新即为创建，后续为更新）
     Update provider profile (create if not exists, else update)
     """
     result = await db.execute(
@@ -141,7 +136,7 @@ async def update_provider_profile(
     )
     profile = result.scalars().first()
     if not profile:
-        # 首次创建
+        # First time create
         profile = ProviderProfile(
             id=user_id,
             skills=skills,
@@ -151,7 +146,7 @@ async def update_provider_profile(
         )
         db.add(profile)
     else:
-        # 更新
+        # Update existing
         profile.skills = skills
         profile.experience_years = experience_years
         profile.hourly_rate = hourly_rate
