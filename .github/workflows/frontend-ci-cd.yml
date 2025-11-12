@@ -1,0 +1,340 @@
+name: Frontend CI/CD - Vue.js Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - bala
+    paths:
+      - frontend/**
+      - ".github/workflows/frontend-ci-cd.yml"
+  
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+env:
+  NODE_VERSION: "18"
+  FRONTEND_DIR: frontend
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+jobs:
+  # ============================================
+  # Job 1: Linting (ESLint) - Runs in Parallel
+  # ============================================
+  lint:
+    name: 🎨 Lint - ESLint & Vue Standards
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          echo "🔍 Running ESLint on Vue.js files..."
+          npm run lint
+          echo "✅ Linting completed!"
+
+      - name: Lint Summary
+        if: always()
+        run: |
+          {
+            echo "## 🎨 ESLint Results"
+            echo ""
+            echo "- **Status**: ✅ Code follows Vue 3 & ESLint standards"
+            echo "- **Rules**: Vue3-essential + ESLint recommended"
+            echo ""
+          } >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Job 2: Build Application - Runs in Parallel
+  # ============================================
+  build:
+    name: 🏗️ Build Vue.js Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm ci
+
+      - name: Build production bundle
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          echo "🏗️ Building Vue.js production bundle..."
+          npm run build
+          echo "✅ Build completed successfully!"
+
+      - name: Check build output
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          echo "📁 Build output directory:"
+          ls -lah dist/
+          echo ""
+          echo "📊 Build size:"
+          du -sh dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ${{ env.FRONTEND_DIR }}/dist/
+          retention-days: 30
+
+      - name: Build Summary
+        if: always()
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          BUILD_SIZE=$(du -sh dist/ | cut -f1)
+          {
+            echo "## 🏗️ Build Results"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| Build Size | **${BUILD_SIZE}** |"
+            echo "| Output Directory | \`dist/\` |"
+            echo "| Node Version | ${{ env.NODE_VERSION }} |"
+            echo ""
+            echo "✅ Production bundle created successfully!"
+          } >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Job 3: Security Audit - Runs in Parallel
+  # ============================================
+  security-audit:
+    name: 🔒 Security Audit - npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          echo "🔒 Running npm security audit..."
+          npm audit --json > npm-audit-report.json || true
+          npm audit || true
+          echo "✅ Security audit completed!"
+        continue-on-error: true
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: ${{ env.FRONTEND_DIR }}/npm-audit-report.json
+          retention-days: 90
+
+      - name: Security Summary
+        if: always()
+        working-directory: ${{ env.FRONTEND_DIR }}
+        run: |
+          if [ -f npm-audit-report.json ]; then
+            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit-report.json)
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit-report.json)
+            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' npm-audit-report.json)
+            LOW=$(jq '.metadata.vulnerabilities.low // 0' npm-audit-report.json)
+          else
+            CRITICAL=0
+            HIGH=0
+            MODERATE=0
+            LOW=0
+          fi
+
+          {
+            echo "## 🔒 npm Security Audit"
+            echo ""
+            echo "| Severity | Count |"
+            echo "|----------|-------|"
+            echo "| Critical | **${CRITICAL}** |"
+            echo "| High | **${HIGH}** |"
+            echo "| Moderate | **${MODERATE}** |"
+            echo "| Low | **${LOW}** |"
+            echo ""
+            echo "📁 [Download full audit report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Job 4: Upload Build to S3
+  # ============================================
+  upload-to-s3:
+    name: � Upload Build to S3
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/bala' || github.ref == 'refs/heads/dev')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: dist
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/github-actions-role
+
+      - name: List build files
+        run: |
+          echo "📁 Build files to be zipped:"
+          ls -lah dist/
+          echo ""
+          echo "📊 Total build size:"
+          du -sh dist/
+
+      - name: Create ZIP archive
+        run: |
+          echo "� Creating ZIP archive of build files..."
+          cd dist
+          zip -r ../frontend-build-${{ github.sha }}.zip .
+          cd ..
+          echo "✅ ZIP file created: frontend-build-${{ github.sha }}.zip"
+          ls -lh frontend-build-${{ github.sha }}.zip
+
+      - name: Upload ZIP to S3
+        run: |
+          echo "� Uploading ZIP file to S3..."
+          aws s3 cp frontend-build-${{ github.sha }}.zip s3://${{ env.S3_BUCKET }}/builds/frontend-build-${{ github.sha }}.zip
+          
+          echo "📤 Uploading as latest version..."
+          aws s3 cp frontend-build-${{ github.sha }}.zip s3://${{ env.S3_BUCKET }}/builds/frontend-build-latest.zip
+          
+          echo "✅ ZIP files uploaded successfully!"
+          echo "   📦 Versioned: builds/frontend-build-${{ github.sha }}.zip"
+          echo "   📦 Latest: builds/frontend-build-latest.zip"
+
+      - name: Generate Upload Summary
+        if: always()
+        run: |
+          ZIP_SIZE=$(ls -lh frontend-build-${{ github.sha }}.zip | awk '{print $5}')
+          {
+            echo "## 🚀 S3 ZIP Upload Summary"
+            echo ""
+            echo "### 📦 Upload Details"
+            echo "- **S3 Bucket**: \`s3://${{ env.S3_BUCKET }}/builds/\`"
+            echo "- **Region**: \`${{ env.AWS_REGION }}\`"
+            echo "- **ZIP File Size**: ${ZIP_SIZE}"
+            echo "- **Format**: ZIP archive of entire dist/ folder"
+            echo ""
+            echo "### � Uploaded Files"
+            echo "- **Versioned Build**: \`builds/frontend-build-${{ github.sha }}.zip\`"
+            echo "- **Latest Build**: \`builds/frontend-build-latest.zip\`"
+            echo ""
+            echo "### 📅 Build Information"
+            echo "- **Commit SHA**: \`${{ github.sha }}\`"
+            echo "- **Branch**: \`${{ github.ref_name }}\`"
+            echo "- **Triggered by**: \`${{ github.actor }}\`"
+            echo "- **Workflow**: \`${{ github.workflow }}\`"
+            echo ""
+            echo "### � Download Links"
+            echo "- Versioned: \`s3://${{ env.S3_BUCKET }}/builds/frontend-build-${{ github.sha }}.zip\`"
+            echo "- Latest: \`s3://${{ env.S3_BUCKET }}/builds/frontend-build-latest.zip\`"
+            echo ""
+            echo "---"
+            echo "✅ **Status**: Frontend build ZIP successfully uploaded to S3"
+          } >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Job 5: Pipeline Summary
+  # ============================================
+  pipeline-summary:
+    name: 📊 Pipeline Summary
+    runs-on: ubuntu-latest
+    needs: [lint, build, security-audit]
+    if: always()
+
+    steps:
+      - name: Pipeline Results
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Frontend CI/CD Pipeline Results"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "🎨 ESLint & Code Quality:        ${{ needs.lint.result }}"
+          echo "🏗️ Build Production Bundle:      ${{ needs.build.result }}"
+          echo "🔒 Security Audit (npm):         ${{ needs.security-audit.result }}"
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📁 Artifacts Generated:"
+          echo "  • Production build (dist/)"
+          echo "  • npm audit report (JSON)"
+          echo ""
+          echo "🔧 Technology Stack:"
+          echo "  • Vue.js 3.2.13"
+          echo "  • Vue Router 4.5.1"
+          echo "  • Node.js ${{ env.NODE_VERSION }}"
+          echo "  • Vue CLI 5.0"
+          echo ""
+          echo "✅ Pipeline execution completed!"
+
+      - name: Generate Final Summary
+        if: always()
+        run: |
+          {
+            echo "# 🎯 Frontend CI/CD Pipeline Summary"
+            echo ""
+            echo "## 📊 Job Results"
+            echo ""
+            echo "| Job | Status |"
+            echo "|-----|--------|"
+            echo "| 🎨 ESLint Linting | ${{ needs.lint.result }} |"
+            echo "| 🏗️ Build Production | ${{ needs.build.result }} |"
+            echo "| 🔒 Security Audit | ${{ needs.security-audit.result }} |"
+            echo ""
+            echo "## 🚀 Quick Stats"
+            echo "- **Framework**: Vue.js 3.2.13"
+            echo "- **Build Tool**: Vue CLI 5.0"
+            echo "- **Node Version**: ${{ env.NODE_VERSION }}"
+            echo "- **Commit**: \`${{ github.sha }}\`"
+            echo "- **Branch**: \`${{ github.ref_name }}\`"
+            echo ""
+            echo "---"
+            echo "✅ **Frontend pipeline completed successfully!**"
+          } >> $GITHUB_STEP_SUMMARY

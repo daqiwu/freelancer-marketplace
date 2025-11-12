@@ -1,0 +1,37 @@
+
+Testing /mnt/e/SWE5006/freelancer-marketplace/backend...
+
+Tested 48 dependencies for known issues, found 4 issues, 4 vulnerable paths.
+
+
+Issues to fix by upgrading dependencies:
+
+  Pin starlette@0.48.0 to starlette@0.49.1 to fix
+  ✗ Regular Expression Denial of Service (ReDoS) (new) [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-STARLETTE-13733964] in starlette@0.48.0
+    introduced by fastapi@0.116.2 > starlette@0.48.0
+
+
+Issues with no direct upgrade or patch:
+  ✗ Timing Attack [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-ECDSA-6184115] in ecdsa@0.19.1
+    introduced by python-jose@3.5.0 > ecdsa@0.19.1
+  No upgrade or patch available
+  ✗ Missing Encryption of Sensitive Data [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-ECDSA-6219992] in ecdsa@0.19.1
+    introduced by python-jose@3.5.0 > ecdsa@0.19.1
+  No upgrade or patch available
+  ✗ Arbitrary Command Injection [Medium Severity][https://security.snyk.io/vuln/SNYK-PYTHON-TWISTED-12671201] in twisted@24.11.0
+    introduced by twisted@24.11.0
+  No upgrade or patch available
+
+
+
+Organization:      freelancer-marketplace
+Package manager:   poetry
+Target file:       pyproject.toml
+Project name:      backend
+Open source:       no
+Project path:      /mnt/e/SWE5006/freelancer-marketplace/backend
+Licenses:          enabled
+
+Tip: Detected multiple supported manifests (1), use --all-projects to scan all of them at once.
+
+
