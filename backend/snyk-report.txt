@@ -1,24 +1,10 @@
 
 Testing /mnt/e/SWE5006/freelancer-marketplace/backend...
 
-Tested 48 dependencies for known issues, found 8 issues, 12 vulnerable paths.
+Tested 48 dependencies for known issues, found 4 issues, 4 vulnerable paths.
 
 
 Issues to fix by upgrading dependencies:
-
-  Upgrade aiomysql@0.2.0 to aiomysql@0.3.0 to fix
-  ✗ External Control of File Name or Path (new) [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-AIOMYSQL-13671310] in aiomysql@0.2.0
-    introduced by aiomysql@0.2.0
-
-  Upgrade cryptography@42.0.8 to cryptography@44.0.1 to fix
-  ✗ Missing Report of Error Condition [Medium Severity][https://security.snyk.io/vuln/SNYK-PYTHON-CRYPTOGRAPHY-8715586] in cryptography@42.0.8
-    introduced by cryptography@42.0.8 and 2 other path(s)
-  ✗ Type Confusion [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-CRYPTOGRAPHY-7886970] in cryptography@42.0.8
-    introduced by cryptography@42.0.8 and 2 other path(s)
-
-  Pin rsa@4.2 to rsa@4.7 to fix
-  ✗ Timing Attack [Medium Severity][https://security.snyk.io/vuln/SNYK-PYTHON-RSA-1038401] in rsa@4.2
-    introduced by python-jose@3.5.0 > rsa@4.2
 
   Pin starlette@0.48.0 to starlette@0.49.1 to fix
   ✗ Regular Expression Denial of Service (ReDoS) (new) [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-STARLETTE-13733964] in starlette@0.48.0

@@ -27,10 +27,10 @@ permissions:
   issues: write
 
 env:
-  AWS_REGION: ap-southeast-1
-  ACCOUNT_ID: 539827877726
-  ECR_PUBLIC_URI: t7x9p0n7/freelancermarketplace
-  DOCKER_IMAGE_NAME: balachander20/freelancer-marketplace-api
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_PUBLIC_URI: ${{ secrets.ECR_PUBLIC_URI }}
+  DOCKER_IMAGE_NAME: ${{ secrets.DOCKER_IMAGE_NAME }}
 
 jobs:
   # ============================================
@@ -728,21 +728,21 @@ jobs:
       - name: Tag Docker Image for ECR Public
         run: |
           echo "🏷️ Tagging image for ECR Public..."
+          # Tag the built image for public ECR (do not print the full public ECR URI to logs)
           docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest
           docker tag ${{ env.DOCKER_IMAGE_NAME }}:latest public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}
           echo "✅ Image tagged successfully!"
-          echo "� Tags created:"
-          echo "   - public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
-          echo "   - public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}"
+          
 
       # 6. Push Docker image to ECR Public
       - name: Push Docker Image to ECR Public
         run: |
           echo "🚀 Pushing image to ECR Public..."
+          # Push to public ECR (actual repository URI intentionally omitted from logs)
           docker push public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest
           docker push public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}
           echo "✅ Image pushed successfully!"
-          echo "📍 Image URI: public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
+        
           echo "🎉 Deployment ready!"
 
       # 7. Generate deployment summary
@@ -753,16 +753,13 @@ jobs:
             echo "## 🐳 Docker Build and Push Summary"
             echo ""
             echo "### � Image Details"
-            echo "- **Repository**: \`public.ecr.aws/${{ env.ECR_PUBLIC_URI }}\`"
-            echo "- **Tags**: \`latest\`, \`${{ github.sha }}\`"
+            echo "- **Repository**: \`[REDACTED]\`"
+            echo "- **Tags**: \`latest\`, \`<commit-sha>\`"
             echo "- **Region**: \`${{ env.AWS_REGION }}\`"
             echo "- **Build Context**: \`backend/\`"
             echo ""
             echo "### 🔗 Image URIs"
-            echo "\`\`\`"
-            echo "public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:latest"
-            echo "public.ecr.aws/${{ env.ECR_PUBLIC_URI }}:${{ github.sha }}"
-            echo "\`\`\`"
+            echo "(image URIs omitted from summary for security/privacy)"
             echo ""
             echo "### 📅 Build Information"
             echo "- **Commit SHA**: \`${{ github.sha }}\`"
