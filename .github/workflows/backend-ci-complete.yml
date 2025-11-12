@@ -20,6 +20,12 @@ on:
   schedule:
     - cron: "0 2 * * *"
 
+  # Trigger pipeline for pull requests opened against main and dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
 permissions:
   id-token: write
   contents: read
@@ -694,7 +700,7 @@ jobs:
     runs-on: ubuntu-latest
     # Wait for all quality gates to pass before building
     needs: [lint, unit-tests, sast-scan, sca-scan, snyk-scan]
-    if: success() && github.event_name == 'push'
+    if: ${{ success() && (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') }}
 
     steps:
       # 1. Checkout the repo
