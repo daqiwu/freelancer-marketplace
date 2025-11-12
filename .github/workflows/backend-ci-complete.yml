@@ -1,3 +1,4 @@
+
 name: Backend CI/CD - Complete Quality Pipeline
 
 on:
@@ -19,12 +20,6 @@ on:
   # Run daily at 2 AM UTC
   schedule:
     - cron: "0 2 * * *"
-
-  # Trigger pipeline for pull requests opened against main and dev
-  pull_request:
-    branches:
-      - main
-      - dev
 
 permissions:
   id-token: write
@@ -700,7 +695,7 @@ jobs:
     runs-on: ubuntu-latest
     # Wait for all quality gates to pass before building
     needs: [lint, unit-tests, sast-scan, sca-scan, snyk-scan]
-    if: ${{ success() && (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') }}
+    if: success() && github.event_name == 'push'
 
     steps:
       # 1. Checkout the repo

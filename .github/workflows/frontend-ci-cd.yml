@@ -11,11 +11,6 @@ on:
       - ".github/workflows/frontend-ci-cd.yml"
   
   workflow_dispatch:
-  # Trigger pipeline for pull requests opened against main and dev
-  pull_request:
-    branches:
-      - main
-      - dev
 
 permissions:
   contents: read
@@ -207,7 +202,7 @@ jobs:
     name: � Upload Build to S3
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/bala' || github.ref == 'refs/heads/dev') || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/bala' || github.ref == 'refs/heads/dev')
 
     steps:
       - name: Checkout code
@@ -262,14 +257,14 @@ jobs:
             echo "## 🚀 S3 ZIP Upload Summary"
             echo ""
             echo "### 📦 Upload Details"
-            echo "- **S3 Bucket**: \`[REDACTED S3 BUCKET]\`"
+            echo "- **S3 Bucket**: \`s3://${{ env.S3_BUCKET }}/builds/\`"
             echo "- **Region**: \`${{ env.AWS_REGION }}\`"
             echo "- **ZIP File Size**: ${ZIP_SIZE}"
             echo "- **Format**: ZIP archive of entire dist/ folder"
             echo ""
             echo "### � Uploaded Files"
-            echo "- **Versioned Build**: \`[REDACTED PATH]/frontend-build-${{ github.sha }}.zip\`"
-            echo "- **Latest Build**: \`[REDACTED PATH]/frontend-build-latest.zip\`"
+            echo "- **Versioned Build**: \`builds/frontend-build-${{ github.sha }}.zip\`"
+            echo "- **Latest Build**: \`builds/frontend-build-latest.zip\`"
             echo ""
             echo "### 📅 Build Information"
             echo "- **Commit SHA**: \`${{ github.sha }}\`"
@@ -291,7 +286,7 @@ jobs:
   pipeline-summary:
     name: 📊 Pipeline Summary
     runs-on: ubuntu-latest
-    needs: [lint, build, security-audit, upload-to-s3]
+    needs: [lint, build, security-audit]
     if: always()
 
     steps:
